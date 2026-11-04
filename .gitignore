@@ -1,0 +1,4 @@
+# Max-Run: lokaler Arbeitsstand, soll Branch-Wechsel ueberleben und nicht in Pull Requests landen
+HANDOFF.md
+.claude/max-run-state.json
+.claude/settings.local.json

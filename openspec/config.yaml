@@ -1,0 +1,48 @@
+schema: spec-driven
+
+context: |
+  Project: Drone Lending System. Drones and accessories are loaned to student groups.
+  The application replaces the paper note on the cabinet door and keeps a lasting history.
+
+  Technology stack:
+  - Backend: C#, ASP.NET Core 10 Web API
+  - Persistence: Entity Framework Core, SQLite
+  - Frontend: Angular, TypeScript
+  - API: REST/JSON
+
+  Architecture:
+  - The application consists of an Angular frontend and an ASP.NET Core backend.
+  - The frontend communicates exclusively with the backend REST API.
+  - Business logic and validation must be implemented in the backend.
+  - The frontend must not access the database directly.
+
+  Development:
+  - Backend code is located in /backend/DroneInventory.Api.
+  - Frontend code is located in /frontend/drone-inventory-ui.
+  - OpenSpec is the source of truth for requirements.
+
+  Domain concepts: Drone, StudentGroup, Loan, LoanItem.
+  Use these terms everywhere. Do not introduce synonyms.
+
+  Domain rules:
+  - A drone can only have one active loan.
+  - Only available drones can be loaned.
+  - Returning a loan makes the drone available again.
+  - Accessory quantities must not be negative.
+  - Returned loans stay stored and are never deleted.
+  - Batteries and propellers are tracked as quantities only.
+  - Drone availability follows from the active loan and is never entered by a user.
+
+  Out of scope for the initial version: login, user accounts and roles; individual
+  batteries with their own identity; reservations in advance; damage management and
+  return differences; reports, statistics and exports.
+
+rules:
+  proposal:
+    - State explicitly what is out of scope.
+  specs:
+    - Use Given/When/Then scenarios for acceptance criteria.
+    - Describe behavior, not implementation details.
+  tasks:
+    - Keep tasks small, independent and individually testable.
+    - Every Given/When/Then scenario needs a test task.
