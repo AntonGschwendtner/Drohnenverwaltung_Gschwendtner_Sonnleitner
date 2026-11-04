@@ -3,7 +3,7 @@
 ## 1. Backend foundation
 
 - [x] 1.1 Remove the `/weatherforecast` sample, add EF Core with SQLite, a `DbContext` and migrations applied at startup; ignore the database file in Git; verify the API starts and creates the database file (foundation for all requirements) (#9)
-- [ ] 1.2 Create the test project `backend/DroneInventory.Api.Tests` with xUnit, `WebApplicationFactory`, isolated in-memory SQLite and a fixed `TimeProvider`; verify a smoke test passes with `dotnet test` (foundation for all requirements) (#10)
+- [x] 1.2 Create the test project `backend/DroneInventory.Api.Tests` with xUnit, `WebApplicationFactory`, isolated in-memory SQLite and a fixed `TimeProvider`; verify a smoke test passes with `dotnet test` (foundation for all requirements) (#10)
 
 ## 2. Domain model
 

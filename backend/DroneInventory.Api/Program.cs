@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<DroneInventoryDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DroneInventory")));
+builder.Services.AddSingleton(TimeProvider.System);
 
 var app = builder.Build();
 
