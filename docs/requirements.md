@@ -39,7 +39,12 @@ The system SHALL list all drones with name, status and description. The status S
 
 ## REQ-003 Schülergruppe anlegen
 
-The system SHALL allow a student group to be created with a name.
+The system SHALL allow a student group to be created with a name and SHALL list all student groups, so that a group can be chosen for a loan.
+
+**Scenario: List student groups**
+- GIVEN the student group "Group 3" exists
+- WHEN the student groups are listed
+- THEN the list contains "Group 3"
 
 **Scenario: Create a student group**
 - GIVEN no student group named "Group 3" exists
@@ -104,6 +109,10 @@ A loan SHALL be able to include batteries and propellers as quantities. Quantiti
 
 **Scenario: Unknown accessory type**
 - WHEN a drone is loaned with an accessory type other than Battery or Propeller
+- THEN the loan is rejected
+
+**Scenario: Accessory type appears twice**
+- WHEN a drone is loaned with two separate battery entries
 - THEN the loan is rejected
 
 ## REQ-007 Aktive Ausleihen anzeigen
