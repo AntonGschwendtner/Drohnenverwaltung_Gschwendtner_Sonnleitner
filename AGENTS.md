@@ -37,4 +37,5 @@ SQLite
 - Create issues with `/openspec-to-github`, implement with `/openspec-apply-with-github`, archive with `/openspec-archive-with-github`.
 - Implement one task per run: one issue, one branch, one pull request.
 - Create a new branch from `main` for every feature, named after it, such as `feature/16-loan-api`.
-- Merge into `main` through the pull request as soon as the feature is finished and its tests pass.
+- Merge into `main` through the pull request as soon as the feature is finished, its tests pass and its review has no open findings.
+- Review every pull request against its spec before merging. The review may be done by an AI, is posted as a pull request comment and is labeled as an AI review.

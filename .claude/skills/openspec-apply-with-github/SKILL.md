@@ -17,9 +17,11 @@ Only implement the task of the named issue. Do not implement other OpenSpec task
 3. Execute `opsx:apply` for this task only.
 4. Run the tests. Every Given/When/Then scenario of the task needs a test.
 5. Read `git diff`, then commit.
-6. Once the task is finished and the tests pass: push the branch, create a pull request that references the issue and the requirement, and merge it into `main` with `gh pr merge --merge`. Keep the branch. Never merge unfinished or failing work.
-7. Set the issue status to "In review".
-8. Do not set the status to "Done" or archive the OpenSpec change.
+6. Once the task is finished and the tests pass: push the branch and create a pull request that references the requirement and the issue with `Refs #<issue>`. Do not use `Closes`, because closing the issue moves it to "Done" on the board.
+7. Review the pull request before merging. Start a separate read-only agent that gets only the pull request number and the task number. It compares the diff with the task, the matching spec scenarios and `design.md`, checks that every scenario of the task has a test, and looks for correctness bugs. Post its result with `gh pr comment`, starting with `**KI-Review (Claude, kein menschliches Review)**`. Fix real findings, run the tests again and push.
+8. Merge into `main` with `gh pr merge --merge`. Keep the branch. Never merge unfinished or failing work, or work with open review findings.
+9. Set the issue status to "In review".
+10. Do not set the status to "Done", close the issue or archive the OpenSpec change.
 
 ## GitHub tools
 

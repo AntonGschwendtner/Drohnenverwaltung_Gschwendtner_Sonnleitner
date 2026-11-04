@@ -12,7 +12,7 @@ Archive only when all tasks of the change are implemented, tested and merged int
 
 ## Workflow
 
-1. Update the corresponding GitHub Issues for the current OpenSpec change. Set the status to "Done" and add a comment with the OpenSpec change reference (if not done before).
+1. Update the corresponding GitHub Issues for the current OpenSpec change. Set the status to "Done", add a comment with the OpenSpec change reference (if not done before) and close the issue.
 2. Archive the current OpenSpec change. `opsx:archive`
 
 ## GitHub tools
