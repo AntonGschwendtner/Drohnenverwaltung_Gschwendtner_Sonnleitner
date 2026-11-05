@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using DroneInventory.Api.Common;
 using DroneInventory.Api.Data;
 using DroneInventory.Api.Drones;
+using DroneInventory.Api.StudentGroups;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,7 @@ builder.Services.AddDbContext<DroneInventoryDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DroneInventory")));
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<DroneService>();
+builder.Services.AddScoped<StudentGroupService>();
 
 var app = builder.Build();
 
@@ -38,5 +40,6 @@ app.UseStatusCodePages();
 app.UseHttpsRedirection();
 
 app.MapDroneEndpoints();
+app.MapStudentGroupEndpoints();
 
 app.Run();
