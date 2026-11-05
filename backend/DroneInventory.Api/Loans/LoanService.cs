@@ -78,12 +78,17 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             loan.Status));
     }
 
-    private static (List<LoanItem> Items, string? Error) ReadItems(IReadOnlyList<CreateLoanItemRequest>? requestedItems)
+    private static (List<LoanItem> Items, string? Error) ReadItems(IReadOnlyList<CreateLoanItemRequest?>? requestedItems)
     {
         var items = new List<LoanItem>();
 
         foreach (var requestedItem in requestedItems ?? [])
         {
+            if (requestedItem is null)
+            {
+                return (items, "The accessories contain an empty entry.");
+            }
+
             // Enum.TryParse would also accept numbers such as "0", so only the exact names are allowed.
             if (!Enum.GetNames<LoanItemType>().Contains(requestedItem.Type))
             {

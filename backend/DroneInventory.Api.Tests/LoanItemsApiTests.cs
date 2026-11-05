@@ -117,6 +117,18 @@ public sealed class LoanItemsApiTests : IDisposable
         await AssertRejectedAndDroneAvailableAsync(response);
     }
 
+    [Theory]
+    [InlineData("[null]")]
+    [InlineData("""[{"type":"Battery","quantity":1},null]""")]
+    public async Task Empty_entry_in_the_items_is_rejected(string items)
+    {
+        var (droneId, studentGroupId) = await SeedAsync();
+
+        var response = await PostItemsAsync(droneId, studentGroupId, items);
+
+        await AssertRejectedAndDroneAvailableAsync(response);
+    }
+
     [Fact]
     public async Task Missing_quantity_is_rejected()
     {

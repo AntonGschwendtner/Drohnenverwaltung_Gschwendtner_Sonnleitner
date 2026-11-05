@@ -4,7 +4,7 @@ namespace DroneInventory.Api.Loans;
 
 public sealed record CreateLoanItemRequest(string? Type, int? Quantity);
 
-public sealed record CreateLoanRequest(int? DroneId, int? StudentGroupId, IReadOnlyList<CreateLoanItemRequest>? Items);
+public sealed record CreateLoanRequest(int? DroneId, int? StudentGroupId, IReadOnlyList<CreateLoanItemRequest?>? Items);
 
 public sealed record LoanResponse(
     int Id,
