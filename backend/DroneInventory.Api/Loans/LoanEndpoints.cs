@@ -24,5 +24,12 @@ public static class LoanEndpoints
                 ? error.ToProblem()
                 : Results.Created($"/api/loans/{result.Value!.Id}", result.Value);
         });
+
+        loans.MapPost("/{id:int}/return", async (int id, LoanService service, CancellationToken cancellationToken) =>
+        {
+            var result = await service.ReturnAsync(id, cancellationToken);
+
+            return result.Error is { } error ? error.ToProblem() : Results.Ok(result.Value);
+        });
     }
 }
