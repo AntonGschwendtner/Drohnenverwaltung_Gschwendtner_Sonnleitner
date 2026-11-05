@@ -22,15 +22,18 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
 
     public async Task<ServiceResult<IReadOnlyList<LoanResponse>>> ListAsync(LoanStatus? status, CancellationToken cancellationToken)
     {
-        if (status != LoanStatus.Active)
+        if (status is not { } requestedStatus)
         {
-            return ServiceResult<IReadOnlyList<LoanResponse>>.Invalid("Use status=Active to list loans.");
+            return ServiceResult<IReadOnlyList<LoanResponse>>.Invalid("Use status=Active or status=Returned to list loans.");
         }
 
-        var loans = await dbContext.Loans
-            .Where(loan => loan.Status == LoanStatus.Active)
-            .OrderByDescending(loan => loan.LoanDate)
-            .ThenByDescending(loan => loan.Id)
+        var matchingLoans = dbContext.Loans.Where(loan => loan.Status == requestedStatus);
+
+        var sortedLoans = requestedStatus == LoanStatus.Returned
+            ? matchingLoans.OrderByDescending(loan => loan.ReturnDate).ThenByDescending(loan => loan.Id)
+            : matchingLoans.OrderByDescending(loan => loan.LoanDate).ThenByDescending(loan => loan.Id);
+
+        var loans = await sortedLoans
             .Select(ToResponse)
             .ToListAsync(cancellationToken);
 
