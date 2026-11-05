@@ -34,7 +34,10 @@ public sealed class NoDoubleLoanApiTests : IDisposable
         var dbContext = scope.ServiceProvider.GetRequiredService<DroneInventoryDbContext>();
         var loan = await dbContext.Loans.SingleAsync();
         Assert.Equal(firstGroupId, loan.StudentGroupId);
+        Assert.Equal(droneId, loan.DroneId);
         Assert.Equal(LoanStatus.Active, loan.Status);
+        Assert.Equal(new DateOnly(2026, 8, 19), loan.LoanDate);
+        Assert.Null(loan.ReturnDate);
     }
 
     [Theory]
@@ -43,10 +46,14 @@ public sealed class NoDoubleLoanApiTests : IDisposable
     public async Task Two_loans_at_the_same_time(int requestCount)
     {
         var droneId = await CreateAsync("/api/drones", new { name = "TELLO-07", description = "x" });
-        var studentGroupId = await CreateAsync("/api/student-groups", new { name = "Group 3" });
+        var studentGroupIds = new List<int>();
+        for (var number = 0; number < requestCount; number++)
+        {
+            studentGroupIds.Add(await CreateAsync("/api/student-groups", new { name = $"Group {number}" }));
+        }
 
-        var requests = Enumerable.Range(0, requestCount)
-            .Select(_ => _factory.CreateClient().PostAsJsonAsync("/api/loans", new { droneId, studentGroupId }));
+        var requests = studentGroupIds
+            .Select(studentGroupId => _factory.CreateClient().PostAsJsonAsync("/api/loans", new { droneId, studentGroupId }));
         var responses = await Task.WhenAll(requests);
 
         Assert.Single(responses, response => response.StatusCode == HttpStatusCode.Created);
