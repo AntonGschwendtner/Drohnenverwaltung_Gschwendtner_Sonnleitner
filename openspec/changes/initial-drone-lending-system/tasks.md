@@ -8,7 +8,7 @@
 ## 2. Domain model
 
 - [x] 2.1 Add the `Drone` entity with a unique name index and a migration; verify with a test that a duplicate name is refused by the database (REQ-001) (#11)
-- [ ] 2.2 Add the `StudentGroup` entity with a unique name index and a migration; verify with a test that a duplicate name is refused by the database (REQ-003) (#12)
+- [x] 2.2 Add the `StudentGroup` entity with a unique name index and a migration; verify with a test that a duplicate name is refused by the database (REQ-003) (#12)
 - [ ] 2.3 Add the `Loan` and `LoanItem` entities with a migration and the partial unique index for active loans; verify with a test that a second active loan for one drone is refused by the database and a returned loan does not block a new one (REQ-005, REQ-006, REQ-010) (#13)
 
 ## 3. Drone and student group API
