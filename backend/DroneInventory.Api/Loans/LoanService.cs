@@ -19,6 +19,12 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             return ServiceResult<LoanResponse>.Invalid("A loan needs a student group.");
         }
 
+        var (items, itemError) = ReadItems(request.Items);
+        if (itemError is not null)
+        {
+            return ServiceResult<LoanResponse>.Invalid(itemError);
+        }
+
         var drone = await dbContext.Drones.FindAsync([droneId], cancellationToken);
         if (drone is null)
         {
@@ -45,6 +51,7 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             StudentGroupId = studentGroup.Id,
             LoanDate = DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime),
             Status = LoanStatus.Active,
+            Items = items,
         };
         dbContext.Loans.Add(loan);
 
@@ -64,10 +71,55 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             drone.Name,
             studentGroup.Id,
             studentGroup.Name,
+            QuantityOf(loan, LoanItemType.Battery),
+            QuantityOf(loan, LoanItemType.Propeller),
             loan.LoanDate,
             loan.ReturnDate,
             loan.Status));
     }
+
+    private static (List<LoanItem> Items, string? Error) ReadItems(IReadOnlyList<CreateLoanItemRequest?>? requestedItems)
+    {
+        var items = new List<LoanItem>();
+
+        foreach (var requestedItem in requestedItems ?? [])
+        {
+            if (requestedItem is null)
+            {
+                return (items, "The accessories contain an empty entry.");
+            }
+
+            // Enum.TryParse would also accept numbers such as "0", so only the exact names are allowed.
+            if (!Enum.GetNames<LoanItemType>().Contains(requestedItem.Type))
+            {
+                return (items, $"\"{requestedItem.Type}\" is not an accessory type. Use Battery or Propeller.");
+            }
+
+            var type = Enum.Parse<LoanItemType>(requestedItem.Type!);
+
+            if (requestedItem.Quantity is not { } quantity)
+            {
+                return (items, $"The accessory type {type} needs a quantity.");
+            }
+
+            if (quantity < 0)
+            {
+                return (items, "Accessory quantities must not be negative.");
+            }
+
+            if (items.Any(item => item.Type == type))
+            {
+                return (items, $"The accessory type {type} appears more than once.");
+            }
+
+            items.Add(new LoanItem { Type = type, Quantity = quantity });
+        }
+
+        return (items, null);
+    }
+
+    private static int QuantityOf(Loan loan, LoanItemType type) =>
+        loan.Items.Where(item => item.Type == type).Sum(item => item.Quantity);
 
     private static ServiceResult<LoanResponse> AlreadyLoaned(Drone drone) =>
         ServiceResult<LoanResponse>.Conflict($"The drone \"{drone.Name}\" is already loaned.");
