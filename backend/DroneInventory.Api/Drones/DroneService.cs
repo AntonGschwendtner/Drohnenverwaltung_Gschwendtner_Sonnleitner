@@ -7,6 +7,18 @@ namespace DroneInventory.Api.Drones;
 
 public class DroneService(DroneInventoryDbContext dbContext)
 {
+    public async Task<IReadOnlyList<DroneResponse>> ListAsync(CancellationToken cancellationToken) =>
+        await dbContext.Drones
+            .OrderBy(drone => drone.Name)
+            .Select(drone => new DroneResponse(
+                drone.Id,
+                drone.Name,
+                dbContext.Loans.Any(loan => loan.DroneId == drone.Id && loan.Status == LoanStatus.Active)
+                    ? DroneStatus.Loaned
+                    : DroneStatus.Available,
+                drone.Description))
+            .ToListAsync(cancellationToken);
+
     public async Task<ServiceResult<DroneResponse>> CreateAsync(CreateDroneRequest request, CancellationToken cancellationToken)
     {
         var name = request.Name?.Trim();
