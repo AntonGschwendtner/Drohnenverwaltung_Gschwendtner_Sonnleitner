@@ -20,7 +20,7 @@
 
 ## 4. Loan API
 
-- [ ] 4.1 Implement `POST /api/loans` for an available drone and known group; verify with tests for the scenarios Loan an available drone, Unknown drone, Unknown student group and Active loan has no return date (REQ-004, REQ-009) (#18)
+- [x] 4.1 Implement `POST /api/loans` for an available drone and known group; verify with tests for the scenarios Loan an available drone, Unknown drone, Unknown student group and Active loan has no return date (REQ-004, REQ-009) (#18)
 - [ ] 4.2 Reject a loan for a drone that is already loaned; verify with tests for the scenarios Drone is already loaned and Two loans at the same time (REQ-005) (#19)
 - [ ] 4.3 Add accessories and their validation to the loan; verify with tests for the scenarios Loan with accessories, Quantity of zero, Negative quantity, Quantity is not a whole number, Unknown accessory type and Accessory type appears twice (REQ-006) (#20)
 - [ ] 4.4 Implement `GET /api/loans?status=Active`; verify with tests for the scenarios List active loans and Returned loan is not active (REQ-007) (#21)
