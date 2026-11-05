@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using DroneInventory.Api.Common;
 using DroneInventory.Api.Data;
 using DroneInventory.Api.Domain;
@@ -7,6 +8,18 @@ namespace DroneInventory.Api.Loans;
 
 public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timeProvider)
 {
+    private static readonly Expression<Func<Loan, LoanResponse>> ToResponse = loan => new LoanResponse(
+        loan.Id,
+        loan.DroneId,
+        loan.Drone!.Name,
+        loan.StudentGroupId,
+        loan.StudentGroup!.Name,
+        loan.Items.Where(item => item.Type == LoanItemType.Battery).Sum(item => item.Quantity),
+        loan.Items.Where(item => item.Type == LoanItemType.Propeller).Sum(item => item.Quantity),
+        loan.LoanDate,
+        loan.ReturnDate,
+        loan.Status);
+
     public async Task<ServiceResult<IReadOnlyList<LoanResponse>>> ListAsync(LoanStatus? status, CancellationToken cancellationToken)
     {
         if (status != LoanStatus.Active)
@@ -18,17 +31,7 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             .Where(loan => loan.Status == LoanStatus.Active)
             .OrderByDescending(loan => loan.LoanDate)
             .ThenByDescending(loan => loan.Id)
-            .Select(loan => new LoanResponse(
-                loan.Id,
-                loan.DroneId,
-                loan.Drone!.Name,
-                loan.StudentGroupId,
-                loan.StudentGroup!.Name,
-                loan.Items.Where(item => item.Type == LoanItemType.Battery).Sum(item => item.Quantity),
-                loan.Items.Where(item => item.Type == LoanItemType.Propeller).Sum(item => item.Quantity),
-                loan.LoanDate,
-                loan.ReturnDate,
-                loan.Status))
+            .Select(ToResponse)
             .ToListAsync(cancellationToken);
 
         return ServiceResult<IReadOnlyList<LoanResponse>>.Success(loans);
@@ -103,6 +106,34 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             loan.LoanDate,
             loan.ReturnDate,
             loan.Status));
+    }
+
+    public async Task<ServiceResult<LoanResponse>> ReturnAsync(int id, CancellationToken cancellationToken)
+    {
+        DateOnly? returnDate = DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime);
+
+        // One statement, so that of two returns at the same time only one changes the loan.
+        var changedLoans = await dbContext.Loans
+            .Where(loan => loan.Id == id && loan.Status == LoanStatus.Active)
+            .ExecuteUpdateAsync(
+                setters => setters
+                    .SetProperty(loan => loan.Status, LoanStatus.Returned)
+                    .SetProperty(loan => loan.ReturnDate, returnDate),
+                cancellationToken);
+
+        var returnedLoan = await dbContext.Loans
+            .Where(loan => loan.Id == id)
+            .Select(ToResponse)
+            .SingleOrDefaultAsync(cancellationToken);
+
+        if (returnedLoan is null)
+        {
+            return ServiceResult<LoanResponse>.NotFound($"The loan with the id {id} does not exist.");
+        }
+
+        return changedLoans == 0
+            ? ServiceResult<LoanResponse>.Conflict($"The loan with the id {id} is already returned.")
+            : ServiceResult<LoanResponse>.Success(returnedLoan);
     }
 
     private static (List<LoanItem> Items, string? Error) ReadItems(IReadOnlyList<CreateLoanItemRequest?>? requestedItems)
