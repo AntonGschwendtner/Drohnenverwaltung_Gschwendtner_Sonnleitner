@@ -10,12 +10,12 @@ public sealed class BadRequestExceptionHandler(IProblemDetailsService problemDet
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
-        if (exception is not BadHttpRequestException)
+        if (exception is not BadHttpRequestException badRequest)
         {
             return false;
         }
 
-        httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+        httpContext.Response.StatusCode = badRequest.StatusCode;
 
         return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
         {
@@ -23,7 +23,7 @@ public sealed class BadRequestExceptionHandler(IProblemDetailsService problemDet
             Exception = exception,
             ProblemDetails = new ProblemDetails
             {
-                Status = StatusCodes.Status400BadRequest,
+                Status = badRequest.StatusCode,
                 Detail = "The request could not be read. Check that all values have the expected format.",
             },
         });
