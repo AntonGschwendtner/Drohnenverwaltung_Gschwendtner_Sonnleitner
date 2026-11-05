@@ -7,6 +7,33 @@ namespace DroneInventory.Api.Loans;
 
 public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timeProvider)
 {
+    public async Task<ServiceResult<IReadOnlyList<LoanResponse>>> ListAsync(LoanStatus? status, CancellationToken cancellationToken)
+    {
+        if (status != LoanStatus.Active)
+        {
+            return ServiceResult<IReadOnlyList<LoanResponse>>.Invalid("Use status=Active to list loans.");
+        }
+
+        var loans = await dbContext.Loans
+            .Where(loan => loan.Status == LoanStatus.Active)
+            .OrderByDescending(loan => loan.LoanDate)
+            .ThenByDescending(loan => loan.Id)
+            .Select(loan => new LoanResponse(
+                loan.Id,
+                loan.DroneId,
+                loan.Drone!.Name,
+                loan.StudentGroupId,
+                loan.StudentGroup!.Name,
+                loan.Items.Where(item => item.Type == LoanItemType.Battery).Sum(item => item.Quantity),
+                loan.Items.Where(item => item.Type == LoanItemType.Propeller).Sum(item => item.Quantity),
+                loan.LoanDate,
+                loan.ReturnDate,
+                loan.Status))
+            .ToListAsync(cancellationToken);
+
+        return ServiceResult<IReadOnlyList<LoanResponse>>.Success(loans);
+    }
+
     public async Task<ServiceResult<LoanResponse>> CreateAsync(CreateLoanRequest request, CancellationToken cancellationToken)
     {
         if (request.DroneId is not { } droneId)
