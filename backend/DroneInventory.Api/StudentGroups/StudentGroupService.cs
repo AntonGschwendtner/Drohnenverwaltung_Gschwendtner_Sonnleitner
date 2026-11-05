@@ -7,6 +7,12 @@ namespace DroneInventory.Api.StudentGroups;
 
 public class StudentGroupService(DroneInventoryDbContext dbContext)
 {
+    public async Task<IReadOnlyList<StudentGroupResponse>> ListAsync(CancellationToken cancellationToken) =>
+        await dbContext.StudentGroups
+            .OrderBy(studentGroup => studentGroup.Name)
+            .Select(studentGroup => new StudentGroupResponse(studentGroup.Id, studentGroup.Name))
+            .ToListAsync(cancellationToken);
+
     public async Task<ServiceResult<StudentGroupResponse>> CreateAsync(
         CreateStudentGroupRequest request,
         CancellationToken cancellationToken)

@@ -8,6 +8,9 @@ public static class StudentGroupEndpoints
     {
         var studentGroups = app.MapGroup("/api/student-groups");
 
+        studentGroups.MapGet("/", async (StudentGroupService service, CancellationToken cancellationToken) =>
+            await service.ListAsync(cancellationToken));
+
         studentGroups.MapPost("/", async (CreateStudentGroupRequest request, StudentGroupService service, CancellationToken cancellationToken) =>
         {
             var result = await service.CreateAsync(request, cancellationToken);
