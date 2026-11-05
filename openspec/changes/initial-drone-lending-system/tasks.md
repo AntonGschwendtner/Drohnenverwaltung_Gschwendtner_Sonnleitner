@@ -16,7 +16,7 @@
 - [x] 3.1 Implement `POST /api/drones`; verify with tests for the scenarios Create a drone, Name is missing and Name already exists (REQ-001) (#14)
 - [x] 3.2 Implement `GET /api/drones` with the calculated status; verify with tests for the scenarios Drone without an active loan and Drone with an active loan (REQ-002) (#15)
 - [x] 3.3 Implement `POST /api/student-groups`; verify with tests for the scenarios Create a student group, Name is missing and Name already exists (REQ-003) (#16)
-- [ ] 3.4 Implement `GET /api/student-groups`; verify with a test for the scenario List student groups (REQ-003) (#17)
+- [x] 3.4 Implement `GET /api/student-groups`; verify with a test for the scenario List student groups (REQ-003) (#17)
 
 ## 4. Loan API
 
