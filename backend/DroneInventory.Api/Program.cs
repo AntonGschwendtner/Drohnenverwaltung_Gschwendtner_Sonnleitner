@@ -16,7 +16,8 @@ builder.Services.Configure<RouteHandlerOptions>(options => options.ThrowOnBadReq
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddDbContext<DroneInventoryDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DroneInventory")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DroneInventory")
+        ?? throw new InvalidOperationException("The connection string \"DroneInventory\" is missing.")));
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<DroneService>();
 builder.Services.AddScoped<StudentGroupService>();
