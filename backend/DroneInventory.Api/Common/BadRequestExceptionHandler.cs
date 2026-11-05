@@ -1,0 +1,31 @@
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
+
+namespace DroneInventory.Api.Common;
+
+/// <summary>
+/// Reports a request body that cannot be read, such as invalid JSON, as a rejection instead of a server error.
+/// </summary>
+public sealed class BadRequestExceptionHandler(IProblemDetailsService problemDetailsService) : IExceptionHandler
+{
+    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
+    {
+        if (exception is not BadHttpRequestException)
+        {
+            return false;
+        }
+
+        httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+
+        return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
+        {
+            HttpContext = httpContext,
+            Exception = exception,
+            ProblemDetails = new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Detail = "The request could not be read. Check that all values have the expected format.",
+            },
+        });
+    }
+}
