@@ -19,6 +19,11 @@ public sealed class DroneInventoryApiFactory : WebApplicationFactory<Program>
 {
     public static readonly DateTimeOffset FixedNow = new(2026, 8, 19, 12, 0, 0, TimeSpan.Zero);
 
+    /// <summary>
+    /// The date the API sees. A test can move it to get different loan and return dates.
+    /// </summary>
+    public FixedTimeProvider Time { get; } = new(FixedNow);
+
     private readonly string _connectionString =
         $"Data Source={Guid.NewGuid():N};Mode=Memory;Cache=Shared";
 
@@ -42,7 +47,7 @@ public sealed class DroneInventoryApiFactory : WebApplicationFactory<Program>
             services.AddDbContext<DroneInventoryDbContext>(options => options.UseSqlite(_connectionString));
 
             services.RemoveAll<TimeProvider>();
-            services.AddSingleton<TimeProvider>(new FixedTimeProvider(FixedNow));
+            services.AddSingleton<TimeProvider>(Time);
         });
     }
 
