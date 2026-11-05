@@ -31,6 +31,14 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             return ServiceResult<LoanResponse>.Invalid($"The student group with the id {studentGroupId} does not exist.");
         }
 
+        var isLoaned = await dbContext.Loans.AnyAsync(
+            loan => loan.DroneId == drone.Id && loan.Status == LoanStatus.Active,
+            cancellationToken);
+        if (isLoaned)
+        {
+            return AlreadyLoaned(drone);
+        }
+
         var loan = new Loan
         {
             DroneId = drone.Id,
@@ -39,7 +47,16 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             Status = LoanStatus.Active,
         };
         dbContext.Loans.Add(loan);
-        await dbContext.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException exception) when (exception.IsUniqueConstraintViolation())
+        {
+            // Another request loaned the drone after the check above.
+            return AlreadyLoaned(drone);
+        }
 
         return ServiceResult<LoanResponse>.Success(new LoanResponse(
             loan.Id,
@@ -51,4 +68,7 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             loan.ReturnDate,
             loan.Status));
     }
+
+    private static ServiceResult<LoanResponse> AlreadyLoaned(Drone drone) =>
+        ServiceResult<LoanResponse>.Conflict($"The drone \"{drone.Name}\" is already loaned.");
 }
