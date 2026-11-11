@@ -4,22 +4,18 @@ Drohnen und Zubehör werden an Schülergruppen ausgeliehen, und bisher ist ein Z
 
 Schulprojekt im Fach SYP, 4. INF, 2026/27, von Gschwendtner und Sonnleitner. Betreuung: DI (FH) Markus Falkensteiner.
 
-## Stand
-
-Die Anwendung ist noch in Arbeit. Die REST-API ist fertig: Drohnen, Gruppen, Ausleihen, Rückgaben und Historie. Das Frontend hat Navigation und Anbindung ans Backend, die einzelnen Ansichten folgen noch.
-
-Der aktuelle Fortschritt steht in [tasks.md](openspec/changes/initial-drone-lending-system/tasks.md) und im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
-
-## Geplanter Funktionsumfang
+## Funktionsumfang
 
 - Drohnen anlegen und mit ihrem Status anzeigen. Der Status „Available“ oder „Loaned“ ergibt sich aus der aktiven Ausleihe und wird nie eingegeben.
 - Schülergruppen anlegen und anzeigen.
 - Eine verfügbare Drohne an eine Gruppe ausleihen, mit Akkus und Propellern als Mengenangabe.
-- Eine zweite aktive Ausleihe derselben Drohne und ungültige Mengen ablehnen.
-- Aktive Ausleihen anzeigen und zurückgeben. Das Rückgabedatum setzt das System.
+- Eine zweite aktive Ausleihe derselben Drohne und ungültige Mengen ablehnen, auch wenn zwei Anfragen gleichzeitig kommen.
+- Aktive Ausleihen anzeigen und zurückgeben. Ausleih- und Rückgabedatum setzt das System.
 - Zurückgegebene Ausleihen dauerhaft als Historie behalten.
 
-Nicht geplant sind Login und Rollen, einzeln erfasste Akkus, Reservierungen, Schadensverwaltung und Auswertungen.
+Nicht enthalten sind Login und Rollen, einzeln erfasste Akkus, Reservierungen, Schadensverwaltung und Auswertungen. Sie können später als eigener Change Request folgen.
+
+Der Fortschritt steht in [tasks.md](openspec/changes/initial-drone-lending-system/tasks.md) und im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
 
 ## Technik
 
@@ -34,11 +30,11 @@ ASP.NET Core 10 Web API (backend/DroneInventory.Api)
 Entity Framework Core mit SQLite
 ```
 
-Die Regeln und die Validierung liegen im Backend. Das Frontend greift nie direkt auf die Datenbank zu.
+Die Regeln und die Validierung liegen im Backend. Das Frontend zeigt die Meldungen des Backends an und greift nie direkt auf die Datenbank zu.
 
 ## Starten
 
-Getestet mit .NET SDK 10.0.402, Node.js 26.8.2 und npm 11.19.1.
+Getestet mit .NET SDK 10.0.402, Node.js 26.8.2 und npm 11.19.1. Backend und Frontend laufen in zwei Terminals.
 
 **Backend** (läuft auf http://localhost:5067):
 
@@ -56,7 +52,18 @@ npm install
 npm start
 ```
 
-Das Frontend leitet alle Anfragen an `/api` an das Backend weiter (`proxy.conf.json`). Dafür muss das Backend laufen.
+Das Frontend leitet alle Anfragen an `/api` an das Backend weiter (`proxy.conf.json`). Dafür muss das Backend laufen. Danach http://localhost:4200 im Browser öffnen.
+
+## Bedienung am Beispiel
+
+So läuft das Prüfbeispiel aus [docs/requirements.md](docs/requirements.md) durch:
+
+1. **Drones:** Drohne `TELLO-07` mit der Beschreibung `SSID: TELLO-9FA21B, rechter Propellerschutz beschädigt` anlegen. Sie erscheint mit dem Status `Available`.
+2. **Student groups:** Gruppe `Group 3` anlegen.
+3. **Loans:** `TELLO-07` an `Group 3` mit 4 Akkus und 8 Propellern ausleihen. Die Ausleihe erscheint unter „Active loans“ mit dem heutigen Datum, unter „Drones“ steht `TELLO-07` jetzt auf `Loaned`.
+4. **Loans:** Dieselbe Drohne noch einmal ausleihen. Das wird abgelehnt: „The drone "TELLO-07" is already loaned.“
+5. **Loans:** Bei der Ausleihe auf `Return` klicken. Sie verschwindet aus den aktiven Ausleihen, und `TELLO-07` ist wieder `Available`.
+6. **Loan history:** Die Ausleihe steht dort mit 4 Akkus, 8 Propellern, Ausleih- und Rückgabedatum.
 
 ## Testen
 
@@ -69,7 +76,7 @@ cd frontend/drone-inventory-ui
 npm test -- --watch=false
 ```
 
-Die Backend-Tests starten die API mit einer eigenen Datenbank im Arbeitsspeicher und dem festen Datum 19.08.2026. Sie verändern die lokale Datenbank nicht.
+Die Backend-Tests prüfen jedes Szenario der Specs über die HTTP-API. Sie starten die API mit einer eigenen Datenbank im Arbeitsspeicher und dem festen Datum 19.08.2026 und verändern die lokale Datenbank nicht. Die Frontend-Tests prüfen die Ansichten gegen ein simuliertes Backend.
 
 Für neue Migrationen wird das Werkzeug `dotnet-ef` gebraucht. Das Einrichten funktioniert nur im Ordner `backend`:
 
@@ -78,6 +85,21 @@ cd backend
 dotnet tool restore
 ```
 
+## REST-API
+
+| Methode und Pfad | Zweck |
+|---|---|
+| `GET /api/drones` | Drohnen mit Status |
+| `POST /api/drones` | Drohne anlegen |
+| `GET /api/student-groups` | Schülergruppen |
+| `POST /api/student-groups` | Schülergruppe anlegen |
+| `POST /api/loans` | Drohne mit Zubehör ausleihen |
+| `GET /api/loans?status=Active` | Aktive Ausleihen |
+| `POST /api/loans/{id}/return` | Ausleihe zurückgeben |
+| `GET /api/loans?status=Returned` | Historie, neueste Rückgabe zuerst |
+
+Ablehnungen kommen als ProblemDetails mit lesbarer Meldung: 400 bei ungültiger Eingabe, 404 bei unbekannter Ausleihe, 409 bei doppeltem Namen, bereits ausgeliehener Drohne oder bereits zurückgegebener Ausleihe.
+
 ## Dokumentation
 
 | Dokument | Inhalt |
@@ -85,7 +107,7 @@ dotnet tool restore
 | [docs/requirements.md](docs/requirements.md) | Anforderungen REQ-001 bis REQ-010 mit Szenarien |
 | [docs/domain-model.md](docs/domain-model.md) | Begriffe und Datenmodell |
 | [proposal.md](openspec/changes/initial-drone-lending-system/proposal.md) | Warum es die Änderung gibt und was dazugehört |
-| [design.md](openspec/changes/initial-drone-lending-system/design.md) | Technische Entscheidungen und geplante REST-API |
+| [design.md](openspec/changes/initial-drone-lending-system/design.md) | Technische Entscheidungen |
 | [tasks.md](openspec/changes/initial-drone-lending-system/tasks.md) | Alle Tasks mit Anforderung und Issue |
 | [AGENTS.md](AGENTS.md) | Regeln für die Arbeit im Projekt |
 
@@ -98,5 +120,5 @@ Anforderung -> Spec -> Task -> Issue -> Branch -> Pull Request -> Code und Tests
 ```
 
 - Pro Task gibt es ein Issue, einen Branch `feature/<issue>-<name>` und einen Pull Request.
-- Jeder Pull Request wird vor dem Merge gegen die Spec geprüft. Dieses Review macht derzeit eine KI und steht als gekennzeichneter Kommentar im Pull Request.
+- Jeder Pull Request wird vor dem Merge gegen die Spec geprüft. Dieses Review macht eine KI, es steht als gekennzeichneter Kommentar im Pull Request.
 - Eine Verhaltensänderung beginnt immer in der Spec.
