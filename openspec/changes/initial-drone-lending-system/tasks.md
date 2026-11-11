@@ -40,7 +40,7 @@
 
 ## 6. Integration
 
-- [ ] 6.1 Describe how to start and test the application in `README.md`, then walk through the example from `docs/requirements.md` in the running application: create TELLO-07 and Group 3, loan with 4 batteries and 8 propellers, try a second loan, return, check the history; verify that each step behaves as specified and that `dotnet test` and `ng test` pass (all requirements) (#32)
+- [x] 6.1 Describe how to start and test the application in `README.md`, then walk through the example from `docs/requirements.md` in the running application: create TELLO-07 and Group 3, loan with 4 batteries and 8 propellers, try a second loan, return, check the history; verify that each step behaves as specified and that `dotnet test` and `ng test` pass (all requirements) (#32)
 
 ## Workflow follow-up
 
