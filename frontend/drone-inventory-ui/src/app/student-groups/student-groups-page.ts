@@ -2,10 +2,12 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ApiService, readErrorMessage, StudentGroup } from '../api.service';
 import { I18nService } from '../i18n.service';
+import { EmptyState } from '../shared/empty-state';
+import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-student-groups-page',
-  imports: [ReactiveFormsModule],
+  imports: [EmptyState, ReactiveFormsModule, StripSkeleton],
   template: `
     <p class="kicker">{{ i18n.t('groups.kicker') }}</p>
     <h1>{{ i18n.t('nav.studentGroups') }}</h1>
@@ -23,14 +25,16 @@ import { I18nService } from '../i18n.service';
           {{ i18n.t('field.name') }}
           <input formControlName="name" name="name" autocomplete="off" />
         </label>
-        <button type="submit" [disabled]="saving()">{{ i18n.t('groups.add') }}</button>
+        <button type="submit" [disabled]="saving()" [class.busy]="saving()">{{ i18n.t('groups.add') }}</button>
       </form>
     </section>
 
-    @if (loadErrorMessage(); as message) {
+    @if (loading()) {
+      <app-strip-skeleton />
+    } @else if (loadErrorMessage(); as message) {
       <p class="error" role="alert">{{ message }}</p>
     } @else if (studentGroups().length === 0) {
-      <p class="empty">{{ i18n.t('groups.empty') }}</p>
+      <app-empty-state>{{ i18n.t('groups.empty') }}</app-empty-state>
     } @else {
       <table>
         <thead>
@@ -59,6 +63,7 @@ export class StudentGroupsPage implements OnInit {
   protected readonly loadErrorMessage = signal<string | null>(null);
   protected readonly saveErrorMessage = signal<string | null>(null);
   protected readonly saving = signal(false);
+  protected readonly loading = signal(true);
 
   ngOnInit(): void {
     this.loadStudentGroups();
@@ -69,8 +74,12 @@ export class StudentGroupsPage implements OnInit {
       next: (studentGroups) => {
         this.studentGroups.set(studentGroups);
         this.loadErrorMessage.set(null);
+        this.loading.set(false);
       },
-      error: (error: unknown) => this.loadErrorMessage.set(readErrorMessage(error, this.i18n.t('error.fallback'))),
+      error: (error: unknown) => {
+        this.loadErrorMessage.set(readErrorMessage(error, this.i18n.t('error.fallback')));
+        this.loading.set(false);
+      },
     });
   }
 

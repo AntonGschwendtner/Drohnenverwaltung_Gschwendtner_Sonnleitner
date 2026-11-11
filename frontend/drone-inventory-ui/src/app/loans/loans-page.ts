@@ -3,10 +3,12 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ApiService, Drone, Loan, readErrorMessage, StudentGroup } from '../api.service';
 import { I18nService } from '../i18n.service';
+import { EmptyState } from '../shared/empty-state';
+import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-loans-page',
-  imports: [DatePipe, ReactiveFormsModule],
+  imports: [DatePipe, EmptyState, ReactiveFormsModule, StripSkeleton],
   template: `
     <p class="kicker">{{ i18n.t('loans.kicker') }}</p>
     <h1>{{ i18n.t('nav.loans') }}</h1>
@@ -54,7 +56,7 @@ import { I18nService } from '../i18n.service';
           {{ i18n.t('field.propellers') }}
           <input type="number" formControlName="propellers" name="propellers" />
         </label>
-        <button type="submit" [disabled]="saving()">{{ i18n.t('loans.submit') }}</button>
+        <button type="submit" [disabled]="saving()" [class.busy]="saving()">{{ i18n.t('loans.submit') }}</button>
       </form>
     </section>
 
@@ -65,10 +67,12 @@ import { I18nService } from '../i18n.service';
         <p class="error" role="alert">{{ message }}</p>
       }
 
-      @if (activeLoansErrorMessage(); as message) {
+      @if (loadingActiveLoans()) {
+        <app-strip-skeleton [rows]="2" />
+      } @else if (activeLoansErrorMessage(); as message) {
         <p class="error" role="alert">{{ message }}</p>
       } @else if (activeLoans().length === 0) {
-        <p class="empty">{{ i18n.t('loans.empty') }}</p>
+        <app-empty-state>{{ i18n.t('loans.empty') }}</app-empty-state>
       } @else {
         <table>
           <thead>
@@ -85,12 +89,17 @@ import { I18nService } from '../i18n.service';
             @for (loan of activeLoans(); track loan.id) {
               <tr>
                 <td>{{ loan.studentGroupName }}</td>
-                <td>{{ loan.droneName }}</td>
-                <td>{{ loan.batteries }}</td>
-                <td>{{ loan.propellers }}</td>
-                <td>{{ loan.loanDate | date: 'dd.MM.yyyy' }}</td>
+                <td [attr.data-label]="i18n.t('field.drone')">{{ loan.droneName }}</td>
+                <td [attr.data-label]="i18n.t('field.batteries')">{{ loan.batteries }}</td>
+                <td [attr.data-label]="i18n.t('field.propellers')">{{ loan.propellers }}</td>
+                <td [attr.data-label]="i18n.t('field.loanDate')">{{ loan.loanDate | date: 'dd.MM.yyyy' }}</td>
                 <td>
-                  <button type="button" (click)="returnLoan(loan)" [disabled]="returningId() !== null">
+                  <button
+                    type="button"
+                    (click)="returnLoan(loan)"
+                    [disabled]="returningId() !== null"
+                    [class.busy]="returningId() === loan.id"
+                  >
                     {{ i18n.t('loans.return') }}<span class="visually-hidden"> {{ loan.droneName }}</span>
                   </button>
                 </td>
@@ -123,6 +132,7 @@ export class LoansPage implements OnInit {
   protected readonly activeLoansErrorMessage = signal<string | null>(null);
   protected readonly returnErrorMessage = signal<string | null>(null);
   protected readonly returningId = signal<number | null>(null);
+  protected readonly loadingActiveLoans = signal(true);
 
   ngOnInit(): void {
     this.loadChoices();
@@ -134,8 +144,12 @@ export class LoansPage implements OnInit {
       next: (loans) => {
         this.activeLoans.set(loans);
         this.activeLoansErrorMessage.set(null);
+        this.loadingActiveLoans.set(false);
       },
-      error: (error: unknown) => this.activeLoansErrorMessage.set(this.errorMessage(error)),
+      error: (error: unknown) => {
+        this.activeLoansErrorMessage.set(this.errorMessage(error));
+        this.loadingActiveLoans.set(false);
+      },
     });
   }
 
