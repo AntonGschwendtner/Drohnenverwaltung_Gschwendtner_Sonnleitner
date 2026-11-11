@@ -2,19 +2,23 @@ import { DatePipe } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ApiService, Loan, readErrorMessage } from '../api.service';
 import { I18nService } from '../i18n.service';
+import { EmptyState } from '../shared/empty-state';
+import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-history-page',
-  imports: [DatePipe],
+  imports: [DatePipe, EmptyState, StripSkeleton],
   template: `
     <p class="kicker">{{ i18n.t('history.kicker') }}</p>
     <h1>{{ i18n.t('nav.history') }}</h1>
     <p class="lede">{{ i18n.t('history.lede') }}</p>
 
-    @if (errorMessage(); as message) {
+    @if (loading()) {
+      <app-strip-skeleton />
+    } @else if (errorMessage(); as message) {
       <p class="error" role="alert">{{ message }}</p>
     } @else if (loans().length === 0) {
-      <p class="empty">{{ i18n.t('history.empty') }}</p>
+      <app-empty-state>{{ i18n.t('history.empty') }}</app-empty-state>
     } @else {
       <table>
         <thead>
@@ -31,11 +35,11 @@ import { I18nService } from '../i18n.service';
           @for (loan of loans(); track loan.id) {
             <tr>
               <td>{{ loan.studentGroupName }}</td>
-              <td>{{ loan.droneName }}</td>
-              <td>{{ loan.batteries }}</td>
-              <td>{{ loan.propellers }}</td>
-              <td>{{ loan.loanDate | date: 'dd.MM.yyyy' }}</td>
-              <td>{{ loan.returnDate | date: 'dd.MM.yyyy' }}</td>
+              <td [attr.data-label]="i18n.t('field.drone')">{{ loan.droneName }}</td>
+              <td [attr.data-label]="i18n.t('field.batteries')">{{ loan.batteries }}</td>
+              <td [attr.data-label]="i18n.t('field.propellers')">{{ loan.propellers }}</td>
+              <td [attr.data-label]="i18n.t('field.loanDate')">{{ loan.loanDate | date: 'dd.MM.yyyy' }}</td>
+              <td [attr.data-label]="i18n.t('field.returnDate')">{{ loan.returnDate | date: 'dd.MM.yyyy' }}</td>
             </tr>
           }
         </tbody>
@@ -49,11 +53,18 @@ export class HistoryPage implements OnInit {
 
   protected readonly loans = signal<Loan[]>([]);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly loading = signal(true);
 
   ngOnInit(): void {
     this.api.listLoans('Returned').subscribe({
-      next: (loans) => this.loans.set(loans),
-      error: (error: unknown) => this.errorMessage.set(readErrorMessage(error, this.i18n.t('error.fallback'))),
+      next: (loans) => {
+        this.loans.set(loans);
+        this.loading.set(false);
+      },
+      error: (error: unknown) => {
+        this.errorMessage.set(readErrorMessage(error, this.i18n.t('error.fallback')));
+        this.loading.set(false);
+      },
     });
   }
 }

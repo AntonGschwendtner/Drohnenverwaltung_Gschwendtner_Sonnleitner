@@ -33,6 +33,7 @@ const english = {
   'status.available': 'Available',
   'status.loaned': 'Loaned',
   'error.fallback': 'The request failed. Check that the backend is running and try again.',
+  'state.loading': 'Loading',
 
   'drones.kicker': 'Bay 01 · Fleet',
   'drones.lede': 'Every drone with its current status. A drone is loaned while it has an active loan.',
@@ -93,6 +94,7 @@ const german: Record<TextKey, string> = {
   'status.available': 'Verfügbar',
   'status.loaned': 'Ausgeliehen',
   'error.fallback': 'Die Anfrage ist fehlgeschlagen. Prüfe, ob das Backend läuft, und versuche es noch einmal.',
+  'state.loading': 'Wird geladen',
 
   'drones.kicker': 'Platz 01 · Flotte',
   'drones.lede': 'Jede Drohne mit ihrem aktuellen Status. Eine Drohne ist ausgeliehen, solange es eine aktive Ausleihe gibt.',

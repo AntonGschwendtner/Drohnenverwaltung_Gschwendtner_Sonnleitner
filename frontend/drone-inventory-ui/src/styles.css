@@ -381,6 +381,7 @@ td {
   border-bottom: 1px solid var(--line);
   font-family: var(--font-mono);
   font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
   vertical-align: middle;
   transition:
     background-color 0.2s var(--ease),
@@ -507,19 +508,84 @@ tbody tr:has(.status-loaned) td:first-child {
   transform: translateY(-50%);
 }
 
+/* Empty list: a quiet radar scope with nothing on it */
+
 .empty {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   margin: 0;
-  padding: 1.1rem 1rem;
+  padding: 1.1rem 1.25rem;
   border: 1px dashed var(--line-strong);
   border-radius: 3px;
   font-family: var(--font-mono);
   font-size: 0.85rem;
   color: var(--muted);
+  animation: message-in 0.35s var(--ease) both;
 }
 
-.empty::before {
-  content: '\2014  ';
-  color: var(--accent);
+.empty-scope {
+  flex: none;
+  width: 2.6rem;
+  height: 2.6rem;
+  fill: none;
+  stroke: var(--line-strong);
+  stroke-width: 1.2;
+}
+
+.empty-beam {
+  stroke: var(--accent);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  transform-origin: 24px 24px;
+  animation: scope-turn 6s linear infinite;
+}
+
+/* Loading: placeholder strips with a soft shimmer */
+
+.skeleton {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.skeleton-strip {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  height: 3.35rem;
+  padding: 0 1rem;
+  background: var(--strip);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--line-strong);
+  border-radius: 3px;
+}
+
+.skeleton-strip span {
+  height: 0.65rem;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--line) 0 40%, var(--strip-hover) 50%, var(--line) 60% 100%) 0 0 / 300% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.skeleton-strip span:nth-child(1) { width: 18%; }
+.skeleton-strip span:nth-child(2) { width: 10%; }
+.skeleton-strip span:nth-child(3) { width: 32%; }
+
+/* Busy buttons: a small turning ring replaces the arrow */
+
+button.busy {
+  cursor: progress;
+}
+
+form button[type='submit'].busy::after,
+td button.busy::after {
+  content: '';
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 
 .visually-hidden {
@@ -620,6 +686,28 @@ tbody tr:has(.status-loaned) td:first-child {
   }
 }
 
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes scope-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: 0 0;
+  }
+}
+
 @keyframes beacon {
   50% {
     opacity: 0.35;
@@ -637,15 +725,85 @@ tbody tr:has(.status-loaned) td:first-child {
   }
 }
 
-/* Small screens: strips stay readable, the table scrolls sideways */
+/* Small screens: every strip becomes a card, each value with its label */
 
 @media (max-width: 640px) {
-  main table {
+  main table,
+  main tbody,
+  main tr,
+  main td {
     display: block;
-    overflow-x: auto;
+    width: 100%;
   }
 
-  td {
-    white-space: nowrap;
+  main table {
+    margin-top: 0;
+  }
+
+  main thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  main tbody tr {
+    margin-bottom: 0.75rem;
+    padding: 0.35rem 0 0.5rem;
+    background: var(--strip);
+    border: 1px solid var(--line);
+    border-left: 6px solid var(--accent);
+    border-radius: 3px;
+  }
+
+  main tbody tr:has(.status-available) {
+    border-left-color: var(--available);
+  }
+
+  main tbody tr:has(.status-loaned) {
+    border-left-color: var(--loaned);
+  }
+
+  main tbody tr:hover {
+    transform: none;
+  }
+
+  main td,
+  main td:first-child,
+  main td:last-child {
+    padding: 0.35rem 1rem;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+  }
+
+  main tbody tr:hover td {
+    background: transparent;
+  }
+
+  main td[data-label] {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    text-align: right;
+  }
+
+  main td[data-label]::before {
+    content: attr(data-label);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-align: left;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  main td button {
+    width: 100%;
+    margin-top: 0.35rem;
+  }
+
+  .skeleton-strip {
+    gap: 1rem;
   }
 }

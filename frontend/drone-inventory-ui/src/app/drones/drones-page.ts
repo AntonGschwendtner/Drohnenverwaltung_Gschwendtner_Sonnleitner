@@ -2,10 +2,12 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ApiService, Drone, readErrorMessage } from '../api.service';
 import { I18nService } from '../i18n.service';
+import { EmptyState } from '../shared/empty-state';
+import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-drones-page',
-  imports: [ReactiveFormsModule],
+  imports: [EmptyState, ReactiveFormsModule, StripSkeleton],
   template: `
     <p class="kicker">{{ i18n.t('drones.kicker') }}</p>
     <h1>{{ i18n.t('nav.drones') }}</h1>
@@ -27,14 +29,16 @@ import { I18nService } from '../i18n.service';
           {{ i18n.t('field.description') }}
           <textarea formControlName="description" name="description" rows="2"></textarea>
         </label>
-        <button type="submit" [disabled]="saving()">{{ i18n.t('drones.add') }}</button>
+        <button type="submit" [disabled]="saving()" [class.busy]="saving()">{{ i18n.t('drones.add') }}</button>
       </form>
     </section>
 
-    @if (loadErrorMessage(); as message) {
+    @if (loading()) {
+      <app-strip-skeleton />
+    } @else if (loadErrorMessage(); as message) {
       <p class="error" role="alert">{{ message }}</p>
     } @else if (drones().length === 0) {
-      <p class="empty">{{ i18n.t('drones.empty') }}</p>
+      <app-empty-state>{{ i18n.t('drones.empty') }}</app-empty-state>
     } @else {
       <table>
         <thead>
@@ -51,7 +55,7 @@ import { I18nService } from '../i18n.service';
               <td [class]="'status-' + drone.status.toLowerCase()">
                 {{ i18n.t(drone.status === 'Loaned' ? 'status.loaned' : 'status.available') }}
               </td>
-              <td>{{ drone.description }}</td>
+              <td [attr.data-label]="i18n.t('field.description')">{{ drone.description }}</td>
             </tr>
           }
         </tbody>
@@ -72,6 +76,7 @@ export class DronesPage implements OnInit {
   protected readonly loadErrorMessage = signal<string | null>(null);
   protected readonly saveErrorMessage = signal<string | null>(null);
   protected readonly saving = signal(false);
+  protected readonly loading = signal(true);
 
   ngOnInit(): void {
     this.loadDrones();
@@ -82,8 +87,12 @@ export class DronesPage implements OnInit {
       next: (drones) => {
         this.drones.set(drones);
         this.loadErrorMessage.set(null);
+        this.loading.set(false);
       },
-      error: (error: unknown) => this.loadErrorMessage.set(readErrorMessage(error, this.i18n.t('error.fallback'))),
+      error: (error: unknown) => {
+        this.loadErrorMessage.set(readErrorMessage(error, this.i18n.t('error.fallback')));
+        this.loading.set(false);
+      },
     });
   }
 
