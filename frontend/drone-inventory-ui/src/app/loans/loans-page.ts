@@ -1,10 +1,11 @@
+import { DatePipe } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { ApiService, Drone, readErrorMessage, StudentGroup } from '../api.service';
+import { ApiService, Drone, Loan, readErrorMessage, StudentGroup } from '../api.service';
 
 @Component({
   selector: 'app-loans-page',
-  imports: [ReactiveFormsModule],
+  imports: [DatePipe, ReactiveFormsModule],
   template: `
     <h1>Loans</h1>
 
@@ -51,6 +52,39 @@ import { ApiService, Drone, readErrorMessage, StudentGroup } from '../api.servic
         <button type="submit" [disabled]="saving()">Loan drone</button>
       </form>
     </section>
+
+    <section aria-labelledby="active-loans">
+      <h2 id="active-loans">Active loans</h2>
+
+      @if (activeLoansErrorMessage(); as message) {
+        <p class="error" role="alert">{{ message }}</p>
+      } @else if (activeLoans().length === 0) {
+        <p class="empty">No active loans.</p>
+      } @else {
+        <table>
+          <thead>
+            <tr>
+              <th>Student group</th>
+              <th>Drone</th>
+              <th>Batteries</th>
+              <th>Propellers</th>
+              <th>Loan date</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (loan of activeLoans(); track loan.id) {
+              <tr>
+                <td>{{ loan.studentGroupName }}</td>
+                <td>{{ loan.droneName }}</td>
+                <td>{{ loan.batteries }}</td>
+                <td>{{ loan.propellers }}</td>
+                <td>{{ loan.loanDate | date: 'dd.MM.yyyy' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
   `,
   styles: `
     .saved {
@@ -76,12 +110,26 @@ export class LoansPage implements OnInit {
   protected readonly saveErrorMessage = signal<string | null>(null);
   protected readonly savedMessage = signal<string | null>(null);
   protected readonly saving = signal(false);
+  protected readonly activeLoans = signal<Loan[]>([]);
+  protected readonly activeLoansErrorMessage = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadChoices();
+    this.loadActiveLoans();
+  }
+
+  protected loadActiveLoans(): void {
+    this.api.listLoans('Active').subscribe({
+      next: (loans) => {
+        this.activeLoans.set(loans);
+        this.activeLoansErrorMessage.set(null);
+      },
+      error: (error: unknown) => this.activeLoansErrorMessage.set(readErrorMessage(error)),
+    });
   }
 
   protected loadChoices(): void {
+    this.loadErrorMessage.set(null);
     this.api.listDrones().subscribe({
       next: (drones) => this.drones.set(drones),
       error: (error: unknown) => this.loadErrorMessage.set(readErrorMessage(error)),
@@ -118,6 +166,7 @@ export class LoansPage implements OnInit {
           this.savedMessage.set(`${loan.droneName} is loaned to ${loan.studentGroupName}.`);
           this.form.reset({ droneId: null, studentGroupId: null, batteries: 0, propellers: 0 });
           this.loadChoices();
+          this.loadActiveLoans();
         },
         error: (error: unknown) => {
           this.saving.set(false);
