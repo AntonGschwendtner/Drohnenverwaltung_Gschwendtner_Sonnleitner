@@ -4,11 +4,12 @@ import { HistoryPage } from './history/history-page';
 import { LoansPage } from './loans/loans-page';
 import { StudentGroupsPage } from './student-groups/student-groups-page';
 
+// The titles are text keys, I18nTitleStrategy shows them in the chosen language.
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'drones' },
-  { path: 'drones', title: 'Drones', component: DronesPage },
-  { path: 'student-groups', title: 'Student groups', component: StudentGroupsPage },
-  { path: 'loans', title: 'Loans', component: LoansPage },
-  { path: 'history', title: 'Loan history', component: HistoryPage },
+  { path: 'drones', title: 'nav.drones', component: DronesPage },
+  { path: 'student-groups', title: 'nav.studentGroups', component: StudentGroupsPage },
+  { path: 'loans', title: 'nav.loans', component: LoansPage },
+  { path: 'history', title: 'nav.history', component: HistoryPage },
   { path: '**', redirectTo: 'drones' },
 ];

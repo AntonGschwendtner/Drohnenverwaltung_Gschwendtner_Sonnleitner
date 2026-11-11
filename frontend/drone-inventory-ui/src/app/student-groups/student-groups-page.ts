@@ -1,17 +1,18 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ApiService, readErrorMessage, StudentGroup } from '../api.service';
+import { I18nService } from '../i18n.service';
 
 @Component({
   selector: 'app-student-groups-page',
   imports: [ReactiveFormsModule],
   template: `
-    <p class="kicker">Bay 02 &middot; Crews</p>
-    <h1>Student groups</h1>
-    <p class="lede">The groups that can loan drones and are responsible for them.</p>
+    <p class="kicker">{{ i18n.t('groups.kicker') }}</p>
+    <h1>{{ i18n.t('nav.studentGroups') }}</h1>
+    <p class="lede">{{ i18n.t('groups.lede') }}</p>
 
     <section class="panel" aria-labelledby="new-student-group">
-      <h2 id="new-student-group">New student group</h2>
+      <h2 id="new-student-group">{{ i18n.t('groups.new') }}</h2>
 
       @if (saveErrorMessage(); as message) {
         <p class="error" role="alert">{{ message }}</p>
@@ -19,22 +20,22 @@ import { ApiService, readErrorMessage, StudentGroup } from '../api.service';
 
       <form [formGroup]="form" (ngSubmit)="createStudentGroup()">
         <label>
-          Name
+          {{ i18n.t('field.name') }}
           <input formControlName="name" name="name" autocomplete="off" />
         </label>
-        <button type="submit" [disabled]="saving()">Add student group</button>
+        <button type="submit" [disabled]="saving()">{{ i18n.t('groups.add') }}</button>
       </form>
     </section>
 
     @if (loadErrorMessage(); as message) {
       <p class="error" role="alert">{{ message }}</p>
     } @else if (studentGroups().length === 0) {
-      <p class="empty">No student groups yet.</p>
+      <p class="empty">{{ i18n.t('groups.empty') }}</p>
     } @else {
       <table>
         <thead>
           <tr>
-            <th>Name</th>
+            <th>{{ i18n.t('field.name') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -50,6 +51,7 @@ import { ApiService, readErrorMessage, StudentGroup } from '../api.service';
 })
 export class StudentGroupsPage implements OnInit {
   private readonly api = inject(ApiService);
+  protected readonly i18n = inject(I18nService);
 
   protected readonly form = inject(FormBuilder).nonNullable.group({ name: '' });
 
@@ -68,7 +70,7 @@ export class StudentGroupsPage implements OnInit {
         this.studentGroups.set(studentGroups);
         this.loadErrorMessage.set(null);
       },
-      error: (error: unknown) => this.loadErrorMessage.set(readErrorMessage(error)),
+      error: (error: unknown) => this.loadErrorMessage.set(readErrorMessage(error, this.i18n.t('error.fallback'))),
     });
   }
 
@@ -89,7 +91,7 @@ export class StudentGroupsPage implements OnInit {
       },
       error: (error: unknown) => {
         this.saving.set(false);
-        this.saveErrorMessage.set(readErrorMessage(error));
+        this.saveErrorMessage.set(readErrorMessage(error, this.i18n.t('error.fallback')));
       },
     });
   }

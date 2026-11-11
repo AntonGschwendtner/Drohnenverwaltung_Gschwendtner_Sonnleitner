@@ -57,12 +57,13 @@ export interface CreateLoanRequest {
 /**
  * Reads the message the backend sends with a rejection, so that the views do not repeat its rules.
  */
-export function readErrorMessage(error: unknown): string {
+export function readErrorMessage(
+  error: unknown,
+  fallback = 'The request failed. Check that the backend is running and try again.',
+): string {
   const detail = error instanceof HttpErrorResponse ? error.error?.detail : undefined;
 
-  return typeof detail === 'string' && detail.length > 0
-    ? detail
-    : 'The request failed. Check that the backend is running and try again.';
+  return typeof detail === 'string' && detail.length > 0 ? detail : fallback;
 }
 
 @Injectable({ providedIn: 'root' })

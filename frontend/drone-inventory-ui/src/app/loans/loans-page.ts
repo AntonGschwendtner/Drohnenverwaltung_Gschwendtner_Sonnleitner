@@ -2,17 +2,18 @@ import { DatePipe } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ApiService, Drone, Loan, readErrorMessage, StudentGroup } from '../api.service';
+import { I18nService } from '../i18n.service';
 
 @Component({
   selector: 'app-loans-page',
   imports: [DatePipe, ReactiveFormsModule],
   template: `
-    <p class="kicker">Bay 03 &middot; Airborne</p>
-    <h1>Loans</h1>
-    <p class="lede">Loan an available drone with its accessories, and return it here.</p>
+    <p class="kicker">{{ i18n.t('loans.kicker') }}</p>
+    <h1>{{ i18n.t('nav.loans') }}</h1>
+    <p class="lede">{{ i18n.t('loans.lede') }}</p>
 
     <section class="panel" aria-labelledby="new-loan">
-      <h2 id="new-loan">New loan</h2>
+      <h2 id="new-loan">{{ i18n.t('loans.new') }}</h2>
 
       @if (loadErrorMessage(); as message) {
         <p class="error" role="alert">{{ message }}</p>
@@ -26,37 +27,39 @@ import { ApiService, Drone, Loan, readErrorMessage, StudentGroup } from '../api.
 
       <form [formGroup]="form" (ngSubmit)="createLoan()">
         <label>
-          Drone
+          {{ i18n.t('field.drone') }}
           <select formControlName="droneId" name="droneId">
-            <option [ngValue]="null">Choose a drone</option>
+            <option [ngValue]="null">{{ i18n.t('loans.chooseDrone') }}</option>
             @for (drone of drones(); track drone.id) {
-              <option [ngValue]="drone.id">{{ drone.name }} ({{ drone.status }})</option>
+              <option [ngValue]="drone.id">
+                {{ drone.name }} ({{ i18n.t(drone.status === 'Loaned' ? 'status.loaned' : 'status.available') }})
+              </option>
             }
           </select>
         </label>
         <label>
-          Student group
+          {{ i18n.t('field.studentGroup') }}
           <select formControlName="studentGroupId" name="studentGroupId">
-            <option [ngValue]="null">Choose a student group</option>
+            <option [ngValue]="null">{{ i18n.t('loans.chooseGroup') }}</option>
             @for (studentGroup of studentGroups(); track studentGroup.id) {
               <option [ngValue]="studentGroup.id">{{ studentGroup.name }}</option>
             }
           </select>
         </label>
         <label>
-          Batteries
+          {{ i18n.t('field.batteries') }}
           <input type="number" formControlName="batteries" name="batteries" />
         </label>
         <label>
-          Propellers
+          {{ i18n.t('field.propellers') }}
           <input type="number" formControlName="propellers" name="propellers" />
         </label>
-        <button type="submit" [disabled]="saving()">Loan drone</button>
+        <button type="submit" [disabled]="saving()">{{ i18n.t('loans.submit') }}</button>
       </form>
     </section>
 
     <section aria-labelledby="active-loans">
-      <h2 id="active-loans">Active loans</h2>
+      <h2 id="active-loans">{{ i18n.t('loans.active') }}</h2>
 
       @if (returnErrorMessage(); as message) {
         <p class="error" role="alert">{{ message }}</p>
@@ -65,17 +68,17 @@ import { ApiService, Drone, Loan, readErrorMessage, StudentGroup } from '../api.
       @if (activeLoansErrorMessage(); as message) {
         <p class="error" role="alert">{{ message }}</p>
       } @else if (activeLoans().length === 0) {
-        <p class="empty">No active loans.</p>
+        <p class="empty">{{ i18n.t('loans.empty') }}</p>
       } @else {
         <table>
           <thead>
             <tr>
-              <th>Student group</th>
-              <th>Drone</th>
-              <th>Batteries</th>
-              <th>Propellers</th>
-              <th>Loan date</th>
-              <th><span class="visually-hidden">Action</span></th>
+              <th>{{ i18n.t('field.studentGroup') }}</th>
+              <th>{{ i18n.t('field.drone') }}</th>
+              <th>{{ i18n.t('field.batteries') }}</th>
+              <th>{{ i18n.t('field.propellers') }}</th>
+              <th>{{ i18n.t('field.loanDate') }}</th>
+              <th><span class="visually-hidden">{{ i18n.t('field.action') }}</span></th>
             </tr>
           </thead>
           <tbody>
@@ -88,7 +91,7 @@ import { ApiService, Drone, Loan, readErrorMessage, StudentGroup } from '../api.
                 <td>{{ loan.loanDate | date: 'dd.MM.yyyy' }}</td>
                 <td>
                   <button type="button" (click)="returnLoan(loan)" [disabled]="returningId() !== null">
-                    Return<span class="visually-hidden"> {{ loan.droneName }}</span>
+                    {{ i18n.t('loans.return') }}<span class="visually-hidden"> {{ loan.droneName }}</span>
                   </button>
                 </td>
               </tr>
@@ -101,6 +104,7 @@ import { ApiService, Drone, Loan, readErrorMessage, StudentGroup } from '../api.
 })
 export class LoansPage implements OnInit {
   private readonly api = inject(ApiService);
+  protected readonly i18n = inject(I18nService);
 
   protected readonly form = inject(FormBuilder).group({
     droneId: null as number | null,
@@ -131,7 +135,7 @@ export class LoansPage implements OnInit {
         this.activeLoans.set(loans);
         this.activeLoansErrorMessage.set(null);
       },
-      error: (error: unknown) => this.activeLoansErrorMessage.set(readErrorMessage(error)),
+      error: (error: unknown) => this.activeLoansErrorMessage.set(this.errorMessage(error)),
     });
   }
 
@@ -139,11 +143,11 @@ export class LoansPage implements OnInit {
     this.loadErrorMessage.set(null);
     this.api.listDrones().subscribe({
       next: (drones) => this.drones.set(drones),
-      error: (error: unknown) => this.loadErrorMessage.set(readErrorMessage(error)),
+      error: (error: unknown) => this.loadErrorMessage.set(this.errorMessage(error)),
     });
     this.api.listStudentGroups().subscribe({
       next: (studentGroups) => this.studentGroups.set(studentGroups),
-      error: (error: unknown) => this.loadErrorMessage.set(readErrorMessage(error)),
+      error: (error: unknown) => this.loadErrorMessage.set(this.errorMessage(error)),
     });
   }
 
@@ -160,13 +164,13 @@ export class LoansPage implements OnInit {
     this.api.returnLoan(loan.id).subscribe({
       next: (returnedLoan) => {
         this.returningId.set(null);
-        this.savedMessage.set(`${returnedLoan.droneName} is returned.`);
+        this.savedMessage.set(this.i18n.t('loans.returned', { drone: returnedLoan.droneName }));
         this.loadActiveLoans();
         this.loadChoices();
       },
       error: (error: unknown) => {
         this.returningId.set(null);
-        this.returnErrorMessage.set(readErrorMessage(error));
+        this.returnErrorMessage.set(this.errorMessage(error));
         this.loadActiveLoans();
       },
     });
@@ -195,15 +199,19 @@ export class LoansPage implements OnInit {
       .subscribe({
         next: (loan) => {
           this.saving.set(false);
-          this.savedMessage.set(`${loan.droneName} is loaned to ${loan.studentGroupName}.`);
+          this.savedMessage.set(this.i18n.t('loans.saved', { drone: loan.droneName, group: loan.studentGroupName }));
           this.form.reset({ droneId: null, studentGroupId: null, batteries: 0, propellers: 0 });
           this.loadChoices();
           this.loadActiveLoans();
         },
         error: (error: unknown) => {
           this.saving.set(false);
-          this.saveErrorMessage.set(readErrorMessage(error));
+          this.saveErrorMessage.set(this.errorMessage(error));
         },
       });
+  }
+
+  private errorMessage(error: unknown): string {
+    return readErrorMessage(error, this.i18n.t('error.fallback'));
   }
 }

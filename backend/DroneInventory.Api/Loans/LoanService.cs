@@ -24,7 +24,7 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
     {
         if (status is not { } requestedStatus)
         {
-            return ServiceResult<IReadOnlyList<LoanResponse>>.Invalid("Use status=Active or status=Returned to list loans.");
+            return ServiceResult<IReadOnlyList<LoanResponse>>.Invalid(Messages.LoanStatusMissing);
         }
 
         var matchingLoans = dbContext.Loans.Where(loan => loan.Status == requestedStatus);
@@ -44,12 +44,12 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
     {
         if (request.DroneId is not { } droneId)
         {
-            return ServiceResult<LoanResponse>.Invalid("A loan needs a drone.");
+            return ServiceResult<LoanResponse>.Invalid(Messages.LoanNeedsDrone);
         }
 
         if (request.StudentGroupId is not { } studentGroupId)
         {
-            return ServiceResult<LoanResponse>.Invalid("A loan needs a student group.");
+            return ServiceResult<LoanResponse>.Invalid(Messages.LoanNeedsStudentGroup);
         }
 
         var (items, itemError) = ReadItems(request.Items);
@@ -61,13 +61,13 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
         var drone = await dbContext.Drones.FindAsync([droneId], cancellationToken);
         if (drone is null)
         {
-            return ServiceResult<LoanResponse>.Invalid($"The drone with the id {droneId} does not exist.");
+            return ServiceResult<LoanResponse>.Invalid(Messages.UnknownDrone(droneId));
         }
 
         var studentGroup = await dbContext.StudentGroups.FindAsync([studentGroupId], cancellationToken);
         if (studentGroup is null)
         {
-            return ServiceResult<LoanResponse>.Invalid($"The student group with the id {studentGroupId} does not exist.");
+            return ServiceResult<LoanResponse>.Invalid(Messages.UnknownStudentGroup(studentGroupId));
         }
 
         var isLoaned = await dbContext.Loans.AnyAsync(
@@ -131,11 +131,11 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
 
         if (returnedLoan is null)
         {
-            return ServiceResult<LoanResponse>.NotFound($"The loan with the id {id} does not exist.");
+            return ServiceResult<LoanResponse>.NotFound(Messages.UnknownLoan(id));
         }
 
         return changedLoans == 0
-            ? ServiceResult<LoanResponse>.Conflict($"The loan with the id {id} is already returned.")
+            ? ServiceResult<LoanResponse>.Conflict(Messages.LoanAlreadyReturned(id))
             : ServiceResult<LoanResponse>.Success(returnedLoan);
     }
 
@@ -147,30 +147,30 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
         {
             if (requestedItem is null)
             {
-                return (items, "The accessories contain an empty entry.");
+                return (items, Messages.EmptyLoanItem);
             }
 
             // Enum.TryParse would also accept numbers such as "0", so only the exact names are allowed.
             if (!Enum.GetNames<LoanItemType>().Contains(requestedItem.Type))
             {
-                return (items, $"\"{requestedItem.Type}\" is not an accessory type. Use Battery or Propeller.");
+                return (items, Messages.UnknownLoanItemType(requestedItem.Type));
             }
 
             var type = Enum.Parse<LoanItemType>(requestedItem.Type!);
 
             if (requestedItem.Quantity is not { } quantity)
             {
-                return (items, $"The accessory type {type} needs a quantity.");
+                return (items, Messages.LoanItemNeedsQuantity(type.ToString()));
             }
 
             if (quantity < 0)
             {
-                return (items, "Accessory quantities must not be negative.");
+                return (items, Messages.NegativeQuantity);
             }
 
             if (items.Any(item => item.Type == type))
             {
-                return (items, $"The accessory type {type} appears more than once.");
+                return (items, Messages.LoanItemTypeTwice(type.ToString()));
             }
 
             items.Add(new LoanItem { Type = type, Quantity = quantity });
@@ -183,5 +183,5 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
         loan.Items.Where(item => item.Type == type).Sum(item => item.Quantity);
 
     private static ServiceResult<LoanResponse> AlreadyLoaned(Drone drone) =>
-        ServiceResult<LoanResponse>.Conflict($"The drone \"{drone.Name}\" is already loaned.");
+        ServiceResult<LoanResponse>.Conflict(Messages.DroneAlreadyLoaned(drone.Name));
 }

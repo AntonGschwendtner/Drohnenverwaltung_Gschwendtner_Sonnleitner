@@ -24,7 +24,7 @@ public class DroneService(DroneInventoryDbContext dbContext)
         var name = request.Name?.Trim();
         if (string.IsNullOrEmpty(name))
         {
-            return ServiceResult<DroneResponse>.Invalid("A drone needs a name.");
+            return ServiceResult<DroneResponse>.Invalid(Messages.DroneNeedsName);
         }
 
         if (await dbContext.Drones.AnyAsync(drone => drone.Name == name, cancellationToken))
@@ -49,5 +49,5 @@ public class DroneService(DroneInventoryDbContext dbContext)
     }
 
     private static ServiceResult<DroneResponse> NameAlreadyExists(string name) =>
-        ServiceResult<DroneResponse>.Conflict($"A drone named \"{name}\" already exists.");
+        ServiceResult<DroneResponse>.Conflict(Messages.DroneNameExists(name));
 }

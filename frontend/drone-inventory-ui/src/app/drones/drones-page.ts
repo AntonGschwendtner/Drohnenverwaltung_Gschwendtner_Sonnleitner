@@ -1,17 +1,18 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ApiService, Drone, readErrorMessage } from '../api.service';
+import { I18nService } from '../i18n.service';
 
 @Component({
   selector: 'app-drones-page',
   imports: [ReactiveFormsModule],
   template: `
-    <p class="kicker">Bay 01 &middot; Fleet</p>
-    <h1>Drones</h1>
-    <p class="lede">Every drone with its current status. A drone is loaned while it has an active loan.</p>
+    <p class="kicker">{{ i18n.t('drones.kicker') }}</p>
+    <h1>{{ i18n.t('nav.drones') }}</h1>
+    <p class="lede">{{ i18n.t('drones.lede') }}</p>
 
     <section class="panel" aria-labelledby="new-drone">
-      <h2 id="new-drone">New drone</h2>
+      <h2 id="new-drone">{{ i18n.t('drones.new') }}</h2>
 
       @if (saveErrorMessage(); as message) {
         <p class="error" role="alert">{{ message }}</p>
@@ -19,35 +20,37 @@ import { ApiService, Drone, readErrorMessage } from '../api.service';
 
       <form [formGroup]="form" (ngSubmit)="createDrone()">
         <label>
-          Name
+          {{ i18n.t('field.name') }}
           <input formControlName="name" name="name" autocomplete="off" />
         </label>
         <label>
-          Description
+          {{ i18n.t('field.description') }}
           <textarea formControlName="description" name="description" rows="2"></textarea>
         </label>
-        <button type="submit" [disabled]="saving()">Add drone</button>
+        <button type="submit" [disabled]="saving()">{{ i18n.t('drones.add') }}</button>
       </form>
     </section>
 
     @if (loadErrorMessage(); as message) {
       <p class="error" role="alert">{{ message }}</p>
     } @else if (drones().length === 0) {
-      <p class="empty">No drones yet.</p>
+      <p class="empty">{{ i18n.t('drones.empty') }}</p>
     } @else {
       <table>
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Status</th>
-            <th>Description</th>
+            <th>{{ i18n.t('field.name') }}</th>
+            <th>{{ i18n.t('field.status') }}</th>
+            <th>{{ i18n.t('field.description') }}</th>
           </tr>
         </thead>
         <tbody>
           @for (drone of drones(); track drone.id) {
             <tr>
               <td>{{ drone.name }}</td>
-              <td [class]="'status-' + drone.status.toLowerCase()">{{ drone.status }}</td>
+              <td [class]="'status-' + drone.status.toLowerCase()">
+                {{ i18n.t(drone.status === 'Loaned' ? 'status.loaned' : 'status.available') }}
+              </td>
               <td>{{ drone.description }}</td>
             </tr>
           }
@@ -58,6 +61,7 @@ import { ApiService, Drone, readErrorMessage } from '../api.service';
 })
 export class DronesPage implements OnInit {
   private readonly api = inject(ApiService);
+  protected readonly i18n = inject(I18nService);
 
   protected readonly form = inject(FormBuilder).nonNullable.group({
     name: '',
@@ -79,7 +83,7 @@ export class DronesPage implements OnInit {
         this.drones.set(drones);
         this.loadErrorMessage.set(null);
       },
-      error: (error: unknown) => this.loadErrorMessage.set(readErrorMessage(error)),
+      error: (error: unknown) => this.loadErrorMessage.set(readErrorMessage(error, this.i18n.t('error.fallback'))),
     });
   }
 
@@ -100,7 +104,7 @@ export class DronesPage implements OnInit {
       },
       error: (error: unknown) => {
         this.saving.set(false);
-        this.saveErrorMessage.set(readErrorMessage(error));
+        this.saveErrorMessage.set(readErrorMessage(error, this.i18n.t('error.fallback')));
       },
     });
   }

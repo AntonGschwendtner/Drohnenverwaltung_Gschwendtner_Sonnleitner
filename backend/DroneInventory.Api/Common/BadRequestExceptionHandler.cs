@@ -24,7 +24,7 @@ public sealed class BadRequestExceptionHandler(IProblemDetailsService problemDet
             ProblemDetails = new ProblemDetails
             {
                 Status = badRequest.StatusCode,
-                Detail = "The request could not be read. Check that all values have the expected format.",
+                Detail = Messages.RequestNotReadable,
             },
         });
     }

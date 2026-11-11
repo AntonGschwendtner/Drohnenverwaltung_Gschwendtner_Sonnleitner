@@ -38,6 +38,11 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+// Before the exception handler, so that its messages use the language of the request as well.
+app.UseRequestLocalization(new RequestLocalizationOptions()
+    .SetDefaultCulture(Messages.English)
+    .AddSupportedCultures(Messages.English, Messages.German)
+    .AddSupportedUICultures(Messages.English, Messages.German));
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseHttpsRedirection();

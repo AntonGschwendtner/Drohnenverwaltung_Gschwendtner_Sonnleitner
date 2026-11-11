@@ -20,7 +20,7 @@ public class StudentGroupService(DroneInventoryDbContext dbContext)
         var name = request.Name?.Trim();
         if (string.IsNullOrEmpty(name))
         {
-            return ServiceResult<StudentGroupResponse>.Invalid("A student group needs a name.");
+            return ServiceResult<StudentGroupResponse>.Invalid(Messages.StudentGroupNeedsName);
         }
 
         if (await dbContext.StudentGroups.AnyAsync(studentGroup => studentGroup.Name == name, cancellationToken))
@@ -44,5 +44,5 @@ public class StudentGroupService(DroneInventoryDbContext dbContext)
     }
 
     private static ServiceResult<StudentGroupResponse> NameAlreadyExists(string name) =>
-        ServiceResult<StudentGroupResponse>.Conflict($"A student group named \"{name}\" already exists.");
+        ServiceResult<StudentGroupResponse>.Conflict(Messages.StudentGroupNameExists(name));
 }

@@ -33,7 +33,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem 1.5rem;
-  max-width: 72rem;
+  max-width: 80rem;
   margin: 0 auto;
   padding: 0.85rem 1.5rem;
 }
@@ -169,63 +169,6 @@ nav a:focus-visible {
   animation: tick 1s steps(2, jump-none) infinite;
 }
 
-/* Day and night switch */
-
-.theme-toggle {
-  gap: 0.6rem;
-  min-height: auto;
-  padding: 0.35rem 0.5rem;
-  border: 1px solid var(--line-strong);
-  background: transparent;
-  color: var(--ink);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-}
-
-.theme-toggle:hover:not(:disabled) {
-  border-color: var(--accent);
-  box-shadow: none;
-  transform: none;
-}
-
-.toggle-track {
-  position: relative;
-  width: 2.5rem;
-  height: 1.3rem;
-  border-radius: 999px;
-  background: var(--line);
-  transition: background-color 0.3s var(--ease);
-}
-
-.toggle-knob {
-  position: absolute;
-  top: 0.15rem;
-  left: 0.15rem;
-  width: 1rem;
-  height: 1rem;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
-  transition: transform 0.35s var(--ease);
-}
-
-.theme-toggle[aria-pressed='true'] .toggle-track {
-  background: var(--strip-hover);
-}
-
-.theme-toggle[aria-pressed='true'] .toggle-knob {
-  transform: translateX(1.2rem);
-  background: var(--available);
-  box-shadow: 0 0 10px var(--available);
-}
-
-.toggle-label {
-  min-width: 2.6rem;
-  text-align: left;
-}
-
 /* Page and footer */
 
 main {
@@ -262,7 +205,7 @@ main {
   }
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1340px) {
   .clock {
     display: none;
   }

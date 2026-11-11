@@ -1,36 +1,42 @@
 <header class="tower">
   <div class="tower-inner">
-    <a class="brand" routerLink="/drones" aria-label="Drone Inventory, start page">
+    <a class="brand" routerLink="/drones" [attr.aria-label]="i18n.t('app.start')">
       <span class="scope" aria-hidden="true"><span class="sweep"></span></span>
       <span class="brand-text">
-        <span class="brand-name">Drone Inventory</span>
-        <span class="brand-sub">Strip bay &middot; lending control</span>
+        <span class="brand-name">{{ i18n.t('app.brand') }}</span>
+        <span class="brand-sub">{{ i18n.t('app.brandSub') }}</span>
       </span>
     </a>
 
     <nav aria-label="Main">
-      <a routerLink="/drones" routerLinkActive="active"><span class="nav-code" aria-hidden="true">01</span>Drones</a>
-      <a routerLink="/student-groups" routerLinkActive="active"><span class="nav-code" aria-hidden="true">02</span>Student groups</a>
-      <a routerLink="/loans" routerLinkActive="active"><span class="nav-code" aria-hidden="true">03</span>Loans</a>
-      <a routerLink="/history" routerLinkActive="active"><span class="nav-code" aria-hidden="true">04</span>Loan history</a>
+      <a routerLink="/drones" routerLinkActive="active"><span class="nav-code" aria-hidden="true">01</span>{{ i18n.t('nav.drones') }}</a>
+      <a routerLink="/student-groups" routerLinkActive="active"><span class="nav-code" aria-hidden="true">02</span>{{ i18n.t('nav.studentGroups') }}</a>
+      <a routerLink="/loans" routerLinkActive="active"><span class="nav-code" aria-hidden="true">03</span>{{ i18n.t('nav.loans') }}</a>
+      <a routerLink="/history" routerLinkActive="active"><span class="nav-code" aria-hidden="true">04</span>{{ i18n.t('nav.history') }}</a>
     </nav>
 
     <div class="tower-tools">
-    <span class="clock" aria-hidden="true">
-      <span class="clock-dot"></span>
-      <span>{{ time() }}</span>
-    </span>
+      <span class="clock" aria-hidden="true">
+        <span class="clock-dot"></span>
+        <span>{{ time() }}</span>
+      </span>
 
-    <button
-      class="theme-toggle"
-      type="button"
-      (click)="theme.toggle()"
-      [attr.aria-pressed]="theme.theme() === 'dark'"
-      [attr.aria-label]="theme.theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
-    >
-      <span class="toggle-track" aria-hidden="true"><span class="toggle-knob"></span></span>
-      <span class="toggle-label" aria-hidden="true">{{ theme.theme() === 'dark' ? 'Night' : 'Day' }}</span>
-    </button>
+      <button class="lang-toggle" type="button" (click)="i18n.toggle()" [attr.aria-label]="i18n.t('language.switch')">
+        <span [class.on]="i18n.language() === 'de'" aria-hidden="true">DE</span>
+        <span class="lang-divider" aria-hidden="true"></span>
+        <span [class.on]="i18n.language() === 'en'" aria-hidden="true">EN</span>
+      </button>
+
+      <button
+        class="theme-toggle"
+        type="button"
+        (click)="theme.toggle()"
+        [attr.aria-pressed]="theme.theme() === 'dark'"
+        [attr.aria-label]="i18n.t(theme.theme() === 'dark' ? 'theme.toLight' : 'theme.toDark')"
+      >
+        <span class="toggle-track" aria-hidden="true"><span class="toggle-knob"></span></span>
+        <span class="toggle-label" aria-hidden="true">{{ i18n.t(theme.theme() === 'dark' ? 'theme.night' : 'theme.day') }}</span>
+      </button>
     </div>
   </div>
 </header>
@@ -40,7 +46,7 @@
 </main>
 
 <footer class="ticker">
-  <span>Drone Inventory</span>
+  <span>{{ i18n.t('app.brand') }}</span>
   <span aria-hidden="true">&middot;</span>
   <span>SYP 4. INF 2026/27</span>
   <span aria-hidden="true">&middot;</span>
