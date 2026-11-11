@@ -71,5 +71,6 @@ describe('DronesPage', () => {
     expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent).toContain(
       'The database is not reachable.',
     );
+    expect(fixture.nativeElement.textContent).not.toContain('No drones yet.');
   });
 });

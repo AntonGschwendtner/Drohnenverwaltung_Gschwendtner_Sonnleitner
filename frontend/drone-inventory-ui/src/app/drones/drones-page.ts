@@ -1,16 +1,36 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ApiService, Drone, readErrorMessage } from '../api.service';
 
 @Component({
   selector: 'app-drones-page',
+  imports: [ReactiveFormsModule],
   template: `
     <h1>Drones</h1>
 
-    @if (errorMessage(); as message) {
-      <p class="error" role="alert">{{ message }}</p>
-    }
+    <section class="panel" aria-labelledby="new-drone">
+      <h2 id="new-drone">New drone</h2>
 
-    @if (drones().length === 0) {
+      @if (saveErrorMessage(); as message) {
+        <p class="error" role="alert">{{ message }}</p>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="createDrone()">
+        <label>
+          Name
+          <input formControlName="name" name="name" autocomplete="off" />
+        </label>
+        <label>
+          Description
+          <textarea formControlName="description" name="description" rows="2"></textarea>
+        </label>
+        <button type="submit" [disabled]="saving()">Add drone</button>
+      </form>
+    </section>
+
+    @if (loadErrorMessage(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    } @else if (drones().length === 0) {
       <p class="empty">No drones yet.</p>
     } @else {
       <table>
@@ -48,8 +68,15 @@ import { ApiService, Drone, readErrorMessage } from '../api.service';
 export class DronesPage implements OnInit {
   private readonly api = inject(ApiService);
 
+  protected readonly form = inject(FormBuilder).nonNullable.group({
+    name: '',
+    description: '',
+  });
+
   protected readonly drones = signal<Drone[]>([]);
-  protected readonly errorMessage = signal<string | null>(null);
+  protected readonly loadErrorMessage = signal<string | null>(null);
+  protected readonly saveErrorMessage = signal<string | null>(null);
+  protected readonly saving = signal(false);
 
   ngOnInit(): void {
     this.loadDrones();
@@ -59,9 +86,27 @@ export class DronesPage implements OnInit {
     this.api.listDrones().subscribe({
       next: (drones) => {
         this.drones.set(drones);
-        this.errorMessage.set(null);
+        this.loadErrorMessage.set(null);
       },
-      error: (error: unknown) => this.errorMessage.set(readErrorMessage(error)),
+      error: (error: unknown) => this.loadErrorMessage.set(readErrorMessage(error)),
+    });
+  }
+
+  // The backend checks the name, so the form sends what was entered and shows its answer.
+  protected createDrone(): void {
+    this.saving.set(true);
+    this.saveErrorMessage.set(null);
+
+    this.api.createDrone(this.form.getRawValue()).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.form.reset();
+        this.loadDrones();
+      },
+      error: (error: unknown) => {
+        this.saving.set(false);
+        this.saveErrorMessage.set(readErrorMessage(error));
+      },
     });
   }
 }
