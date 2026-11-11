@@ -23,6 +23,7 @@ describe('LoansPage loan form', () => {
     fixture = TestBed.createComponent(LoansPage);
     fixture.detectChanges();
     respondToChoices();
+    respondToActiveLoans();
     await settle();
   });
 
@@ -31,6 +32,10 @@ describe('LoansPage loan form', () => {
   function respondToChoices(): void {
     http.expectOne({ method: 'GET', url: '/api/drones' }).flush(drones);
     http.expectOne({ method: 'GET', url: '/api/student-groups' }).flush(studentGroups);
+  }
+
+  function respondToActiveLoans(): void {
+    http.expectOne({ method: 'GET', url: '/api/loans?status=Active' }).flush([]);
   }
 
   async function settle(): Promise<void> {
@@ -104,6 +109,7 @@ describe('LoansPage loan form', () => {
     });
     await settle();
     respondToChoices();
+    respondToActiveLoans();
     await settle();
 
     expect(element().querySelector('[role="status"]')?.textContent).toContain('TELLO-07 is loaned to Group 3.');
