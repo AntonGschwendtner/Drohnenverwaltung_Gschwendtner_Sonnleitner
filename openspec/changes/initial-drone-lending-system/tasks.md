@@ -29,7 +29,7 @@
 
 ## 5. Frontend
 
-- [ ] 5.1 Replace the template start page with navigation and routes, add the `/api` proxy and a shared API service; verify with `ng test` that the service calls the expected URLs and that `ng serve` reaches the backend through the proxy (foundation for all views) (#24)
+- [x] 5.1 Replace the template start page with navigation and routes, add the `/api` proxy and a shared API service; verify with `ng test` that the service calls the expected URLs and that `ng serve` reaches the backend through the proxy (foundation for all views) (#24)
 - [ ] 5.2 Add the drone list with name, status and description; verify with a component test that Available and Loaned are shown (REQ-002) (#25)
 - [ ] 5.3 Add the drone form; verify with component tests that a valid drone is sent and that a rejection message from the backend is shown (REQ-001) (#26)
 - [ ] 5.4 Add the student group view with list and form; verify with component tests that groups are shown, a group is sent and a rejection message is shown (REQ-003) (#27)

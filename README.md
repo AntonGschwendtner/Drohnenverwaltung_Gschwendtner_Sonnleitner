@@ -6,7 +6,7 @@ Schulprojekt im Fach SYP, 4. INF, 2026/27, von Gschwendtner und Sonnleitner. Bet
 
 ## Stand
 
-Die Anwendung ist noch in Arbeit und kann fachlich noch nichts. Fertig sind die Grundlagen: API-Grundgerüst, Datenbank mit Migrationen und Testprojekt. Das Frontend zeigt noch die Angular-Startseite.
+Die Anwendung ist noch in Arbeit. Die REST-API ist fertig: Drohnen, Gruppen, Ausleihen, Rückgaben und Historie. Das Frontend hat Navigation und Anbindung ans Backend, die einzelnen Ansichten folgen noch.
 
 Der aktuelle Fortschritt steht in [tasks.md](openspec/changes/initial-drone-lending-system/tasks.md) und im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
 
@@ -56,7 +56,7 @@ npm install
 npm start
 ```
 
-Frontend und Backend sind noch nicht verbunden. Das folgt mit Task 5.1.
+Das Frontend leitet alle Anfragen an `/api` an das Backend weiter (`proxy.conf.json`). Dafür muss das Backend laufen.
 
 ## Testen
 
