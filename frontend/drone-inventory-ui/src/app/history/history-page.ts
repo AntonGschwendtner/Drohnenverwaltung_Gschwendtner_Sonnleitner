@@ -6,7 +6,9 @@ import { ApiService, Loan, readErrorMessage } from '../api.service';
   selector: 'app-history-page',
   imports: [DatePipe],
   template: `
+    <p class="kicker">Bay 04 &middot; Logbook</p>
     <h1>Loan history</h1>
+    <p class="lede">Every returned loan stays here, the newest return first.</p>
 
     @if (errorMessage(); as message) {
       <p class="error" role="alert">{{ message }}</p>

@@ -6,7 +6,9 @@ import { ApiService, Drone, readErrorMessage } from '../api.service';
   selector: 'app-drones-page',
   imports: [ReactiveFormsModule],
   template: `
+    <p class="kicker">Bay 01 &middot; Fleet</p>
     <h1>Drones</h1>
+    <p class="lede">Every drone with its current status. A drone is loaned while it has an active loan.</p>
 
     <section class="panel" aria-labelledby="new-drone">
       <h2 id="new-drone">New drone</h2>
@@ -51,17 +53,6 @@ import { ApiService, Drone, readErrorMessage } from '../api.service';
           }
         </tbody>
       </table>
-    }
-  `,
-  styles: `
-    .status-available {
-      color: var(--available);
-      font-weight: 600;
-    }
-
-    .status-loaned {
-      color: var(--loaned);
-      font-weight: 600;
     }
   `,
 })

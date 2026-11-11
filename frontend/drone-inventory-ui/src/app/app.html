@@ -1,12 +1,48 @@
-<header class="app-header">
-  <span class="brand">Drone Inventory</span>
-  <nav aria-label="Main">
-    <a routerLink="/drones" routerLinkActive="active">Drones</a>
-    <a routerLink="/student-groups" routerLinkActive="active">Student groups</a>
-    <a routerLink="/loans" routerLinkActive="active">Loans</a>
-    <a routerLink="/history" routerLinkActive="active">Loan history</a>
-  </nav>
+<header class="tower">
+  <div class="tower-inner">
+    <a class="brand" routerLink="/drones" aria-label="Drone Inventory, start page">
+      <span class="scope" aria-hidden="true"><span class="sweep"></span></span>
+      <span class="brand-text">
+        <span class="brand-name">Drone Inventory</span>
+        <span class="brand-sub">Strip bay &middot; lending control</span>
+      </span>
+    </a>
+
+    <nav aria-label="Main">
+      <a routerLink="/drones" routerLinkActive="active"><span class="nav-code" aria-hidden="true">01</span>Drones</a>
+      <a routerLink="/student-groups" routerLinkActive="active"><span class="nav-code" aria-hidden="true">02</span>Student groups</a>
+      <a routerLink="/loans" routerLinkActive="active"><span class="nav-code" aria-hidden="true">03</span>Loans</a>
+      <a routerLink="/history" routerLinkActive="active"><span class="nav-code" aria-hidden="true">04</span>Loan history</a>
+    </nav>
+
+    <div class="tower-tools">
+    <span class="clock" aria-hidden="true">
+      <span class="clock-dot"></span>
+      <span>{{ time() }}</span>
+    </span>
+
+    <button
+      class="theme-toggle"
+      type="button"
+      (click)="theme.toggle()"
+      [attr.aria-pressed]="theme.theme() === 'dark'"
+      [attr.aria-label]="theme.theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+    >
+      <span class="toggle-track" aria-hidden="true"><span class="toggle-knob"></span></span>
+      <span class="toggle-label" aria-hidden="true">{{ theme.theme() === 'dark' ? 'Night' : 'Day' }}</span>
+    </button>
+    </div>
+  </div>
 </header>
+
 <main>
   <router-outlet />
 </main>
+
+<footer class="ticker">
+  <span>Drone Inventory</span>
+  <span aria-hidden="true">&middot;</span>
+  <span>SYP 4. INF 2026/27</span>
+  <span aria-hidden="true">&middot;</span>
+  <span>Gschwendtner &amp; Sonnleitner</span>
+</footer>
