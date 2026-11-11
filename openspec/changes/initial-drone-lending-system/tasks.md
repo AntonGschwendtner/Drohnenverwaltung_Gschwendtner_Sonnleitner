@@ -36,7 +36,7 @@
 - [x] 5.5 Add the loan form with drone, group, batteries and propellers; verify with component tests that the loan is sent with its items and that a rejection message is shown (REQ-004, REQ-005, REQ-006) (#28)
 - [x] 5.6 Add the active loan list; verify with a component test that group, drone, batteries, propellers and date in the format `dd.MM.yyyy` are shown (REQ-007) (#29)
 - [x] 5.7 Add the return action to the active loan list; verify with a component test that the return is sent and the list is refreshed (REQ-008, REQ-009) (#30)
-- [ ] 5.8 Add the loan history view; verify with a component test that accessories, loan date and return date are shown (REQ-010) (#31)
+- [x] 5.8 Add the loan history view; verify with a component test that accessories, loan date and return date are shown (REQ-010) (#31)
 
 ## 6. Integration
 
