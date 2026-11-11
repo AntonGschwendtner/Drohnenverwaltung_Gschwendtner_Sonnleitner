@@ -7,7 +7,9 @@ import { ApiService, Drone, Loan, readErrorMessage, StudentGroup } from '../api.
   selector: 'app-loans-page',
   imports: [DatePipe, ReactiveFormsModule],
   template: `
+    <p class="kicker">Bay 03 &middot; Airborne</p>
     <h1>Loans</h1>
+    <p class="lede">Loan an available drone with its accessories, and return it here.</p>
 
     <section class="panel" aria-labelledby="new-loan">
       <h2 id="new-loan">New loan</h2>
@@ -95,22 +97,6 @@ import { ApiService, Drone, Loan, readErrorMessage, StudentGroup } from '../api.
         </table>
       }
     </section>
-  `,
-  styles: `
-    .visually-hidden {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip-path: inset(50%);
-      white-space: nowrap;
-    }
-
-    .saved {
-      margin: 0 0 1rem;
-      color: var(--available);
-      font-weight: 600;
-    }
   `,
 })
 export class LoansPage implements OnInit {

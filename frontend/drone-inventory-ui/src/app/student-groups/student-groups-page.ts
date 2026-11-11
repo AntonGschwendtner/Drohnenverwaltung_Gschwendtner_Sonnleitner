@@ -6,7 +6,9 @@ import { ApiService, readErrorMessage, StudentGroup } from '../api.service';
   selector: 'app-student-groups-page',
   imports: [ReactiveFormsModule],
   template: `
+    <p class="kicker">Bay 02 &middot; Crews</p>
     <h1>Student groups</h1>
+    <p class="lede">The groups that can loan drones and are responsible for them.</p>
 
     <section class="panel" aria-labelledby="new-student-group">
       <h2 id="new-student-group">New student group</h2>

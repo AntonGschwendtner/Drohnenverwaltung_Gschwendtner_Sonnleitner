@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { ThemeService } from './theme.service';
 
 @Component({
   imports: [RouterLink, RouterLinkActive, RouterOutlet],
@@ -7,4 +8,18 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
   styleUrl: './app.css',
   templateUrl: './app.html',
 })
-export class App {}
+export class App {
+  protected readonly theme = inject(ThemeService);
+
+  /** A tower clock in the header. It is decoration only, the backend sets every date. */
+  protected readonly time = signal(App.formatTime(new Date()));
+
+  constructor() {
+    const timer = setInterval(() => this.time.set(App.formatTime(new Date())), 1000);
+    inject(DestroyRef).onDestroy(() => clearInterval(timer));
+  }
+
+  private static formatTime(date: Date): string {
+    return date.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+}

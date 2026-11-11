@@ -6,6 +6,16 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <script>
+    // Sets the light or dark look before the app starts, so the page does not flash.
+    try {
+      var theme = localStorage.getItem('drone-inventory-theme');
+      if (theme !== 'light' && theme !== 'dark') {
+        theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.dataset.theme = theme;
+    } catch (error) {}
+  </script>
 </head>
 <body>
   <app-root></app-root>
