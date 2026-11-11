@@ -42,12 +42,15 @@ export interface Loan {
 
 export interface CreateLoanItemRequest {
   type: LoanItemType;
-  quantity: number;
+  quantity: number | null;
 }
 
+/**
+ * Values can be empty, because the backend checks them and answers with a message.
+ */
 export interface CreateLoanRequest {
-  droneId: number;
-  studentGroupId: number;
+  droneId: number | null;
+  studentGroupId: number | null;
   items: CreateLoanItemRequest[];
 }
 
