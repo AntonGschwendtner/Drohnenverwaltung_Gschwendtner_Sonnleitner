@@ -52,7 +52,7 @@ npm install
 npm start
 ```
 
-Das Frontend leitet alle Anfragen an `/api` an das Backend weiter (`proxy.conf.json`). Dafür muss das Backend laufen. Danach http://localhost:4200 im Browser öffnen.
+Das Frontend leitet alle Anfragen an `/api` an das Backend weiter (`proxy.conf.json`). Dafür muss das Backend laufen. Danach http://localhost:4200 im Browser öffnen. Oben rechts lässt sich zwischen Deutsch und Englisch sowie zwischen hellem und dunklem Modus wechseln. Die Meldungen des Backends kommen in der gewählten Sprache.
 
 ## Bedienung am Beispiel
 

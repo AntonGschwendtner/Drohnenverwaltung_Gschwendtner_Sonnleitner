@@ -14,6 +14,11 @@
         theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       }
       document.documentElement.dataset.theme = theme;
+      var language = localStorage.getItem('drone-inventory-language');
+      if (language !== 'en' && language !== 'de') {
+        language = navigator.language.toLowerCase().indexOf('de') === 0 ? 'de' : 'en';
+      }
+      document.documentElement.lang = language;
     } catch (error) {}
   </script>
 </head>
