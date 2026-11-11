@@ -16,18 +16,19 @@
   --grid-dot: rgb(15 27 45 / 0.1);
   --glow: transparent;
   --ink: #0f1b2d;
-  --muted: #56677b;
+  /* Every text color reaches at least 4.5:1 on --page, --panel and --strip. */
+  --muted: #506174;
   --line: #cfd7e0;
   --line-strong: #95a4b5;
   --panel: #f5f7f9;
   --strip: #fbfcfd;
   --strip-hover: #ffffff;
   --field: #ffffff;
-  --accent: #ee4f17;
-  --accent-soft: rgb(238 79 23 / 0.2);
+  --accent: #b83b0b;
+  --accent-soft: rgb(184 59 11 / 0.18);
   --on-accent: #ffffff;
-  --available: #078a57;
-  --loaned: #c26a00;
+  --available: #067046;
+  --loaned: #935000;
   --error: #c0262d;
   --error-surface: #fdeeed;
   --shadow: 0 1px 0 rgb(15 27 45 / 0.05), 0 10px 24px -16px rgb(15 27 45 / 0.45);
