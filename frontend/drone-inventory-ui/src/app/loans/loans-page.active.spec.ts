@@ -45,7 +45,9 @@ describe('LoansPage active loans', () => {
   function rows(): string[][] {
     const element = fixture.nativeElement as HTMLElement;
     return Array.from(element.querySelectorAll('section[aria-labelledby="active-loans"] tbody tr')).map((row) =>
-      Array.from(row.querySelectorAll('td')).map((cell) => cell.textContent?.trim() ?? ''),
+      Array.from(row.querySelectorAll('td'))
+        .slice(0, 5)
+        .map((cell) => cell.textContent?.trim() ?? ''),
     );
   }
 
