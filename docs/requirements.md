@@ -173,6 +173,42 @@ Returned loans SHALL stay stored and SHALL NOT be deleted. The system SHALL list
 - WHEN "TELLO-07" is loaned again
 - THEN the returned loan stays unchanged in the history
 
+## REQ-011 Listen durchsuchen und filtern
+
+The user SHALL be able to narrow the drone list by name and status, the student group list by name and the loan history by drone or student group. The search SHALL ignore upper and lower case. A search without a match SHALL show a hint instead of an empty table.
+
+**Scenario: Search drones by name**
+- GIVEN the drones "TELLO-07" and "MAVIC-02" exist
+- WHEN the user searches for "tello"
+- THEN only "TELLO-07" is shown
+
+## REQ-012 Leihdauer anzeigen
+
+The system SHALL show for every active loan how many full days it has been running. A loan running longer than 7 days SHALL be marked as long-running.
+
+**Scenario: Long-running loan**
+- GIVEN "TELLO-07" was loaned to "Group 3" 9 days ago
+- WHEN the active loans are listed
+- THEN the loan shows 9 days and is marked as long-running
+
+## REQ-013 Rückgabe bestätigen
+
+Before a loan is returned, the system SHALL ask for confirmation and name the drone and the student group. Cancelling SHALL leave the loan active.
+
+**Scenario: Cancel the return**
+- GIVEN "TELLO-07" is loaned to "Group 3"
+- WHEN the user chooses Return and then cancels
+- THEN the loan stays active
+
+## REQ-014 Statusübersicht
+
+The drone page SHALL show the number of all drones, of available drones and of loaned drones.
+
+**Scenario: Overview after a loan**
+- GIVEN three drones exist and one of them is loaned
+- WHEN the drone page is shown
+- THEN the overview shows 3 drones, 2 available and 1 loaned
+
 ## Out of Scope
 
 - Login, Benutzerkonten und Rollen
@@ -193,6 +229,7 @@ Die Folien lassen diese Punkte offen. So sind sie hier festgelegt:
 | Datum | Ausleih- und Rückgabedatum setzt das System | Ein eingegebenes Datum könnte die Historie verfälschen |
 | Ausleihe ohne Zubehör | Erlaubt, Mengen ab 0 | REQ-006 erlaubt Mengen >= 0 |
 | Mengen beim Zurückgeben | Werden nicht erfasst | Rückgabedifferenzen sind Out of Scope |
+| Lange Ausleihe (Vorschlag) | Ab mehr als 7 vollen Tagen | Eine Schulwoche plus Wochenende; wird im Spec-Review bestätigt |
 
 ## Prüfbeispiel
 
