@@ -15,7 +15,7 @@ Schulprojekt im Fach SYP, 4. INF, 2026/27, von Gschwendtner und Sonnleitner. Bet
 
 Nicht enthalten sind Login und Rollen, einzeln erfasste Akkus, Reservierungen, Schadensverwaltung und Auswertungen. Sie können später als eigener Change Request folgen.
 
-Der Fortschritt steht in [tasks.md](openspec/changes/initial-drone-lending-system/tasks.md) und im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
+Der erste Change `initial-drone-lending-system` ist abgeschlossen und archiviert. Die geltenden Anforderungen stehen in [openspec/specs](openspec/specs), die erledigten Aufgaben im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
 
 ## Technik
 
@@ -106,9 +106,10 @@ Ablehnungen kommen als ProblemDetails mit lesbarer Meldung: 400 bei ungültiger 
 |---|---|
 | [docs/requirements.md](docs/requirements.md) | Anforderungen REQ-001 bis REQ-010 mit Szenarien |
 | [docs/domain-model.md](docs/domain-model.md) | Begriffe und Datenmodell |
-| [proposal.md](openspec/changes/initial-drone-lending-system/proposal.md) | Warum es die Änderung gibt und was dazugehört |
-| [design.md](openspec/changes/initial-drone-lending-system/design.md) | Technische Entscheidungen |
-| [tasks.md](openspec/changes/initial-drone-lending-system/tasks.md) | Alle Tasks mit Anforderung und Issue |
+| [openspec/specs](openspec/specs) | Geltende Specs für `drone`, `student-group` und `loan` |
+| [proposal.md](openspec/changes/archive/2026-11-11-initial-drone-lending-system/proposal.md) | Warum es den ersten Change gab und was dazugehörte |
+| [design.md](openspec/changes/archive/2026-11-11-initial-drone-lending-system/design.md) | Technische Entscheidungen |
+| [tasks.md](openspec/changes/archive/2026-11-11-initial-drone-lending-system/tasks.md) | Alle Tasks mit Anforderung und Issue |
 | [AGENTS.md](AGENTS.md) | Regeln für die Arbeit im Projekt |
 
 ## Arbeitsweise
