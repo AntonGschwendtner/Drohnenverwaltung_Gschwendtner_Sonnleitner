@@ -56,6 +56,10 @@ import { ApiService, Drone, Loan, readErrorMessage, StudentGroup } from '../api.
     <section aria-labelledby="active-loans">
       <h2 id="active-loans">Active loans</h2>
 
+      @if (returnErrorMessage(); as message) {
+        <p class="error" role="alert">{{ message }}</p>
+      }
+
       @if (activeLoansErrorMessage(); as message) {
         <p class="error" role="alert">{{ message }}</p>
       } @else if (activeLoans().length === 0) {
@@ -69,6 +73,7 @@ import { ApiService, Drone, Loan, readErrorMessage, StudentGroup } from '../api.
               <th>Batteries</th>
               <th>Propellers</th>
               <th>Loan date</th>
+              <th><span class="visually-hidden">Action</span></th>
             </tr>
           </thead>
           <tbody>
@@ -79,6 +84,11 @@ import { ApiService, Drone, Loan, readErrorMessage, StudentGroup } from '../api.
                 <td>{{ loan.batteries }}</td>
                 <td>{{ loan.propellers }}</td>
                 <td>{{ loan.loanDate | date: 'dd.MM.yyyy' }}</td>
+                <td>
+                  <button type="button" (click)="returnLoan(loan)" [disabled]="returningId() !== null">
+                    Return<span class="visually-hidden"> {{ loan.droneName }}</span>
+                  </button>
+                </td>
               </tr>
             }
           </tbody>
@@ -87,6 +97,15 @@ import { ApiService, Drone, Loan, readErrorMessage, StudentGroup } from '../api.
     </section>
   `,
   styles: `
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
     .saved {
       margin: 0 0 1rem;
       color: var(--available);
@@ -112,6 +131,8 @@ export class LoansPage implements OnInit {
   protected readonly saving = signal(false);
   protected readonly activeLoans = signal<Loan[]>([]);
   protected readonly activeLoansErrorMessage = signal<string | null>(null);
+  protected readonly returnErrorMessage = signal<string | null>(null);
+  protected readonly returningId = signal<number | null>(null);
 
   ngOnInit(): void {
     this.loadChoices();
@@ -137,6 +158,31 @@ export class LoansPage implements OnInit {
     this.api.listStudentGroups().subscribe({
       next: (studentGroups) => this.studentGroups.set(studentGroups),
       error: (error: unknown) => this.loadErrorMessage.set(readErrorMessage(error)),
+    });
+  }
+
+  // The backend decides whether the loan can still be returned, so the view only shows its answer.
+  protected returnLoan(loan: Loan): void {
+    if (this.returningId() !== null) {
+      return;
+    }
+
+    this.returningId.set(loan.id);
+    this.returnErrorMessage.set(null);
+    this.savedMessage.set(null);
+
+    this.api.returnLoan(loan.id).subscribe({
+      next: (returnedLoan) => {
+        this.returningId.set(null);
+        this.savedMessage.set(`${returnedLoan.droneName} is returned.`);
+        this.loadActiveLoans();
+        this.loadChoices();
+      },
+      error: (error: unknown) => {
+        this.returningId.set(null);
+        this.returnErrorMessage.set(readErrorMessage(error));
+        this.loadActiveLoans();
+      },
     });
   }
 
