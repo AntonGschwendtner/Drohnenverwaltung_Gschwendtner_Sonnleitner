@@ -8,7 +8,7 @@
       </span>
     </a>
 
-    <nav aria-label="Main">
+    <nav [attr.aria-label]="i18n.t('nav.label')">
       <a routerLink="/drones" routerLinkActive="active"><span class="nav-code" aria-hidden="true">01</span>{{ i18n.t('nav.drones') }}</a>
       <a routerLink="/student-groups" routerLinkActive="active"><span class="nav-code" aria-hidden="true">02</span>{{ i18n.t('nav.studentGroups') }}</a>
       <a routerLink="/loans" routerLinkActive="active"><span class="nav-code" aria-hidden="true">03</span>{{ i18n.t('nav.loans') }}</a>
