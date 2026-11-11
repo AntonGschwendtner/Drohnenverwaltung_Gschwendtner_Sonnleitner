@@ -94,6 +94,10 @@ export class DronesPage implements OnInit {
 
   // The backend checks the name, so the form sends what was entered and shows its answer.
   protected createDrone(): void {
+    if (this.saving()) {
+      return;
+    }
+
     this.saving.set(true);
     this.saveErrorMessage.set(null);
 
