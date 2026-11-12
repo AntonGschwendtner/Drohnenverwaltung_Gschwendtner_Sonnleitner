@@ -1,4 +1,5 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { afterNextRender, Component, computed, effect, inject, Injector, OnInit, signal, untracked } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ApiService, Drone, DroneStatus, readErrorMessage } from '../api.service';
 import { I18nService } from '../i18n.service';
@@ -115,7 +116,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
                 </td>
               </tr>
             } @else {
-              <tr>
+              <tr [attr.data-drone]="drone.id">
                 <td>{{ drone.name }}</td>
                 <td [class]="'status-' + drone.status.toLowerCase()">
                   {{ i18n.t(drone.status === 'Loaned' ? 'status.loaned' : 'status.available') }}
@@ -151,6 +152,8 @@ import { StripSkeleton } from '../shared/strip-skeleton';
 })
 export class DronesPage implements OnInit {
   private readonly api = inject(ApiService);
+  private readonly document = inject(DOCUMENT);
+  private readonly injector = inject(Injector);
   protected readonly i18n = inject(I18nService);
 
   protected readonly form = inject(FormBuilder).nonNullable.group({
@@ -200,6 +203,15 @@ export class DronesPage implements OnInit {
     ),
   );
 
+  constructor() {
+    // A new search or filter closes an open edit, so no hidden strip stays in edit mode.
+    effect(() => {
+      this.search();
+      this.statusFilter();
+      untracked(() => this.editingId.set(null));
+    });
+  }
+
   ngOnInit(): void {
     this.loadDrones();
   }
@@ -244,11 +256,19 @@ export class DronesPage implements OnInit {
     this.listErrorMessage.set(null);
     this.editForm.setValue({ name: drone.name, description: drone.description });
     this.editingId.set(drone.id);
+    this.focusAfterRender(`#edit-name-${drone.id}`);
   }
 
   protected cancelEdit(): void {
+    const id = this.editingId();
     this.editingId.set(null);
     this.listErrorMessage.set(null);
+    this.focusAfterRender(`[data-drone="${id}"] button.edit`);
+  }
+
+  /** Keeps the keyboard focus where the user works, also when the strip turns into a form and back. */
+  private focusAfterRender(selector: string): void {
+    afterNextRender(() => this.document.querySelector<HTMLElement>(selector)?.focus(), { injector: this.injector });
   }
 
   // The backend checks the name, so the edit sends what was entered and shows its answer.
@@ -265,6 +285,7 @@ export class DronesPage implements OnInit {
         this.busyId.set(null);
         this.editingId.set(null);
         this.loadDrones();
+        this.focusAfterRender(`[data-drone="${drone.id}"] button.edit`);
       },
       error: (error: unknown) => {
         this.busyId.set(null);

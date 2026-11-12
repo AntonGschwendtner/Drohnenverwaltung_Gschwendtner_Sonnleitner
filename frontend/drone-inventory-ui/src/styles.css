@@ -1624,6 +1624,21 @@ td button.busy::after {
     margin-top: 0.4rem;
   }
 
+  /* Edit and delete sit side by side under the card, each half of the width. */
+  main td.row-actions {
+    display: flex;
+    gap: 0.6rem;
+    width: 100%;
+    text-align: left;
+  }
+
+  main td.row-actions button,
+  main td.row-actions button + button {
+    flex: 1;
+    width: auto;
+    margin: 0.4rem 0 0;
+  }
+
   .skeleton-strip {
     gap: 1rem;
   }

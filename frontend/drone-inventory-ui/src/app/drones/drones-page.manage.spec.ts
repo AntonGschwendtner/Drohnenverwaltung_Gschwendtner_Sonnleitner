@@ -97,6 +97,30 @@ describe('DronesPage edit and delete', () => {
     expect(names()).toEqual(['TELO-07', 'TELLO-09']);
   });
 
+  it('moves the focus into the name field and back to Edit after cancelling', async () => {
+    button('button.edit').click();
+    await settle();
+    expect(document.activeElement).toBe(element.querySelector('input[name="editName"]'));
+
+    button('button.quiet:not(.save)').click();
+    await settle();
+    expect(document.activeElement).toBe(button('button.edit'));
+  });
+
+  it('closes an open edit when the search changes', async () => {
+    button('button.edit').click();
+    await settle();
+    const search = element.querySelector('input[type="search"]') as HTMLInputElement;
+    search.value = 'tello';
+    search.dispatchEvent(new Event('input'));
+    await settle();
+    search.value = '';
+    search.dispatchEvent(new Event('input'));
+    await settle();
+
+    expect(element.querySelector('tr.editing')).toBeNull();
+  });
+
   it('deletes a drone after the confirmation (scenario "Delete a drone without loans")', async () => {
     button('button.delete', 1).click();
     await settle();
