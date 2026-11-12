@@ -977,6 +977,29 @@ tbody tr:hover td:first-child:last-child {
   animation: beacon 1.6s ease-in-out infinite;
 }
 
+/* ───────────── Loan duration: long loans get a warning edge and a stamp (REQ-012) ───────────── */
+
+tbody tr.long-loan {
+  --status: var(--error);
+}
+
+td.duration {
+  white-space: nowrap;
+}
+
+.long-running {
+  display: inline-block;
+  margin-left: 0.6rem;
+  padding: 0.1rem 0.45rem;
+  border: 2px solid var(--error);
+  color: var(--error);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transform: rotate(-2deg);
+}
+
 /* ───────────── Messages ───────────── */
 
 .error,
@@ -1398,6 +1421,15 @@ td button.busy::after {
     text-align: left;
     text-transform: uppercase;
     color: var(--muted);
+  }
+
+  main td.duration {
+    flex-wrap: wrap;
+    white-space: normal;
+  }
+
+  main td.duration .long-running {
+    margin-left: 0;
   }
 
   main td button {

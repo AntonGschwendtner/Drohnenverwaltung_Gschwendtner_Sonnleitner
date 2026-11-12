@@ -38,6 +38,10 @@ export interface Loan {
   loanDate: string;
   returnDate: string | null;
   status: LoanStatus;
+  /** Full days since the loan date, only for an active loan (REQ-012). */
+  daysActive?: number | null;
+  /** True when an active loan runs longer than 7 days (REQ-012). */
+  isLongRunning?: boolean;
 }
 
 export interface CreateLoanItemRequest {
