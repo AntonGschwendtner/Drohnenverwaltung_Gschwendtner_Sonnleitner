@@ -1,4 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { StudentGroupsPage } from './student-groups-page';
@@ -11,7 +12,7 @@ describe('StudentGroupsPage search', () => {
   beforeEach(async () => {
     TestBed.configureTestingModule({
       imports: [StudentGroupsPage],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     });
     fixture = TestBed.createComponent(StudentGroupsPage);
     fixture.detectChanges();

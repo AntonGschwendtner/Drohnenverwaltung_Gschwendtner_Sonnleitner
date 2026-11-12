@@ -100,6 +100,22 @@ describe('DroneDetailPage', () => {
     expect(element.querySelector('a.back-link')?.getAttribute('href')).toBe('/drones');
   });
 
+  it('ignores a late answer for the drone opened before', async () => {
+    await open(7);
+    const oldDrone = http.expectOne('/api/drones/7');
+    const oldLoans = http.expectOne((request) => request.url === '/api/loans' && request.params.get('droneId') === '7');
+
+    await harness.navigateByUrl('/drones/8', DroneDetailPage);
+    http.expectOne('/api/drones/8').flush({ id: 8, name: 'TELLO-08', status: 'Available', description: '' });
+    http.expectOne((request) => request.url === '/api/loans' && request.params.get('droneId') === '8').flush([]);
+    await harness.fixture.whenStable();
+    harness.detectChanges();
+
+    expect(oldDrone.cancelled).toBe(true);
+    expect(oldLoans.cancelled).toBe(true);
+    expect(harness.routeNativeElement?.querySelector('h1')?.textContent?.trim()).toBe('TELLO-08');
+  });
+
   it('links group names to their detail page', async () => {
     await open(7);
     await respond({ id: 7, name: 'TELLO-07', status: 'Loaned', description: '' }, [active]);
