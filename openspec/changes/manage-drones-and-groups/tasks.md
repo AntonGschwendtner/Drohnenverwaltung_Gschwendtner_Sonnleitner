@@ -14,4 +14,4 @@
 
 ## 3. Documentation
 
-- [ ] 3.1 README (features, API table) (#105)
+- [x] 3.1 README (features, API table) (#105)
