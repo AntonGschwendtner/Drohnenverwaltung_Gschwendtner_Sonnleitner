@@ -2,6 +2,7 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ApiService, Drone, DroneStatus, readErrorMessage } from '../api.service';
 import { I18nService } from '../i18n.service';
+import { ConfirmDialog } from '../shared/confirm-dialog';
 import { EmptyState } from '../shared/empty-state';
 import { PageHead } from '../shared/page-head';
 import { matchesSearch, SearchField } from '../shared/search-field';
@@ -9,7 +10,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-drones-page',
-  imports: [EmptyState, PageHead, ReactiveFormsModule, SearchField, StripSkeleton],
+  imports: [ConfirmDialog, EmptyState, PageHead, ReactiveFormsModule, SearchField, StripSkeleton],
   template: `
     <app-page-head
       bay="01"
@@ -75,6 +76,10 @@ import { StripSkeleton } from '../shared/strip-skeleton';
         </div>
       </div>
 
+      @if (listErrorMessage(); as message) {
+        <p class="error" role="alert">{{ message }}</p>
+      }
+
       @if (visibleDrones().length === 0) {
         <app-empty-state>{{ i18n.t('drones.noMatch') }}</app-empty-state>
       } @else {
@@ -84,21 +89,63 @@ import { StripSkeleton } from '../shared/strip-skeleton';
             <th>{{ i18n.t('field.name') }}</th>
             <th>{{ i18n.t('field.status') }}</th>
             <th>{{ i18n.t('field.description') }}</th>
+            <th><span class="visually-hidden">{{ i18n.t('field.action') }}</span></th>
           </tr>
         </thead>
         <tbody>
           @for (drone of visibleDrones(); track drone.id) {
-            <tr>
-              <td>{{ drone.name }}</td>
-              <td [class]="'status-' + drone.status.toLowerCase()">
-                {{ i18n.t(drone.status === 'Loaned' ? 'status.loaned' : 'status.available') }}
-              </td>
-              <td [attr.data-label]="i18n.t('field.description')">{{ drone.description }}</td>
-            </tr>
+            @if (editingId() === drone.id) {
+              <tr class="editing" [formGroup]="editForm">
+                <td>
+                  <label class="visually-hidden" [for]="'edit-name-' + drone.id">{{ i18n.t('field.name') }}</label>
+                  <input [id]="'edit-name-' + drone.id" formControlName="name" name="editName" autocomplete="off" />
+                </td>
+                <td [class]="'status-' + drone.status.toLowerCase()">
+                  {{ i18n.t(drone.status === 'Loaned' ? 'status.loaned' : 'status.available') }}
+                </td>
+                <td [attr.data-label]="i18n.t('field.description')">
+                  <label class="visually-hidden" [for]="'edit-description-' + drone.id">{{ i18n.t('field.description') }}</label>
+                  <input [id]="'edit-description-' + drone.id" formControlName="description" name="editDescription" autocomplete="off" />
+                </td>
+                <td class="row-actions">
+                  <button type="button" class="save" (click)="saveEdit(drone)" [disabled]="busyId() !== null" [class.busy]="busyId() === drone.id">
+                    {{ i18n.t('action.save') }}
+                  </button>
+                  <button type="button" class="quiet" (click)="cancelEdit()">{{ i18n.t('dialog.cancel') }}</button>
+                </td>
+              </tr>
+            } @else {
+              <tr>
+                <td>{{ drone.name }}</td>
+                <td [class]="'status-' + drone.status.toLowerCase()">
+                  {{ i18n.t(drone.status === 'Loaned' ? 'status.loaned' : 'status.available') }}
+                </td>
+                <td [attr.data-label]="i18n.t('field.description')">{{ drone.description }}</td>
+                <td class="row-actions">
+                  <button type="button" class="quiet edit" (click)="startEdit(drone)" [disabled]="busyId() !== null">
+                    {{ i18n.t('action.edit') }}<span class="visually-hidden"> {{ drone.name }}</span>
+                  </button>
+                  <button type="button" class="quiet delete" (click)="askToDelete(drone, $event)" [disabled]="busyId() !== null" [class.busy]="busyId() === drone.id">
+                    {{ i18n.t('action.delete') }}<span class="visually-hidden"> {{ drone.name }}</span>
+                  </button>
+                </td>
+              </tr>
+            }
           }
         </tbody>
       </table>
       }
+    }
+
+    @if (pendingDelete(); as drone) {
+      <app-confirm-dialog
+        [heading]="i18n.t('drones.deleteTitle', { drone: drone.name })"
+        [text]="i18n.t('drones.deleteText', { drone: drone.name })"
+        [confirmLabel]="i18n.t('action.delete')"
+        [cancelLabel]="i18n.t('dialog.cancel')"
+        (confirmed)="confirmDelete()"
+        (cancelled)="cancelDelete()"
+      />
     }
   `,
 })
@@ -111,7 +158,18 @@ export class DronesPage implements OnInit {
     description: '',
   });
 
+  protected readonly editForm = inject(FormBuilder).nonNullable.group({
+    name: '',
+    description: '',
+  });
+
   protected readonly drones = signal<Drone[]>([]);
+  /** Edit and delete work on one strip at a time (REQ-015, REQ-016). */
+  protected readonly editingId = signal<number | null>(null);
+  protected readonly busyId = signal<number | null>(null);
+  protected readonly pendingDelete = signal<Drone | null>(null);
+  protected readonly listErrorMessage = signal<string | null>(null);
+  private deleteTrigger: HTMLElement | null = null;
   protected readonly loadErrorMessage = signal<string | null>(null);
   protected readonly saveErrorMessage = signal<string | null>(null);
   protected readonly saving = signal(false);
@@ -178,6 +236,78 @@ export class DronesPage implements OnInit {
       error: (error: unknown) => {
         this.saving.set(false);
         this.saveErrorMessage.set(readErrorMessage(error, this.i18n.t('error.fallback')));
+      },
+    });
+  }
+
+  protected startEdit(drone: Drone): void {
+    this.listErrorMessage.set(null);
+    this.editForm.setValue({ name: drone.name, description: drone.description });
+    this.editingId.set(drone.id);
+  }
+
+  protected cancelEdit(): void {
+    this.editingId.set(null);
+    this.listErrorMessage.set(null);
+  }
+
+  // The backend checks the name, so the edit sends what was entered and shows its answer.
+  protected saveEdit(drone: Drone): void {
+    if (this.busyId() !== null) {
+      return;
+    }
+
+    this.busyId.set(drone.id);
+    this.listErrorMessage.set(null);
+
+    this.api.updateDrone(drone.id, this.editForm.getRawValue()).subscribe({
+      next: () => {
+        this.busyId.set(null);
+        this.editingId.set(null);
+        this.loadDrones();
+      },
+      error: (error: unknown) => {
+        this.busyId.set(null);
+        this.listErrorMessage.set(readErrorMessage(error, this.i18n.t('error.fallback')));
+      },
+    });
+  }
+
+  protected askToDelete(drone: Drone, event: Event): void {
+    if (this.busyId() !== null) {
+      return;
+    }
+
+    this.deleteTrigger = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+    this.pendingDelete.set(drone);
+  }
+
+  protected cancelDelete(): void {
+    this.pendingDelete.set(null);
+    this.deleteTrigger?.focus();
+    this.deleteTrigger = null;
+  }
+
+  // The backend refuses drones with loans; the page shows its message.
+  protected confirmDelete(): void {
+    const drone = this.pendingDelete();
+    this.pendingDelete.set(null);
+    this.deleteTrigger = null;
+    if (!drone) {
+      return;
+    }
+
+    this.busyId.set(drone.id);
+    this.listErrorMessage.set(null);
+
+    this.api.deleteDrone(drone.id).subscribe({
+      next: () => {
+        this.busyId.set(null);
+        this.loadDrones();
+      },
+      error: (error: unknown) => {
+        this.busyId.set(null);
+        this.listErrorMessage.set(readErrorMessage(error, this.i18n.t('error.fallback')));
       },
     });
   }

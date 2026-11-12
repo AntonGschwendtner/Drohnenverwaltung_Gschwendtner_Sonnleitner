@@ -82,6 +82,14 @@ export class ApiService {
     return this.http.post<Drone>('/api/drones', request);
   }
 
+  updateDrone(id: number, request: CreateDroneRequest): Observable<Drone> {
+    return this.http.put<Drone>(`/api/drones/${id}`, request);
+  }
+
+  deleteDrone(id: number): Observable<void> {
+    return this.http.delete<void>(`/api/drones/${id}`);
+  }
+
   listStudentGroups(): Observable<StudentGroup[]> {
     return this.http.get<StudentGroup[]>('/api/student-groups');
   }
