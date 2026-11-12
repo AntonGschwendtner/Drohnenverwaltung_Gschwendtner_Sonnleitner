@@ -7,7 +7,7 @@
 ## 2. Loan page (REQ-012, REQ-013)
 
 - [x] 2.1 Show the days and the long-running mark in the active loans list, English and German; component test for both cases (#82)
-- [ ] 2.2 Add the return confirmation dialog with drone and group name; component tests for "Confirm the return" and "Cancel the return" (no request sent) (#83)
+- [x] 2.2 Add the return confirmation dialog with drone and group name; component tests for "Confirm the return" and "Cancel the return" (no request sent) (#83)
 
 ## 3. Search and filter (REQ-011)
 

@@ -55,6 +55,17 @@ describe('LoansPage return', () => {
     return element().querySelector('section[aria-labelledby="active-loans"] tbody button') as HTMLButtonElement;
   }
 
+  function dialog(): HTMLElement | null {
+    return element().querySelector('[role="alertdialog"]');
+  }
+
+  async function chooseReturnAndConfirm(): Promise<void> {
+    returnButton().click();
+    await settle();
+    (dialog()?.querySelector('.dialog-confirm') as HTMLButtonElement).click();
+    await settle();
+  }
+
   function activeDroneNames(): string[] {
     return Array.from(element().querySelectorAll('section[aria-labelledby="active-loans"] tbody tr')).map(
       (row) => row.querySelectorAll('td')[1].textContent?.trim() ?? '',
@@ -64,8 +75,7 @@ describe('LoansPage return', () => {
   it('sends the return and refreshes the list', async () => {
     expect(activeDroneNames()).toEqual(['TELLO-07']);
 
-    returnButton().click();
-    await settle();
+    await chooseReturnAndConfirm();
 
     const request = http.expectOne({ method: 'POST', url: '/api/loans/1/return' });
     expect(returnButton().disabled).toBe(true);
@@ -82,8 +92,7 @@ describe('LoansPage return', () => {
   });
 
   it('shows the message when the loan is already returned and refreshes the list', async () => {
-    returnButton().click();
-    await settle();
+    await chooseReturnAndConfirm();
 
     http.expectOne({ method: 'POST', url: '/api/loans/1/return' }).flush(
       { detail: 'The loan with the id 1 is already returned.' },
@@ -101,14 +110,83 @@ describe('LoansPage return', () => {
   });
 
   it('sends only one return while a request runs', async () => {
-    returnButton().click();
+    await chooseReturnAndConfirm();
     returnButton().click();
     await settle();
+    expect(dialog()).toBeNull();
 
     http.expectOne({ method: 'POST', url: '/api/loans/1/return' }).flush({ ...loan, status: 'Returned' });
     await settle();
     http.expectOne('/api/loans?status=Active').flush([]);
     respondToChoices();
     await settle();
+  });
+
+  describe('confirmation (REQ-013)', () => {
+    it('names the drone and the student group before anything is sent', async () => {
+      returnButton().click();
+      await settle();
+
+      expect(dialog()?.textContent).toContain('Return TELLO-07?');
+      expect(dialog()?.textContent).toContain('TELLO-07 comes back from Group 3.');
+      expect(document.activeElement?.classList.contains('dialog-cancel')).toBe(true);
+      http.expectNone({ method: 'POST', url: '/api/loans/1/return' });
+    });
+
+    it('Confirm the return', async () => {
+      await chooseReturnAndConfirm();
+
+      expect(dialog()).toBeNull();
+      http.expectOne({ method: 'POST', url: '/api/loans/1/return' }).flush({ ...loan, status: 'Returned' });
+      await settle();
+      http.expectOne('/api/loans?status=Active').flush([]);
+      respondToChoices();
+      await settle();
+    });
+
+    it('Cancel the return', async () => {
+      returnButton().click();
+      await settle();
+      (dialog()?.querySelector('.dialog-cancel') as HTMLButtonElement).click();
+      await settle();
+
+      expect(dialog()).toBeNull();
+      http.expectNone({ method: 'POST', url: '/api/loans/1/return' });
+      expect(activeDroneNames()).toEqual(['TELLO-07']);
+      expect(document.activeElement).toBe(returnButton());
+    });
+
+    it('cancels with Escape', async () => {
+      returnButton().click();
+      await settle();
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      await settle();
+
+      expect(dialog()).toBeNull();
+      http.expectNone({ method: 'POST', url: '/api/loans/1/return' });
+    });
+
+    it('cancels with a click next to the dialog', async () => {
+      returnButton().click();
+      await settle();
+      (element().querySelector('.dialog-backdrop') as HTMLElement).click();
+      await settle();
+
+      expect(dialog()).toBeNull();
+      http.expectNone({ method: 'POST', url: '/api/loans/1/return' });
+    });
+
+    it('keeps the focus inside the dialog with Tab', async () => {
+      returnButton().click();
+      await settle();
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
+      expect(document.activeElement?.classList.contains('dialog-confirm')).toBe(true);
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true }));
+      expect(document.activeElement?.classList.contains('dialog-cancel')).toBe(true);
+
+      (dialog()?.querySelector('.dialog-cancel') as HTMLButtonElement).click();
+      await settle();
+    });
   });
 });

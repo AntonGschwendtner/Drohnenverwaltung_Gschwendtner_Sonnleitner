@@ -3,13 +3,14 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ApiService, Drone, Loan, readErrorMessage, StudentGroup } from '../api.service';
 import { I18nService } from '../i18n.service';
+import { ConfirmDialog } from '../shared/confirm-dialog';
 import { EmptyState } from '../shared/empty-state';
 import { PageHead } from '../shared/page-head';
 import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-loans-page',
-  imports: [DatePipe, EmptyState, PageHead, ReactiveFormsModule, StripSkeleton],
+  imports: [ConfirmDialog, DatePipe, EmptyState, PageHead, ReactiveFormsModule, StripSkeleton],
   template: `
     <app-page-head
       bay="03"
@@ -107,7 +108,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
                 <td>
                   <button
                     type="button"
-                    (click)="returnLoan(loan)"
+                    (click)="askToReturn(loan, $event)"
                     [disabled]="returningId() !== null"
                     [class.busy]="returningId() === loan.id"
                   >
@@ -120,6 +121,17 @@ import { StripSkeleton } from '../shared/strip-skeleton';
         </table>
       }
     </section>
+
+    @if (pendingReturn(); as loan) {
+      <app-confirm-dialog
+        [heading]="i18n.t('loans.confirmTitle', { drone: loan.droneName })"
+        [text]="i18n.t('loans.confirmText', { drone: loan.droneName, group: loan.studentGroupName })"
+        [confirmLabel]="i18n.t('loans.return')"
+        [cancelLabel]="i18n.t('dialog.cancel')"
+        (confirmed)="confirmReturn()"
+        (cancelled)="cancelReturn()"
+      />
+    }
   `,
 })
 export class LoansPage implements OnInit {
@@ -176,8 +188,37 @@ export class LoansPage implements OnInit {
     });
   }
 
+  /** The loan waiting for the answer of the confirmation dialog (REQ-013). */
+  protected readonly pendingReturn = signal<Loan | null>(null);
+  private returnTrigger: HTMLElement | null = null;
+
+  protected askToReturn(loan: Loan, event: Event): void {
+    if (this.returningId() !== null) {
+      return;
+    }
+
+    this.returnTrigger = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+    this.pendingReturn.set(loan);
+  }
+
+  protected confirmReturn(): void {
+    const loan = this.pendingReturn();
+    this.pendingReturn.set(null);
+    this.returnTrigger = null;
+    if (loan) {
+      this.returnLoan(loan);
+    }
+  }
+
+  // Cancelling sends nothing and gives the focus back to the button that opened the dialog.
+  protected cancelReturn(): void {
+    this.pendingReturn.set(null);
+    this.returnTrigger?.focus();
+    this.returnTrigger = null;
+  }
+
   // The backend decides whether the loan can still be returned, so the view only shows its answer.
-  protected returnLoan(loan: Loan): void {
+  private returnLoan(loan: Loan): void {
     if (this.returningId() !== null) {
       return;
     }
