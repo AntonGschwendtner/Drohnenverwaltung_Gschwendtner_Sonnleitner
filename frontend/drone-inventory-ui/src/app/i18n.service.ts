@@ -37,6 +37,9 @@ const english = {
   'state.loading': 'Loading',
   'search.label': 'Search',
   'filter.all': 'All',
+  'action.edit': 'Edit',
+  'action.save': 'Save',
+  'action.delete': 'Delete',
   'overview.label': 'Fleet status',
   'overview.total': 'Drones',
 
@@ -47,6 +50,8 @@ const english = {
   'drones.empty': 'No drones yet.',
   'drones.searchHint': 'Name of the drone',
   'drones.noMatch': 'No drone matches the search.',
+  'drones.deleteTitle': 'Delete {drone}?',
+  'drones.deleteText': '{drone} is removed from the fleet. This is only possible while it has never been loaned.',
 
   'groups.kicker': 'Bay 02 · Crews',
   'groups.lede': 'The groups that can loan drones and are responsible for them.',
@@ -115,6 +120,9 @@ const german: Record<TextKey, string> = {
   'state.loading': 'Wird geladen',
   'search.label': 'Suche',
   'filter.all': 'Alle',
+  'action.edit': 'Bearbeiten',
+  'action.save': 'Speichern',
+  'action.delete': 'Löschen',
   'overview.label': 'Flottenstatus',
   'overview.total': 'Drohnen',
 
@@ -125,6 +133,8 @@ const german: Record<TextKey, string> = {
   'drones.empty': 'Noch keine Drohnen.',
   'drones.searchHint': 'Name der Drohne',
   'drones.noMatch': 'Keine Drohne passt zur Suche.',
+  'drones.deleteTitle': '{drone} löschen?',
+  'drones.deleteText': '{drone} wird aus der Flotte entfernt. Das geht nur, solange sie nie ausgeliehen war.',
 
   'groups.kicker': 'Platz 02 · Crews',
   'groups.lede': 'Die Gruppen, die Drohnen ausleihen und dafür verantwortlich sind.',

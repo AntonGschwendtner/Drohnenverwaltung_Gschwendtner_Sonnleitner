@@ -30,7 +30,9 @@ describe('DronesPage', () => {
   function rows(): string[][] {
     const element = fixture.nativeElement as HTMLElement;
     return Array.from(element.querySelectorAll('tbody tr')).map((row) =>
-      Array.from(row.querySelectorAll('td')).map((cell) => cell.textContent?.trim() ?? ''),
+      Array.from(row.querySelectorAll('td'))
+        .slice(0, 3)
+        .map((cell) => cell.textContent?.trim() ?? ''),
     );
   }
 

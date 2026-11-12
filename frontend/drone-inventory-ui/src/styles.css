@@ -1010,6 +1010,46 @@ tbody tr:hover td:first-child:last-child {
     8px 8px 0 var(--hard);
 }
 
+/* ───────────── Row actions: edit and delete on a strip (REQ-015 to REQ-017) ───────────── */
+
+td.row-actions {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+}
+
+td.row-actions button + button {
+  margin-left: 0.5rem;
+}
+
+td button.quiet {
+  background: transparent;
+  box-shadow: none;
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+
+td button.quiet:hover:not(:disabled) {
+  background: var(--strip-hover);
+  border-color: var(--edge);
+  box-shadow: 3px 3px 0 var(--hard);
+  color: var(--ink);
+}
+
+td button.delete:hover:not(:disabled) {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+tr.editing td {
+  background: var(--strip-hover);
+}
+
+tr.editing input {
+  margin-top: 0;
+  padding: 0.45rem 0.6rem;
+}
+
 /* ───────────── Status badges ───────────── */
 
 .status-available,
@@ -1582,6 +1622,21 @@ td button.busy::after {
   main td button {
     width: 100%;
     margin-top: 0.4rem;
+  }
+
+  /* Edit and delete sit side by side under the card, each half of the width. */
+  main td.row-actions {
+    display: flex;
+    gap: 0.6rem;
+    width: 100%;
+    text-align: left;
+  }
+
+  main td.row-actions button,
+  main td.row-actions button + button {
+    flex: 1;
+    width: auto;
+    margin: 0.4rem 0 0;
   }
 
   .skeleton-strip {
