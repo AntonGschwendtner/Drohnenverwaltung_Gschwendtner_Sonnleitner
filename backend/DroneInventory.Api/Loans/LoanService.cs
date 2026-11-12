@@ -23,18 +23,43 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
         loan.ReturnDate,
         loan.Status);
 
-    public async Task<ServiceResult<IReadOnlyList<LoanResponse>>> ListAsync(LoanStatus? status, CancellationToken cancellationToken)
+    /// <summary>
+    /// Lists loans by status, by drone or by student group (REQ-007, REQ-010, REQ-018, REQ-019). Without a drone
+    /// or a group the status is required, so a client never loads every loan by accident.
+    /// </summary>
+    public async Task<ServiceResult<IReadOnlyList<LoanResponse>>> ListAsync(
+        LoanStatus? status,
+        int? droneId,
+        int? studentGroupId,
+        CancellationToken cancellationToken)
     {
-        if (status is not { } requestedStatus)
+        if (status is null && droneId is null && studentGroupId is null)
         {
             return ServiceResult<IReadOnlyList<LoanResponse>>.Invalid(Messages.LoanStatusMissing);
         }
 
-        var matchingLoans = dbContext.Loans.Where(loan => loan.Status == requestedStatus);
+        var matchingLoans = dbContext.Loans.AsQueryable();
+        if (status is { } requestedStatus)
+        {
+            matchingLoans = matchingLoans.Where(loan => loan.Status == requestedStatus);
+        }
 
-        var sortedLoans = requestedStatus == LoanStatus.Returned
-            ? matchingLoans.OrderByDescending(loan => loan.ReturnDate).ThenByDescending(loan => loan.Id)
-            : matchingLoans.OrderByDescending(loan => loan.LoanDate).ThenByDescending(loan => loan.Id);
+        if (droneId is { } requestedDroneId)
+        {
+            matchingLoans = matchingLoans.Where(loan => loan.DroneId == requestedDroneId);
+        }
+
+        if (studentGroupId is { } requestedStudentGroupId)
+        {
+            matchingLoans = matchingLoans.Where(loan => loan.StudentGroupId == requestedStudentGroupId);
+        }
+
+        // Active loans first, then the newest return first; ties by the newer loan.
+        var sortedLoans = matchingLoans
+            .OrderBy(loan => loan.Status == LoanStatus.Active ? 0 : 1)
+            .ThenByDescending(loan => loan.ReturnDate)
+            .ThenByDescending(loan => loan.LoanDate)
+            .ThenByDescending(loan => loan.Id);
 
         var loans = await sortedLoans
             .Select(ToResponse)
