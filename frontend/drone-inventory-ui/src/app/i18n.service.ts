@@ -50,6 +50,8 @@ const english = {
   'groups.new': 'New student group',
   'groups.add': 'Add student group',
   'groups.empty': 'No student groups yet.',
+  'groups.searchHint': 'Name of the group',
+  'groups.noMatch': 'No student group matches the search.',
 
   'loans.kicker': 'Bay 03 · Airborne',
   'loans.lede': 'Loan an available drone with its accessories, and return it here.',
@@ -115,6 +117,8 @@ const german: Record<TextKey, string> = {
   'groups.new': 'Neue Schülergruppe',
   'groups.add': 'Gruppe anlegen',
   'groups.empty': 'Noch keine Schülergruppen.',
+  'groups.searchHint': 'Name der Gruppe',
+  'groups.noMatch': 'Keine Schülergruppe passt zur Suche.',
 
   'loans.kicker': 'Platz 03 · In der Luft',
   'loans.lede': 'Eine verfügbare Drohne mit Zubehör ausleihen und hier wieder zurückgeben.',

@@ -1,14 +1,15 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ApiService, readErrorMessage, StudentGroup } from '../api.service';
 import { I18nService } from '../i18n.service';
 import { EmptyState } from '../shared/empty-state';
 import { PageHead } from '../shared/page-head';
+import { matchesSearch, SearchField } from '../shared/search-field';
 import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-student-groups-page',
-  imports: [EmptyState, PageHead, ReactiveFormsModule, StripSkeleton],
+  imports: [EmptyState, PageHead, ReactiveFormsModule, SearchField, StripSkeleton],
   template: `
     <app-page-head
       bay="02"
@@ -40,6 +41,13 @@ import { StripSkeleton } from '../shared/strip-skeleton';
     } @else if (studentGroups().length === 0) {
       <app-empty-state>{{ i18n.t('groups.empty') }}</app-empty-state>
     } @else {
+      <div class="list-tools">
+        <app-search-field [label]="i18n.t('search.label')" [placeholder]="i18n.t('groups.searchHint')" [(value)]="search" />
+      </div>
+
+      @if (visibleStudentGroups().length === 0) {
+        <app-empty-state>{{ i18n.t('groups.noMatch') }}</app-empty-state>
+      } @else {
       <table>
         <thead>
           <tr>
@@ -47,13 +55,14 @@ import { StripSkeleton } from '../shared/strip-skeleton';
           </tr>
         </thead>
         <tbody>
-          @for (studentGroup of studentGroups(); track studentGroup.id) {
+          @for (studentGroup of visibleStudentGroups(); track studentGroup.id) {
             <tr>
               <td>{{ studentGroup.name }}</td>
             </tr>
           }
         </tbody>
       </table>
+      }
     }
   `,
 })
@@ -68,6 +77,12 @@ export class StudentGroupsPage implements OnInit {
   protected readonly saveErrorMessage = signal<string | null>(null);
   protected readonly saving = signal(false);
   protected readonly loading = signal(true);
+
+  /** The search narrows the loaded list in the browser (REQ-011). */
+  protected readonly search = signal('');
+  protected readonly visibleStudentGroups = computed(() =>
+    this.studentGroups().filter((studentGroup) => matchesSearch(studentGroup.name, this.search())),
+  );
 
   ngOnInit(): void {
     this.loadStudentGroups();
