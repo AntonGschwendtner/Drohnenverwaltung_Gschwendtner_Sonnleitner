@@ -9,9 +9,9 @@ public static class LoanEndpoints
     {
         var loans = app.MapGroup("/api/loans");
 
-        loans.MapGet("/", async (LoanStatus? status, LoanService service, CancellationToken cancellationToken) =>
+        loans.MapGet("/", async (LoanStatus? status, int? droneId, int? studentGroupId, LoanService service, CancellationToken cancellationToken) =>
         {
-            var result = await service.ListAsync(status, cancellationToken);
+            var result = await service.ListAsync(status, droneId, studentGroupId, cancellationToken);
 
             return result.Error is { } error ? error.ToProblem() : Results.Ok(result.Value);
         });

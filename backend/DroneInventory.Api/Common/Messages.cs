@@ -33,8 +33,8 @@ public static class Messages
         $"Eine Schülergruppe mit dem Namen „{name}“ gibt es bereits.");
 
     public static string LoanStatusMissing => Pick(
-        "Use status=Active or status=Returned to list loans.",
-        "Ausleihen lassen sich mit status=Active oder status=Returned auflisten.");
+        "Use status=Active or status=Returned, or droneId or studentGroupId, to list loans.",
+        "Ausleihen lassen sich mit status=Active oder status=Returned, mit droneId oder studentGroupId auflisten.");
 
     public static string LoanNeedsDrone => Pick(
         "A loan needs a drone.",
