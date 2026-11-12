@@ -40,3 +40,4 @@ Groups that need a drone for a lesson or a project day cannot rely on it being t
 - `docs/requirements.md` lists "Reservierungen im Voraus" as out of scope. This change moves it into scope.
 - Should a group be allowed to reserve a drone that is loaned right now (this proposal: yes, with a warning)?
 - Should a defective drone (from `return-check-and-damage`) be reservable (this proposal: no, if that change is implemented)?
+- Deleting a drone or student group (from `manage-drones-and-groups`) that still has upcoming reservations: reject the deletion (this proposal) or delete the reservations with it?
