@@ -10,7 +10,8 @@ export interface SortState<Column extends string> {
 /** A value to sort by: text, a number, an ISO date such as 2026-08-19, or nothing. */
 export type SortValue = string | number | null | undefined;
 
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}/;
+// A whole date such as 2026-08-19, optionally with a time; a name that only starts like a date is text.
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}(T[\d:.]+(Z|[+-]\d{2}:\d{2})?)?$/;
 
 /**
  * Compares two values in ascending order. Texts ignore upper and lower case, numbers compare as numbers,

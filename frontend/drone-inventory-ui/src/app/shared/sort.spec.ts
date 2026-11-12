@@ -18,6 +18,11 @@ describe('sort helper (REQ-020)', () => {
     ]);
   });
 
+  it('treats names that only start like a date as text', () => {
+    expect(['2026-01-01-b', '2026-01-01-A'].sort(compareValues)).toEqual(['2026-01-01-A', '2026-01-01-b']);
+    expect(compareValues('2026-01-01-b', '2026-01-01-B')).toBe(0);
+  });
+
   it('keeps empty values at the end in both directions', () => {
     const loans = [{ returnDate: null }, { returnDate: '2026-08-20' }, { returnDate: '2026-09-10' }];
     const value = (loan: { returnDate: string | null }) => loan.returnDate;
