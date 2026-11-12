@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { ApiService, Drone, Loan, readErrorMessage, StudentGroup } from '../api.service';
 import { I18nService } from '../i18n.service';
 import { ConfirmDialog } from '../shared/confirm-dialog';
@@ -10,7 +11,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-loans-page',
-  imports: [ConfirmDialog, DatePipe, EmptyState, PageHead, ReactiveFormsModule, StripSkeleton],
+  imports: [ConfirmDialog, DatePipe, EmptyState, PageHead, ReactiveFormsModule, RouterLink, StripSkeleton],
   template: `
     <app-page-head
       bay="03"
@@ -95,7 +96,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
             @for (loan of activeLoans(); track loan.id) {
               <tr [class.long-loan]="loan.isLongRunning">
                 <td>{{ loan.studentGroupName }}</td>
-                <td [attr.data-label]="i18n.t('field.drone')">{{ loan.droneName }}</td>
+                <td [attr.data-label]="i18n.t('field.drone')"><a [routerLink]="['/drones', loan.droneId]">{{ loan.droneName }}</a></td>
                 <td [attr.data-label]="i18n.t('field.batteries')">{{ loan.batteries }}</td>
                 <td [attr.data-label]="i18n.t('field.propellers')">{{ loan.propellers }}</td>
                 <td [attr.data-label]="i18n.t('field.loanDate')">{{ loan.loanDate | date: 'dd.MM.yyyy' }}</td>

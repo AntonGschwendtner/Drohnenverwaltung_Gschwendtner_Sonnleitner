@@ -1,4 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { matchesSearch } from '../shared/search-field';
@@ -12,7 +13,7 @@ describe('DronesPage search and filter', () => {
   beforeEach(async () => {
     TestBed.configureTestingModule({
       imports: [DronesPage],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     });
     fixture = TestBed.createComponent(DronesPage);
     fixture.detectChanges();

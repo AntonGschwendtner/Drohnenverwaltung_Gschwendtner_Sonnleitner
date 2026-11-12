@@ -78,6 +78,10 @@ export class ApiService {
     return this.http.get<Drone[]>('/api/drones');
   }
 
+  getDrone(id: number): Observable<Drone> {
+    return this.http.get<Drone>(`/api/drones/${id}`);
+  }
+
   createDrone(request: CreateDroneRequest): Observable<Drone> {
     return this.http.post<Drone>('/api/drones', request);
   }
@@ -108,6 +112,18 @@ export class ApiService {
 
   listLoans(status: LoanStatus): Observable<Loan[]> {
     return this.http.get<Loan[]>('/api/loans', { params: { status } });
+  }
+
+  /** Active and returned loans of one drone or one student group, the active loan first (REQ-018, REQ-019). */
+  listLoansFor(filter: { droneId?: number; studentGroupId?: number }): Observable<Loan[]> {
+    const params: Record<string, number> = {};
+    if (filter.droneId !== undefined) {
+      params['droneId'] = filter.droneId;
+    }
+    if (filter.studentGroupId !== undefined) {
+      params['studentGroupId'] = filter.studentGroupId;
+    }
+    return this.http.get<Loan[]>('/api/loans', { params });
   }
 
   createLoan(request: CreateLoanRequest): Observable<Loan> {
