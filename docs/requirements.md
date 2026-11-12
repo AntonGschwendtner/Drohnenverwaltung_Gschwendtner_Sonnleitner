@@ -209,15 +209,38 @@ The drone page SHALL show the number of all drones, of available drones and of l
 - WHEN the drone page is shown
 - THEN the overview shows 3 drones, 2 available and 1 loaned
 
+## Vorgeschlagene Anforderungen (REQ-015 bis REQ-030)
+
+Diese Anforderungen sind als OpenSpec-Changes vorgeschlagen und warten auf das Spec-Review. Die vollständigen Szenarien stehen in den Delta-Specs des jeweiligen Change unter `openspec/changes/<change>/specs/`.
+
+| REQ | Titel | Kurz | Change |
+|---|---|---|---|
+| REQ-015 | Drohne bearbeiten | Name und Beschreibung ändern, Name bleibt eindeutig | `manage-drones-and-groups` |
+| REQ-016 | Drohne löschen | Nur wenn sie nie ausgeliehen war | `manage-drones-and-groups` |
+| REQ-017 | Schülergruppe bearbeiten und löschen | Löschen nur ohne Ausleihen | `manage-drones-and-groups` |
+| REQ-018 | Drohnendetails | Aktive Ausleihe und alle früheren Ausleihen einer Drohne | `drone-and-group-details` |
+| REQ-019 | Gruppendetails | Aktive und frühere Ausleihen einer Gruppe | `drone-and-group-details` |
+| REQ-020 | Listen sortieren | Klick auf die Spaltenüberschrift, zweiter Klick dreht um | `drone-and-group-details` |
+| REQ-021 | Notiz zur Ausleihe | Optional, höchstens 500 Zeichen | `loan-notes-and-due-dates` |
+| REQ-022 | Geplantes Rückgabedatum | Optional, nicht vor dem Ausleihdatum; danach überfällig | `loan-notes-and-due-dates` |
+| REQ-023 | Rückgabe mit Prüfung | Zurückgegebene Mengen, Fehlteile in der Historie | `return-check-and-damage` |
+| REQ-024 | Schaden melden | Status Defective, nicht ausleihbar, reparieren macht verfügbar | `return-check-and-damage` |
+| REQ-025 | Historie exportieren und drucken | CSV für Excel, Druckansicht für PDF | `export-and-qr-codes` |
+| REQ-026 | QR-Code pro Drohne | Öffnet die Ausleihe mit dieser Drohne | `export-and-qr-codes` |
+| REQ-027 | Reservierung anlegen | Eine Drohne für eine Gruppe an einem Tag, höchstens eine pro Tag | `reservations` |
+| REQ-028 | Reservierungen anzeigen und stornieren | Heute und später, früheste zuerst | `reservations` |
+| REQ-029 | Reservierung beim Ausleihen beachten | Am reservierten Tag nur für die reservierende Gruppe | `reservations` |
+| REQ-030 | Statistiken | Summen, pro Drohne und pro Gruppe, für einen Zeitraum | `lending-statistics` |
+
 ## Out of Scope
 
 - Login, Benutzerkonten und Rollen
 - Einzelinventarisierung von Akkus (BAT-001 ...)
-- Reservierungen im Voraus
-- Schadensverwaltung und Rückgabedifferenzen
-- Auswertungen, Statistiken und Exporte
+- Reservierungen im Voraus (Aufnahme vorgeschlagen in `reservations`)
+- Schadensverwaltung und Rückgabedifferenzen (Aufnahme vorgeschlagen in `return-check-and-damage`)
+- Auswertungen, Statistiken und Exporte (Aufnahme vorgeschlagen in `lending-statistics` und `export-and-qr-codes`)
 
-Diese Punkte kommen bei Bedarf später als eigener Change Request.
+Diese Punkte kommen bei Bedarf später als eigener Change Request. Ob die vorgeschlagenen Aufnahmen gelten, entscheidet das Team im Spec-Review.
 
 ## Entscheidungen zu offenen Punkten
 
