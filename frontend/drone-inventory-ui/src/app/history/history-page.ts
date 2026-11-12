@@ -3,15 +3,19 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { ApiService, Loan, readErrorMessage } from '../api.service';
 import { I18nService } from '../i18n.service';
 import { EmptyState } from '../shared/empty-state';
+import { PageHead } from '../shared/page-head';
 import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-history-page',
-  imports: [DatePipe, EmptyState, StripSkeleton],
+  imports: [DatePipe, EmptyState, PageHead, StripSkeleton],
   template: `
-    <p class="kicker">{{ i18n.t('history.kicker') }}</p>
-    <h1>{{ i18n.t('nav.history') }}</h1>
-    <p class="lede">{{ i18n.t('history.lede') }}</p>
+    <app-page-head
+      bay="04"
+      [kicker]="i18n.t('history.kicker')"
+      [title]="i18n.t('nav.history')"
+      [lede]="i18n.t('history.lede')"
+    />
 
     @if (loading()) {
       <app-strip-skeleton />
