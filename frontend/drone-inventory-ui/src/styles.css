@@ -673,6 +673,59 @@ textarea:focus-visible {
   transform: translate(-2px, -2px);
 }
 
+/* ───────────── List tools: search and filters above a list ───────────── */
+
+.list-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.search-field {
+  flex: 1 1 16rem;
+  max-width: 26rem;
+}
+
+.search-field input {
+  padding-left: 2.4rem;
+  background:
+    radial-gradient(circle at 1.05rem 50%, transparent 0.38rem, var(--ink) 0.4rem 0.52rem, transparent 0.54rem),
+    var(--field);
+}
+
+.segmented {
+  display: inline-flex;
+  border: 2px solid var(--edge);
+  box-shadow: 4px 4px 0 var(--hard);
+}
+
+.segmented button {
+  min-height: 2.6rem;
+  padding: 0.45rem 0.9rem;
+  border: 0;
+  background: var(--field);
+  box-shadow: none;
+  color: var(--ink);
+  font-size: 0.78rem;
+}
+
+.segmented button + button {
+  border-left: 2px solid var(--edge);
+}
+
+.segmented button:hover:not(:disabled) {
+  background: var(--strip-hover);
+  box-shadow: none;
+  transform: none;
+}
+
+.segmented button[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--page);
+}
+
 /* ───────────── Buttons: signal blocks that press into their shadow ───────────── */
 
 button {
