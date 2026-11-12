@@ -188,7 +188,6 @@ export class LoansPage implements OnInit {
     });
   }
 
-  // The backend decides whether the loan can still be returned, so the view only shows its answer.
   /** The loan waiting for the answer of the confirmation dialog (REQ-013). */
   protected readonly pendingReturn = signal<Loan | null>(null);
   private returnTrigger: HTMLElement | null = null;
@@ -218,6 +217,7 @@ export class LoansPage implements OnInit {
     this.returnTrigger = null;
   }
 
+  // The backend decides whether the loan can still be returned, so the view only shows its answer.
   private returnLoan(loan: Loan): void {
     if (this.returningId() !== null) {
       return;
