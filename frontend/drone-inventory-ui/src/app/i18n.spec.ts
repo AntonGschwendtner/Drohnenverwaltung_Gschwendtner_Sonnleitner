@@ -14,7 +14,7 @@ describe('Language switch', () => {
   beforeEach(() => {
     localStorage.removeItem(LANGUAGE_STORAGE_KEY);
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(withInterceptors([languageInterceptor])), provideHttpClientTesting()],
+      providers: [provideHttpClient(withInterceptors([languageInterceptor])), provideHttpClientTesting(), provideRouter([])],
     });
   });
 

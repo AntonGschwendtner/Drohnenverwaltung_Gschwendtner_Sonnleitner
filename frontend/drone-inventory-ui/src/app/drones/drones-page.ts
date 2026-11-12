@@ -1,6 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { afterNextRender, Component, computed, effect, inject, Injector, OnInit, signal, untracked } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { ApiService, Drone, DroneStatus, readErrorMessage } from '../api.service';
 import { I18nService } from '../i18n.service';
 import { ConfirmDialog } from '../shared/confirm-dialog';
@@ -11,7 +12,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-drones-page',
-  imports: [ConfirmDialog, EmptyState, PageHead, ReactiveFormsModule, SearchField, StripSkeleton],
+  imports: [ConfirmDialog, EmptyState, PageHead, ReactiveFormsModule, RouterLink, SearchField, StripSkeleton],
   template: `
     <app-page-head
       bay="01"
@@ -117,7 +118,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
               </tr>
             } @else {
               <tr [attr.data-drone]="drone.id">
-                <td>{{ drone.name }}</td>
+                <td><a [routerLink]="['/drones', drone.id]">{{ drone.name }}</a></td>
                 <td [class]="'status-' + drone.status.toLowerCase()">
                   {{ i18n.t(drone.status === 'Loaned' ? 'status.loaned' : 'status.available') }}
                 </td>

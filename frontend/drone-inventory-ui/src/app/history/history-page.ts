@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { ApiService, Loan, readErrorMessage } from '../api.service';
 import { I18nService } from '../i18n.service';
 import { EmptyState } from '../shared/empty-state';
@@ -9,7 +10,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-history-page',
-  imports: [DatePipe, EmptyState, PageHead, SearchField, StripSkeleton],
+  imports: [DatePipe, EmptyState, PageHead, RouterLink, SearchField, StripSkeleton],
   template: `
     <app-page-head
       bay="04"
@@ -47,7 +48,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
           @for (loan of visibleLoans(); track loan.id) {
             <tr>
               <td>{{ loan.studentGroupName }}</td>
-              <td [attr.data-label]="i18n.t('field.drone')">{{ loan.droneName }}</td>
+              <td [attr.data-label]="i18n.t('field.drone')"><a [routerLink]="['/drones', loan.droneId]">{{ loan.droneName }}</a></td>
               <td [attr.data-label]="i18n.t('field.batteries')">{{ loan.batteries }}</td>
               <td [attr.data-label]="i18n.t('field.propellers')">{{ loan.propellers }}</td>
               <td [attr.data-label]="i18n.t('field.loanDate')">{{ loan.loanDate | date: 'dd.MM.yyyy' }}</td>
