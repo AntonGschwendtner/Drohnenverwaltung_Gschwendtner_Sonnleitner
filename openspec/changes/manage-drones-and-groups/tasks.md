@@ -8,7 +8,7 @@
 
 ## 2. Student groups (REQ-017)
 
-- [ ] 2.1 `PUT /api/student-groups/{id}`; tests for "Correct a name", "Name already used", "Unknown student group" (#102)
+- [x] 2.1 `PUT /api/student-groups/{id}`; tests for "Correct a name", "Name already used", "Unknown student group" (#102)
 - [ ] 2.2 `DELETE /api/student-groups/{id}`; tests for "Delete a group without loans", "Group has loans" (#103)
 - [ ] 2.3 Student group page: edit and delete like the drone page; component tests (#104)
 

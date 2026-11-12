@@ -17,15 +17,10 @@ public class StudentGroupService(DroneInventoryDbContext dbContext)
         CreateStudentGroupRequest request,
         CancellationToken cancellationToken)
     {
-        var name = request.Name?.Trim();
-        if (string.IsNullOrEmpty(name))
+        var (name, error) = await CheckNameAsync(request.Name, exceptId: null, cancellationToken);
+        if (error is not null)
         {
-            return ServiceResult<StudentGroupResponse>.Invalid(Messages.StudentGroupNeedsName);
-        }
-
-        if (await dbContext.StudentGroups.AnyAsync(studentGroup => studentGroup.Name == name, cancellationToken))
-        {
-            return NameAlreadyExists(name);
+            return error;
         }
 
         var studentGroup = new StudentGroup { Name = name };
@@ -41,6 +36,57 @@ public class StudentGroupService(DroneInventoryDbContext dbContext)
         }
 
         return ServiceResult<StudentGroupResponse>.Success(new StudentGroupResponse(studentGroup.Id, studentGroup.Name));
+    }
+
+    /// <summary>Changes the name with the same rules as creating (REQ-017).</summary>
+    public async Task<ServiceResult<StudentGroupResponse>> UpdateAsync(
+        int id,
+        UpdateStudentGroupRequest request,
+        CancellationToken cancellationToken)
+    {
+        var studentGroup = await dbContext.StudentGroups.FindAsync([id], cancellationToken);
+        if (studentGroup is null)
+        {
+            return ServiceResult<StudentGroupResponse>.NotFound(Messages.UnknownStudentGroup(id));
+        }
+
+        var (name, error) = await CheckNameAsync(request.Name, exceptId: id, cancellationToken);
+        if (error is not null)
+        {
+            return error;
+        }
+
+        studentGroup.Name = name;
+
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException exception) when (exception.IsUniqueConstraintViolation())
+        {
+            return NameAlreadyExists(name);
+        }
+
+        return ServiceResult<StudentGroupResponse>.Success(new StudentGroupResponse(studentGroup.Id, studentGroup.Name));
+    }
+
+    /// <summary>The name is required and unique. When editing, the group itself may keep its name.</summary>
+    private async Task<(string Name, ServiceResult<StudentGroupResponse>? Error)> CheckNameAsync(
+        string? requestedName,
+        int? exceptId,
+        CancellationToken cancellationToken)
+    {
+        var name = requestedName?.Trim();
+        if (string.IsNullOrEmpty(name))
+        {
+            return (string.Empty, ServiceResult<StudentGroupResponse>.Invalid(Messages.StudentGroupNeedsName));
+        }
+
+        var nameIsTaken = await dbContext.StudentGroups.AnyAsync(
+            studentGroup => studentGroup.Name == name && studentGroup.Id != exceptId,
+            cancellationToken);
+
+        return nameIsTaken ? (name, NameAlreadyExists(name)) : (name, null);
     }
 
     private static ServiceResult<StudentGroupResponse> NameAlreadyExists(string name) =>
