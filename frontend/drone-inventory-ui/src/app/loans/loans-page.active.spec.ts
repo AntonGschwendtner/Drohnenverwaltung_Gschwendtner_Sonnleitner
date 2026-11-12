@@ -69,6 +69,33 @@ describe('LoansPage active loans', () => {
     ]);
   });
 
+  function durationCell(): HTMLElement {
+    const element = fixture.nativeElement as HTMLElement;
+    return element.querySelector('section[aria-labelledby="active-loans"] tbody td.duration') as HTMLElement;
+  }
+
+  it('shows how many days a loan has been running, without a mark below 8 days (REQ-012)', async () => {
+    await respondWithActiveLoans([{ ...loan, daysActive: 7, isLongRunning: false }]);
+
+    expect(durationCell().textContent?.trim()).toBe('7 days');
+    expect(durationCell().querySelector('.long-running')).toBeNull();
+    expect(fixture.nativeElement.querySelector('tbody tr.long-loan')).toBeNull();
+  });
+
+  it('marks a long-running loan (REQ-012)', async () => {
+    await respondWithActiveLoans([{ ...loan, daysActive: 9, isLongRunning: true }]);
+
+    expect(durationCell().textContent).toContain('9 days');
+    expect(durationCell().querySelector('.long-running')?.textContent?.trim()).toBe('Long loan');
+    expect(fixture.nativeElement.querySelector('tbody tr.long-loan')).not.toBeNull();
+  });
+
+  it('says "1 day" for a loan from yesterday', async () => {
+    await respondWithActiveLoans([{ ...loan, daysActive: 1, isLongRunning: false }]);
+
+    expect(durationCell().textContent?.trim()).toBe('1 day');
+  });
+
   it('says when there are no active loans', async () => {
     await respondWithActiveLoans([]);
 

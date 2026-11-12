@@ -86,17 +86,24 @@ import { StripSkeleton } from '../shared/strip-skeleton';
               <th>{{ i18n.t('field.batteries') }}</th>
               <th>{{ i18n.t('field.propellers') }}</th>
               <th>{{ i18n.t('field.loanDate') }}</th>
+              <th>{{ i18n.t('field.duration') }}</th>
               <th><span class="visually-hidden">{{ i18n.t('field.action') }}</span></th>
             </tr>
           </thead>
           <tbody>
             @for (loan of activeLoans(); track loan.id) {
-              <tr>
+              <tr [class.long-loan]="loan.isLongRunning">
                 <td>{{ loan.studentGroupName }}</td>
                 <td [attr.data-label]="i18n.t('field.drone')">{{ loan.droneName }}</td>
                 <td [attr.data-label]="i18n.t('field.batteries')">{{ loan.batteries }}</td>
                 <td [attr.data-label]="i18n.t('field.propellers')">{{ loan.propellers }}</td>
                 <td [attr.data-label]="i18n.t('field.loanDate')">{{ loan.loanDate | date: 'dd.MM.yyyy' }}</td>
+                <td class="duration" [attr.data-label]="i18n.t('field.duration')">
+                  <span>{{ i18n.t(loan.daysActive === 1 ? 'loans.day' : 'loans.days', { days: '' + (loan.daysActive ?? 0) }) }}</span>
+                  @if (loan.isLongRunning) {
+                    <span class="long-running">{{ i18n.t('loans.longRunning') }}</span>
+                  }
+                </td>
                 <td>
                   <button
                     type="button"
