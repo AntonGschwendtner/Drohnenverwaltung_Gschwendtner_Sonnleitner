@@ -17,7 +17,7 @@
 
 ## 4. Status overview (REQ-014)
 
-- [ ] 4.1 Drone page: overview with all, available and loaned drones; tests for "Overview after a loan" and "Overview ignores the search" (#87)
+- [x] 4.1 Drone page: overview with all, available and loaned drones; tests for "Overview after a loan" and "Overview ignores the search" (#87)
 
 ## 5. Documentation
 

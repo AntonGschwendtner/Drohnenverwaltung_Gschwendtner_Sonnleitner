@@ -18,6 +18,25 @@ import { StripSkeleton } from '../shared/strip-skeleton';
       [lede]="i18n.t('drones.lede')"
     />
 
+    @if (!loading() && !loadErrorMessage()) {
+      <section class="overview" [attr.aria-label]="i18n.t('overview.label')">
+        <dl>
+          <div class="overview-tile">
+            <dt>{{ i18n.t('overview.total') }}</dt>
+            <dd>{{ overview().total }}</dd>
+          </div>
+          <div class="overview-tile overview-available">
+            <dt>{{ i18n.t('status.available') }}</dt>
+            <dd>{{ overview().available }}</dd>
+          </div>
+          <div class="overview-tile overview-loaned">
+            <dt>{{ i18n.t('status.loaned') }}</dt>
+            <dd>{{ overview().loaned }}</dd>
+          </div>
+        </dl>
+      </section>
+    }
+
     <section class="panel" aria-labelledby="new-drone">
       <h2 id="new-drone">{{ i18n.t('drones.new') }}</h2>
 
@@ -106,6 +125,15 @@ export class DronesPage implements OnInit {
     { value: 'Available', label: 'status.available' },
     { value: 'Loaned', label: 'status.loaned' },
   ] as const;
+  /** Counts all drones, independent of search and filter (REQ-014). */
+  protected readonly overview = computed(() => {
+    const drones = this.drones();
+    return {
+      total: drones.length,
+      available: drones.filter((drone) => drone.status === 'Available').length,
+      loaned: drones.filter((drone) => drone.status === 'Loaned').length,
+    };
+  });
   protected readonly visibleDrones = computed(() =>
     this.drones().filter(
       (drone) =>

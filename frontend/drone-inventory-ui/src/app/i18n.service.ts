@@ -37,6 +37,8 @@ const english = {
   'state.loading': 'Loading',
   'search.label': 'Search',
   'filter.all': 'All',
+  'overview.label': 'Fleet status',
+  'overview.total': 'Drones',
 
   'drones.kicker': 'Bay 01 · Fleet',
   'drones.lede': 'Every drone with its current status. A drone is loaned while it has an active loan.',
@@ -110,6 +112,8 @@ const german: Record<TextKey, string> = {
   'state.loading': 'Wird geladen',
   'search.label': 'Suche',
   'filter.all': 'Alle',
+  'overview.label': 'Flottenstatus',
+  'overview.total': 'Drohnen',
 
   'drones.kicker': 'Platz 01 · Flotte',
   'drones.lede': 'Jede Drohne mit ihrem aktuellen Status. Eine Drohne ist ausgeliehen, solange es eine aktive Ausleihe gibt.',
