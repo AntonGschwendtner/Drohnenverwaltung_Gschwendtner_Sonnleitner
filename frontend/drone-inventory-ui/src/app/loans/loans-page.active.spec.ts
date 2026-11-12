@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Loan } from '../api.service';
+import { I18nService } from '../i18n.service';
 import { LoansPage } from './loans-page';
 
 describe('LoansPage active loans', () => {
@@ -88,6 +89,27 @@ describe('LoansPage active loans', () => {
     expect(durationCell().textContent).toContain('9 days');
     expect(durationCell().querySelector('.long-running')?.textContent?.trim()).toBe('Long loan');
     expect(fixture.nativeElement.querySelector('tbody tr.long-loan')).not.toBeNull();
+  });
+
+  it('shows 0 days without a mark for a new loan (scenario "New loan")', async () => {
+    await respondWithActiveLoans([{ ...loan, daysActive: 0, isLongRunning: false }]);
+
+    expect(durationCell().textContent?.trim()).toBe('0 days');
+    expect(durationCell().querySelector('.long-running')).toBeNull();
+  });
+
+  it('shows 0 days when the backend sends no duration', async () => {
+    await respondWithActiveLoans([{ ...loan, daysActive: null }]);
+
+    expect(durationCell().textContent?.trim()).toBe('0 days');
+  });
+
+  it('shows the duration and the mark in German', async () => {
+    TestBed.inject(I18nService).language.set('de');
+    await respondWithActiveLoans([{ ...loan, daysActive: 9, isLongRunning: true }]);
+
+    expect(durationCell().textContent).toContain('9 Tage');
+    expect(durationCell().querySelector('.long-running')?.textContent?.trim()).toBe('Lange Ausleihe');
   });
 
   it('says "1 day" for a loan from yesterday', async () => {

@@ -1423,6 +1423,15 @@ td button.busy::after {
     color: var(--muted);
   }
 
+  main td.duration {
+    flex-wrap: wrap;
+    white-space: normal;
+  }
+
+  main td.duration .long-running {
+    margin-left: 0;
+  }
+
   main td button {
     width: 100%;
     margin-top: 0.4rem;
