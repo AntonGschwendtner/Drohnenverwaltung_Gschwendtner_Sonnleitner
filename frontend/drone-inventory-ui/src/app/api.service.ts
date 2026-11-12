@@ -98,6 +98,14 @@ export class ApiService {
     return this.http.post<StudentGroup>('/api/student-groups', request);
   }
 
+  updateStudentGroup(id: number, request: CreateStudentGroupRequest): Observable<StudentGroup> {
+    return this.http.put<StudentGroup>(`/api/student-groups/${id}`, request);
+  }
+
+  deleteStudentGroup(id: number): Observable<void> {
+    return this.http.delete<void>(`/api/student-groups/${id}`);
+  }
+
   listLoans(status: LoanStatus): Observable<Loan[]> {
     return this.http.get<Loan[]>('/api/loans', { params: { status } });
   }

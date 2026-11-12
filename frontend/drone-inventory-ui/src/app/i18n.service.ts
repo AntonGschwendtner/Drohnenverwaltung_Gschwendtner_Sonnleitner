@@ -60,6 +60,8 @@ const english = {
   'groups.empty': 'No student groups yet.',
   'groups.searchHint': 'Name of the group',
   'groups.noMatch': 'No student group matches the search.',
+  'groups.deleteTitle': 'Delete {group}?',
+  'groups.deleteText': '{group} is removed. This is only possible while the group has never loaned a drone.',
 
   'loans.kicker': 'Bay 03 · Airborne',
   'loans.lede': 'Loan an available drone with its accessories, and return it here.',
@@ -143,6 +145,8 @@ const german: Record<TextKey, string> = {
   'groups.empty': 'Noch keine Schülergruppen.',
   'groups.searchHint': 'Name der Gruppe',
   'groups.noMatch': 'Keine Schülergruppe passt zur Suche.',
+  'groups.deleteTitle': '{group} löschen?',
+  'groups.deleteText': '{group} wird entfernt. Das geht nur, solange die Gruppe nie eine Drohne ausgeliehen hat.',
 
   'loans.kicker': 'Platz 03 · In der Luft',
   'loans.lede': 'Eine verfügbare Drohne mit Zubehör ausleihen und hier wieder zurückgeben.',
