@@ -13,6 +13,19 @@ public class StudentGroupService(DroneInventoryDbContext dbContext)
             .Select(studentGroup => new StudentGroupResponse(studentGroup.Id, studentGroup.Name))
             .ToListAsync(cancellationToken);
 
+    /// <summary>One student group in the same shape as an item of the list (REQ-019).</summary>
+    public async Task<ServiceResult<StudentGroupResponse>> GetAsync(int id, CancellationToken cancellationToken)
+    {
+        var studentGroup = await dbContext.StudentGroups
+            .Where(studentGroup => studentGroup.Id == id)
+            .Select(studentGroup => new StudentGroupResponse(studentGroup.Id, studentGroup.Name))
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return studentGroup is null
+            ? ServiceResult<StudentGroupResponse>.NotFound(Messages.UnknownStudentGroup(id))
+            : ServiceResult<StudentGroupResponse>.Success(studentGroup);
+    }
+
     public async Task<ServiceResult<StudentGroupResponse>> CreateAsync(
         CreateStudentGroupRequest request,
         CancellationToken cancellationToken)
