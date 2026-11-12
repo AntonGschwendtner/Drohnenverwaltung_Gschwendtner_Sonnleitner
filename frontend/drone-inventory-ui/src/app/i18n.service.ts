@@ -68,6 +68,9 @@ const english = {
   'loans.day': '{days} day',
   'loans.days': '{days} days',
   'loans.longRunning': 'Long loan',
+  'loans.confirmTitle': 'Return {drone}?',
+  'loans.confirmText': '{drone} comes back from {group}. The loan is then closed and moves to the history.',
+  'dialog.cancel': 'Cancel',
 
   'history.kicker': 'Bay 04 · Logbook',
   'history.lede': 'Every returned loan stays here, the newest return first.',
@@ -141,6 +144,9 @@ const german: Record<TextKey, string> = {
   'loans.day': '{days} Tag',
   'loans.days': '{days} Tage',
   'loans.longRunning': 'Lange Ausleihe',
+  'loans.confirmTitle': '{drone} zurückgeben?',
+  'loans.confirmText': '{drone} kommt von {group} zurück. Die Ausleihe wird damit abgeschlossen und landet in der Historie.',
+  'dialog.cancel': 'Abbrechen',
 
   'history.kicker': 'Platz 04 · Logbuch',
   'history.lede': 'Jede zurückgegebene Ausleihe bleibt hier, die neueste Rückgabe zuerst.',

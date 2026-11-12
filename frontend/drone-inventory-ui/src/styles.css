@@ -1130,6 +1130,84 @@ td button.busy::after {
   animation: spin 0.8s linear infinite;
 }
 
+/* ───────────── Confirmation dialog: a plate over a dimmed board (REQ-013) ───────────── */
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgb(4 7 10 / 0.6);
+  backdrop-filter: blur(2px);
+  animation: fade-in 0.2s ease-out both;
+}
+
+.dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 61;
+  width: min(30rem, calc(100vw - 2rem));
+  padding: 2.2rem 1.6rem 1.5rem;
+  background: var(--panel);
+  border: 2px solid var(--edge);
+  box-shadow: 10px 10px 0 var(--hard);
+  transform: translate(-50%, -50%);
+  animation: dialog-in 0.3s var(--ease) both;
+}
+
+.dialog::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 0.6rem;
+  background: repeating-linear-gradient(-45deg, var(--signal) 0 10px, var(--ink) 10px 20px);
+}
+
+.dialog h2 {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.dialog h2::before {
+  content: none;
+}
+
+.dialog p {
+  margin: 0 0 1.5rem;
+  color: var(--muted);
+}
+
+.dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.9rem;
+}
+
+.dialog-cancel {
+  background: var(--field);
+  color: var(--ink);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%);
+  }
+}
+
 /* ───────────── Footer ───────────── */
 
 .footer {
