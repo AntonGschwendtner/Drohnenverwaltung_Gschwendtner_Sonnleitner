@@ -23,6 +23,6 @@ See proposal.md - Why. The lists are loaded completely (`GET /api/drones`, `/api
 
 ## Risks / Trade-offs
 
-- [Full days depend on the time of day] → Counted as whole 24-hour periods since the loan date; documented in the spec scenarios.
+- [Full days depend on the time of day] → Counted as calendar days between the loan date and today, the same date source as the loan date, so the time of day does not matter.
 - [Filtering in the browser does not scale to very large lists] → Acceptable for one school; a server search can follow as its own change.
 - [REQ-014 touches "Auswertungen, Statistiken" (out of scope)] → Limited to the current stock; open point for the team in proposal.md.

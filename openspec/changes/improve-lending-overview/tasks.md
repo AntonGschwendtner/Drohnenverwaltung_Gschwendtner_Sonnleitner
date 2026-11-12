@@ -2,7 +2,7 @@
 
 ## 1. Loan duration in the backend (REQ-012)
 
-- [ ] 1.1 Add `daysActive` and `isLongRunning` to the loan response, computed with `TimeProvider`; tests for 0, exactly 7 and 9 days and for returned loans (scenarios "New loan", "Loan running exactly 7 days", "Long-running loan") (#81)
+- [x] 1.1 Add `daysActive` and `isLongRunning` to the loan response, computed with `TimeProvider`; tests for 0, exactly 7 and 9 days and for returned loans (scenarios "New loan", "Loan running exactly 7 days", "Long-running loan") (#81)
 
 ## 2. Loan page (REQ-012, REQ-013)
 
