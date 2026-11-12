@@ -19,5 +19,12 @@ public static class StudentGroupEndpoints
                 ? error.ToProblem()
                 : Results.Created($"/api/student-groups/{result.Value!.Id}", result.Value);
         });
+
+        studentGroups.MapPut("/{id:int}", async (int id, UpdateStudentGroupRequest request, StudentGroupService service, CancellationToken cancellationToken) =>
+        {
+            var result = await service.UpdateAsync(id, request, cancellationToken);
+
+            return result.Error is { } error ? error.ToProblem() : Results.Ok(result.Value);
+        });
     }
 }
