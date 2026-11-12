@@ -13,7 +13,7 @@
 
 - [x] 3.1 Drone page: name search and status filter with a no-match hint; tests for "Search by part of the name", "Filter by status", "No drone matches" (#84)
 - [x] 3.2 Student group page: name search with a no-match hint; tests for both scenarios (#85)
-- [ ] 3.3 History page: search by drone or group name with a no-match hint; tests for both scenarios (#86)
+- [x] 3.3 History page: search by drone or group name with a no-match hint; tests for both scenarios (#86)
 
 ## 4. Status overview (REQ-014)
 

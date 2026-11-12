@@ -1,14 +1,15 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ApiService, Loan, readErrorMessage } from '../api.service';
 import { I18nService } from '../i18n.service';
 import { EmptyState } from '../shared/empty-state';
 import { PageHead } from '../shared/page-head';
+import { matchesSearch, SearchField } from '../shared/search-field';
 import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-history-page',
-  imports: [DatePipe, EmptyState, PageHead, StripSkeleton],
+  imports: [DatePipe, EmptyState, PageHead, SearchField, StripSkeleton],
   template: `
     <app-page-head
       bay="04"
@@ -24,6 +25,13 @@ import { StripSkeleton } from '../shared/strip-skeleton';
     } @else if (loans().length === 0) {
       <app-empty-state>{{ i18n.t('history.empty') }}</app-empty-state>
     } @else {
+      <div class="list-tools">
+        <app-search-field [label]="i18n.t('search.label')" [placeholder]="i18n.t('history.searchHint')" [(value)]="search" />
+      </div>
+
+      @if (visibleLoans().length === 0) {
+        <app-empty-state>{{ i18n.t('history.noMatch') }}</app-empty-state>
+      } @else {
       <table>
         <thead>
           <tr>
@@ -36,7 +44,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
           </tr>
         </thead>
         <tbody>
-          @for (loan of loans(); track loan.id) {
+          @for (loan of visibleLoans(); track loan.id) {
             <tr>
               <td>{{ loan.studentGroupName }}</td>
               <td [attr.data-label]="i18n.t('field.drone')">{{ loan.droneName }}</td>
@@ -48,6 +56,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
           }
         </tbody>
       </table>
+      }
     }
   `,
 })
@@ -58,6 +67,14 @@ export class HistoryPage implements OnInit {
   protected readonly loans = signal<Loan[]>([]);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly loading = signal(true);
+
+  /** The search matches the drone or the student group of a loan (REQ-011). */
+  protected readonly search = signal('');
+  protected readonly visibleLoans = computed(() =>
+    this.loans().filter(
+      (loan) => matchesSearch(loan.droneName, this.search()) || matchesSearch(loan.studentGroupName, this.search()),
+    ),
+  );
 
   ngOnInit(): void {
     this.api.listLoans('Returned').subscribe({

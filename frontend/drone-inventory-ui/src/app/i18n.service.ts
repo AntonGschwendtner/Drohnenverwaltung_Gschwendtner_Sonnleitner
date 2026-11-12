@@ -72,6 +72,8 @@ const english = {
   'history.kicker': 'Bay 04 · Logbook',
   'history.lede': 'Every returned loan stays here, the newest return first.',
   'history.empty': 'No returned loans yet.',
+  'history.searchHint': 'Drone or student group',
+  'history.noMatch': 'No loan matches the search.',
 };
 
 export type TextKey = keyof typeof english;
@@ -143,6 +145,8 @@ const german: Record<TextKey, string> = {
   'history.kicker': 'Platz 04 · Logbuch',
   'history.lede': 'Jede zurückgegebene Ausleihe bleibt hier, die neueste Rückgabe zuerst.',
   'history.empty': 'Noch keine zurückgegebenen Ausleihen.',
+  'history.searchHint': 'Drohne oder Schülergruppe',
+  'history.noMatch': 'Keine Ausleihe passt zur Suche.',
 };
 
 const texts: Record<Language, Record<TextKey, string>> = { en: english, de: german };
