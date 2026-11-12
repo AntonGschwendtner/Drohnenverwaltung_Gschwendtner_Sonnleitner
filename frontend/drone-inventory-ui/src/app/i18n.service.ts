@@ -34,12 +34,16 @@ const english = {
   'status.loaned': 'Loaned',
   'error.fallback': 'The request failed. Check that the backend is running and try again.',
   'state.loading': 'Loading',
+  'search.label': 'Search',
+  'filter.all': 'All',
 
   'drones.kicker': 'Bay 01 · Fleet',
   'drones.lede': 'Every drone with its current status. A drone is loaned while it has an active loan.',
   'drones.new': 'New drone',
   'drones.add': 'Add drone',
   'drones.empty': 'No drones yet.',
+  'drones.searchHint': 'Name of the drone',
+  'drones.noMatch': 'No drone matches the search.',
 
   'groups.kicker': 'Bay 02 · Crews',
   'groups.lede': 'The groups that can loan drones and are responsible for them.',
@@ -95,12 +99,16 @@ const german: Record<TextKey, string> = {
   'status.loaned': 'Ausgeliehen',
   'error.fallback': 'Die Anfrage ist fehlgeschlagen. Prüfe, ob das Backend läuft, und versuche es noch einmal.',
   'state.loading': 'Wird geladen',
+  'search.label': 'Suche',
+  'filter.all': 'Alle',
 
   'drones.kicker': 'Platz 01 · Flotte',
   'drones.lede': 'Jede Drohne mit ihrem aktuellen Status. Eine Drohne ist ausgeliehen, solange es eine aktive Ausleihe gibt.',
   'drones.new': 'Neue Drohne',
   'drones.add': 'Drohne anlegen',
   'drones.empty': 'Noch keine Drohnen.',
+  'drones.searchHint': 'Name der Drohne',
+  'drones.noMatch': 'Keine Drohne passt zur Suche.',
 
   'groups.kicker': 'Platz 02 · Crews',
   'groups.lede': 'Die Gruppen, die Drohnen ausleihen und dafür verantwortlich sind.',
