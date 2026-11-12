@@ -2,7 +2,7 @@
 
 ## 1. Backend (REQ-018, REQ-019)
 
-- [ ] 1.1 `GET /api/drones/{id}` and `GET /api/student-groups/{id}`; tests for "Drone that was never loaned", "Unknown drone", "Unknown student group" (#114)
+- [x] 1.1 `GET /api/drones/{id}` and `GET /api/student-groups/{id}`; tests for "Drone that was never loaned", "Unknown drone", "Unknown student group" (#114)
 - [x] 1.2 Filter `GET /api/loans` by `droneId` and `studentGroupId`, `status` optional with a filter; tests for "Loans of one drone", "Loans of one student group" and the order rule (#115)
 
 ## 2. Detail pages (REQ-018, REQ-019)
