@@ -3,15 +3,19 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ApiService, readErrorMessage, StudentGroup } from '../api.service';
 import { I18nService } from '../i18n.service';
 import { EmptyState } from '../shared/empty-state';
+import { PageHead } from '../shared/page-head';
 import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-student-groups-page',
-  imports: [EmptyState, ReactiveFormsModule, StripSkeleton],
+  imports: [EmptyState, PageHead, ReactiveFormsModule, StripSkeleton],
   template: `
-    <p class="kicker">{{ i18n.t('groups.kicker') }}</p>
-    <h1>{{ i18n.t('nav.studentGroups') }}</h1>
-    <p class="lede">{{ i18n.t('groups.lede') }}</p>
+    <app-page-head
+      bay="02"
+      [kicker]="i18n.t('groups.kicker')"
+      [title]="i18n.t('nav.studentGroups')"
+      [lede]="i18n.t('groups.lede')"
+    />
 
     <section class="panel" aria-labelledby="new-student-group">
       <h2 id="new-student-group">{{ i18n.t('groups.new') }}</h2>

@@ -1,7 +1,7 @@
 <header class="tower">
   <div class="tower-inner">
     <a class="brand" routerLink="/drones" [attr.aria-label]="i18n.t('app.start')">
-      <span class="scope" aria-hidden="true"><span class="sweep"></span></span>
+      <span class="scope" aria-hidden="true"><span class="sweep"></span><span class="blip"></span></span>
       <span class="brand-text">
         <span class="brand-name">{{ i18n.t('app.brand') }}</span>
         <span class="brand-sub">{{ i18n.t('app.brandSub') }}</span>
@@ -41,14 +41,32 @@
   </div>
 </header>
 
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    @for (copy of [0, 1]; track copy) {
+      <span class="marquee-group">
+        <span>{{ i18n.t('app.brandSub') }}</span>
+        <span>01 {{ i18n.t('nav.drones') }}</span>
+        <span>02 {{ i18n.t('nav.studentGroups') }}</span>
+        <span>03 {{ i18n.t('nav.loans') }}</span>
+        <span>04 {{ i18n.t('nav.history') }}</span>
+        <span>{{ time() }}</span>
+      </span>
+    }
+  </div>
+</div>
+
 <main>
   <router-outlet />
 </main>
 
-<footer class="ticker">
-  <span>{{ i18n.t('app.brand') }}</span>
-  <span aria-hidden="true">&middot;</span>
-  <span>SYP 4. INF 2026/27</span>
-  <span aria-hidden="true">&middot;</span>
-  <span>Gschwendtner &amp; Sonnleitner</span>
+<footer class="footer">
+  <p class="footer-mark" aria-hidden="true">{{ i18n.t('app.brand') }}</p>
+  <p class="footer-line">
+    <span>{{ i18n.t('app.brand') }}</span>
+    <span aria-hidden="true">&#9670;</span>
+    <span>SYP 4. INF 2026/27</span>
+    <span aria-hidden="true">&#9670;</span>
+    <span>Gschwendtner &amp; Sonnleitner</span>
+  </p>
 </footer>

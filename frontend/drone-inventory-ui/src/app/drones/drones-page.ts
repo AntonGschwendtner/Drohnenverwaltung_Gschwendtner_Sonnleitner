@@ -3,15 +3,19 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ApiService, Drone, readErrorMessage } from '../api.service';
 import { I18nService } from '../i18n.service';
 import { EmptyState } from '../shared/empty-state';
+import { PageHead } from '../shared/page-head';
 import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-drones-page',
-  imports: [EmptyState, ReactiveFormsModule, StripSkeleton],
+  imports: [EmptyState, PageHead, ReactiveFormsModule, StripSkeleton],
   template: `
-    <p class="kicker">{{ i18n.t('drones.kicker') }}</p>
-    <h1>{{ i18n.t('nav.drones') }}</h1>
-    <p class="lede">{{ i18n.t('drones.lede') }}</p>
+    <app-page-head
+      bay="01"
+      [kicker]="i18n.t('drones.kicker')"
+      [title]="i18n.t('nav.drones')"
+      [lede]="i18n.t('drones.lede')"
+    />
 
     <section class="panel" aria-labelledby="new-drone">
       <h2 id="new-drone">{{ i18n.t('drones.new') }}</h2>

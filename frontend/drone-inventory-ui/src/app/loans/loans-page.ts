@@ -4,15 +4,19 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ApiService, Drone, Loan, readErrorMessage, StudentGroup } from '../api.service';
 import { I18nService } from '../i18n.service';
 import { EmptyState } from '../shared/empty-state';
+import { PageHead } from '../shared/page-head';
 import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-loans-page',
-  imports: [DatePipe, EmptyState, ReactiveFormsModule, StripSkeleton],
+  imports: [DatePipe, EmptyState, PageHead, ReactiveFormsModule, StripSkeleton],
   template: `
-    <p class="kicker">{{ i18n.t('loans.kicker') }}</p>
-    <h1>{{ i18n.t('nav.loans') }}</h1>
-    <p class="lede">{{ i18n.t('loans.lede') }}</p>
+    <app-page-head
+      bay="03"
+      [kicker]="i18n.t('loans.kicker')"
+      [title]="i18n.t('nav.loans')"
+      [lede]="i18n.t('loans.lede')"
+    />
 
     <section class="panel" aria-labelledby="new-loan">
       <h2 id="new-loan">{{ i18n.t('loans.new') }}</h2>
