@@ -619,7 +619,8 @@ section + section {
 
   .overview dt {
     font-size: 0.62rem;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.04em;
+    overflow-wrap: anywhere;
   }
 }
 
