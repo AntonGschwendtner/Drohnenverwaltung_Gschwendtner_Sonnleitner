@@ -88,5 +88,9 @@ public static class Messages
         $"The drone \"{name}\" has loans and cannot be deleted, so the loan history stays complete.",
         $"Die Drohne „{name}“ hat Ausleihen und kann nicht gelöscht werden, damit die Historie vollständig bleibt.");
 
+    public static string StudentGroupHasLoans(string name) => Pick(
+        $"The student group \"{name}\" has loans and cannot be deleted, so the loan history stays complete.",
+        $"Die Schülergruppe „{name}“ hat Ausleihen und kann nicht gelöscht werden, damit die Historie vollständig bleibt.");
+
     private static string Pick(string english, string german) => IsGerman ? german : english;
 }
