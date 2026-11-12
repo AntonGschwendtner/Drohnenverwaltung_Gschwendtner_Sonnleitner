@@ -10,14 +10,31 @@ public class DroneService(DroneInventoryDbContext dbContext)
     public async Task<IReadOnlyList<DroneResponse>> ListAsync(CancellationToken cancellationToken) =>
         await dbContext.Drones
             .OrderBy(drone => drone.Name)
-            .Select(drone => new DroneResponse(
-                drone.Id,
-                drone.Name,
-                dbContext.Loans.Any(loan => loan.DroneId == drone.Id && loan.Status == LoanStatus.Active)
-                    ? DroneStatus.Loaned
-                    : DroneStatus.Available,
-                drone.Description))
+            .Select(ToResponse())
             .ToListAsync(cancellationToken);
+
+    /// <summary>One drone in the same shape as an item of the list (REQ-018).</summary>
+    public async Task<ServiceResult<DroneResponse>> GetAsync(int id, CancellationToken cancellationToken)
+    {
+        var drone = await dbContext.Drones
+            .Where(drone => drone.Id == id)
+            .Select(ToResponse())
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return drone is null
+            ? ServiceResult<DroneResponse>.NotFound(Messages.UnknownDrone(id))
+            : ServiceResult<DroneResponse>.Success(drone);
+    }
+
+    // The status follows from the active loan and is computed in the query.
+    private System.Linq.Expressions.Expression<Func<Drone, DroneResponse>> ToResponse() =>
+        drone => new DroneResponse(
+            drone.Id,
+            drone.Name,
+            dbContext.Loans.Any(loan => loan.DroneId == drone.Id && loan.Status == LoanStatus.Active)
+                ? DroneStatus.Loaned
+                : DroneStatus.Available,
+            drone.Description);
 
     public async Task<ServiceResult<DroneResponse>> CreateAsync(CreateDroneRequest request, CancellationToken cancellationToken)
     {
