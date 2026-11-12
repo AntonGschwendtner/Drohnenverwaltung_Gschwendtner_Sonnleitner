@@ -26,5 +26,12 @@ public static class StudentGroupEndpoints
 
             return result.Error is { } error ? error.ToProblem() : Results.Ok(result.Value);
         });
+
+        studentGroups.MapDelete("/{id:int}", async (int id, StudentGroupService service, CancellationToken cancellationToken) =>
+        {
+            var result = await service.DeleteAsync(id, cancellationToken);
+
+            return result.Error is { } error ? error.ToProblem() : Results.NoContent();
+        });
     }
 }

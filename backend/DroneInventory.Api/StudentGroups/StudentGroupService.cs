@@ -70,6 +70,37 @@ public class StudentGroupService(DroneInventoryDbContext dbContext)
         return ServiceResult<StudentGroupResponse>.Success(new StudentGroupResponse(studentGroup.Id, studentGroup.Name));
     }
 
+    /// <summary>
+    /// Deletes a student group that never had a loan (REQ-017). A group with any loan stays, so the history stays complete.
+    /// </summary>
+    public async Task<ServiceResult<bool>> DeleteAsync(int id, CancellationToken cancellationToken)
+    {
+        var studentGroup = await dbContext.StudentGroups.FindAsync([id], cancellationToken);
+        if (studentGroup is null)
+        {
+            return ServiceResult<bool>.NotFound(Messages.UnknownStudentGroup(id));
+        }
+
+        if (await dbContext.Loans.AnyAsync(loan => loan.StudentGroupId == id, cancellationToken))
+        {
+            return ServiceResult<bool>.Conflict(Messages.StudentGroupHasLoans(studentGroup.Name));
+        }
+
+        dbContext.StudentGroups.Remove(studentGroup);
+
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException exception) when (exception.IsForeignKeyViolation())
+        {
+            // A loan was created after the check above; the database refuses the delete.
+            return ServiceResult<bool>.Conflict(Messages.StudentGroupHasLoans(studentGroup.Name));
+        }
+
+        return ServiceResult<bool>.Success(true);
+    }
+
     /// <summary>The name is required and unique. When editing, the group itself may keep its name.</summary>
     private async Task<(string Name, ServiceResult<StudentGroupResponse>? Error)> CheckNameAsync(
         string? requestedName,
