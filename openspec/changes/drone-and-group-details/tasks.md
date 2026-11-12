@@ -12,7 +12,7 @@
 
 ## 3. Sorting (REQ-020)
 
-- [ ] 3.1 Shared sort helper with unit tests for names (case-insensitive), numbers and dates (#118)
+- [x] 3.1 Shared sort helper with unit tests for names (case-insensitive), numbers and dates (#118)
 - [ ] 3.2 Sortable headers with `aria-sort` on all four lists; component tests for "Sort by name", "Reverse the order", "Sort the history by return date" (#119)
 
 ## 4. Documentation
