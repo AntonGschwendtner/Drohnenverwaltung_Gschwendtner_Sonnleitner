@@ -16,4 +16,6 @@ public sealed record LoanResponse(
     int Propellers,
     DateOnly LoanDate,
     DateOnly? ReturnDate,
-    LoanStatus Status);
+    LoanStatus Status,
+    int? DaysActive = null,
+    bool IsLongRunning = false);

@@ -8,6 +8,9 @@ namespace DroneInventory.Api.Loans;
 
 public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timeProvider)
 {
+    /// <summary>An active loan running longer than this many full days is long-running (REQ-012).</summary>
+    public const int LongRunningAfterDays = 7;
+
     private static readonly Expression<Func<Loan, LoanResponse>> ToResponse = loan => new LoanResponse(
         loan.Id,
         loan.DroneId,
@@ -37,7 +40,8 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             .Select(ToResponse)
             .ToListAsync(cancellationToken);
 
-        return ServiceResult<IReadOnlyList<LoanResponse>>.Success(loans);
+        var today = Today();
+        return ServiceResult<IReadOnlyList<LoanResponse>>.Success(loans.Select(loan => WithDuration(loan, today)).ToList());
     }
 
     public async Task<ServiceResult<LoanResponse>> CreateAsync(CreateLoanRequest request, CancellationToken cancellationToken)
@@ -82,7 +86,7 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
         {
             DroneId = drone.Id,
             StudentGroupId = studentGroup.Id,
-            LoanDate = DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime),
+            LoanDate = Today(),
             Status = LoanStatus.Active,
             Items = items,
         };
@@ -98,22 +102,24 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             return AlreadyLoaned(drone);
         }
 
-        return ServiceResult<LoanResponse>.Success(new LoanResponse(
-            loan.Id,
-            drone.Id,
-            drone.Name,
-            studentGroup.Id,
-            studentGroup.Name,
-            QuantityOf(loan, LoanItemType.Battery),
-            QuantityOf(loan, LoanItemType.Propeller),
-            loan.LoanDate,
-            loan.ReturnDate,
-            loan.Status));
+        return ServiceResult<LoanResponse>.Success(WithDuration(
+            new LoanResponse(
+                loan.Id,
+                drone.Id,
+                drone.Name,
+                studentGroup.Id,
+                studentGroup.Name,
+                QuantityOf(loan, LoanItemType.Battery),
+                QuantityOf(loan, LoanItemType.Propeller),
+                loan.LoanDate,
+                loan.ReturnDate,
+                loan.Status),
+            loan.LoanDate));
     }
 
     public async Task<ServiceResult<LoanResponse>> ReturnAsync(int id, CancellationToken cancellationToken)
     {
-        DateOnly? returnDate = DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime);
+        DateOnly? returnDate = Today();
 
         // One statement, so that of two returns at the same time only one changes the loan.
         var changedLoans = await dbContext.Loans
@@ -136,7 +142,24 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
 
         return changedLoans == 0
             ? ServiceResult<LoanResponse>.Conflict(Messages.LoanAlreadyReturned(id))
-            : ServiceResult<LoanResponse>.Success(returnedLoan);
+            : ServiceResult<LoanResponse>.Success(WithDuration(returnedLoan, returnDate.Value));
+    }
+
+    private DateOnly Today() => DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime);
+
+    /// <summary>
+    /// Adds the full days an active loan has been running and whether it is long-running (REQ-012).
+    /// Computed when the loan is read, so the value never gets stale.
+    /// </summary>
+    private static LoanResponse WithDuration(LoanResponse loan, DateOnly today)
+    {
+        if (loan.Status != LoanStatus.Active)
+        {
+            return loan with { DaysActive = null, IsLongRunning = false };
+        }
+
+        var days = today.DayNumber - loan.LoanDate.DayNumber;
+        return loan with { DaysActive = days, IsLongRunning = days > LongRunningAfterDays };
     }
 
     private static (List<LoanItem> Items, string? Error) ReadItems(IReadOnlyList<CreateLoanItemRequest?>? requestedItems)
