@@ -2,7 +2,7 @@
 
 ## 1. Drones (REQ-015, REQ-016)
 
-- [ ] 1.1 `PUT /api/drones/{id}` with shared name validation; tests for "Correct a name", "Edit a loaned drone", "Name already used", "Unknown drone" (#99)
+- [x] 1.1 `PUT /api/drones/{id}` with shared name validation; tests for "Correct a name", "Edit a loaned drone", "Name already used", "Unknown drone" (#99)
 - [ ] 1.2 `DELETE /api/drones/{id}`, rejected when any loan exists; tests for "Delete a drone without loans", "Drone has a returned loan", "Drone is loaned" (#100)
 - [ ] 1.3 Drone page: edit inline and delete with confirmation, English and German; component tests for saving, a rejected delete and cancelling (#101)
 

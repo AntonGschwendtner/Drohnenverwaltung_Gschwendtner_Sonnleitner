@@ -19,5 +19,12 @@ public static class DroneEndpoints
                 ? error.ToProblem()
                 : Results.Created($"/api/drones/{result.Value!.Id}", result.Value);
         });
+
+        drones.MapPut("/{id:int}", async (int id, UpdateDroneRequest request, DroneService service, CancellationToken cancellationToken) =>
+        {
+            var result = await service.UpdateAsync(id, request, cancellationToken);
+
+            return result.Error is { } error ? error.ToProblem() : Results.Ok(result.Value);
+        });
     }
 }

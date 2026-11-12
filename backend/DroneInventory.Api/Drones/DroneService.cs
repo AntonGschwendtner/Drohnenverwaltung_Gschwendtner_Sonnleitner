@@ -21,15 +21,10 @@ public class DroneService(DroneInventoryDbContext dbContext)
 
     public async Task<ServiceResult<DroneResponse>> CreateAsync(CreateDroneRequest request, CancellationToken cancellationToken)
     {
-        var name = request.Name?.Trim();
-        if (string.IsNullOrEmpty(name))
+        var (name, error) = await CheckNameAsync(request.Name, exceptId: null, cancellationToken);
+        if (error is not null)
         {
-            return ServiceResult<DroneResponse>.Invalid(Messages.DroneNeedsName);
-        }
-
-        if (await dbContext.Drones.AnyAsync(drone => drone.Name == name, cancellationToken))
-        {
-            return NameAlreadyExists(name);
+            return error;
         }
 
         var drone = new Drone { Name = name, Description = request.Description ?? string.Empty };
@@ -46,6 +41,66 @@ public class DroneService(DroneInventoryDbContext dbContext)
 
         return ServiceResult<DroneResponse>.Success(
             new DroneResponse(drone.Id, drone.Name, DroneStatus.Available, drone.Description));
+    }
+
+    /// <summary>
+    /// Changes name and description with the same rules as creating (REQ-015). The status stays as it is,
+    /// because it follows from the loans.
+    /// </summary>
+    public async Task<ServiceResult<DroneResponse>> UpdateAsync(int id, UpdateDroneRequest request, CancellationToken cancellationToken)
+    {
+        var drone = await dbContext.Drones.FindAsync([id], cancellationToken);
+        if (drone is null)
+        {
+            return ServiceResult<DroneResponse>.NotFound(Messages.UnknownDrone(id));
+        }
+
+        var (name, error) = await CheckNameAsync(request.Name, exceptId: id, cancellationToken);
+        if (error is not null)
+        {
+            return error;
+        }
+
+        drone.Name = name;
+        drone.Description = request.Description ?? string.Empty;
+
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException exception) when (exception.IsUniqueConstraintViolation())
+        {
+            return NameAlreadyExists(name);
+        }
+
+        var isLoaned = await dbContext.Loans.AnyAsync(
+            loan => loan.DroneId == id && loan.Status == LoanStatus.Active,
+            cancellationToken);
+
+        return ServiceResult<DroneResponse>.Success(new DroneResponse(
+            drone.Id,
+            drone.Name,
+            isLoaned ? DroneStatus.Loaned : DroneStatus.Available,
+            drone.Description));
+    }
+
+    /// <summary>The name is required and unique. When editing, the drone itself may keep its name.</summary>
+    private async Task<(string Name, ServiceResult<DroneResponse>? Error)> CheckNameAsync(
+        string? requestedName,
+        int? exceptId,
+        CancellationToken cancellationToken)
+    {
+        var name = requestedName?.Trim();
+        if (string.IsNullOrEmpty(name))
+        {
+            return (string.Empty, ServiceResult<DroneResponse>.Invalid(Messages.DroneNeedsName));
+        }
+
+        var nameIsTaken = await dbContext.Drones.AnyAsync(
+            drone => drone.Name == name && drone.Id != exceptId,
+            cancellationToken);
+
+        return nameIsTaken ? (name, NameAlreadyExists(name)) : (name, null);
     }
 
     private static ServiceResult<DroneResponse> NameAlreadyExists(string name) =>
