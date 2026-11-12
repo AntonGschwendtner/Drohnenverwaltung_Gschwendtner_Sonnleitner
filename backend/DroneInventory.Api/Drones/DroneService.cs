@@ -84,6 +84,37 @@ public class DroneService(DroneInventoryDbContext dbContext)
             drone.Description));
     }
 
+    /// <summary>
+    /// Deletes a drone that never had a loan (REQ-016). A drone with any loan stays, so the history stays complete.
+    /// </summary>
+    public async Task<ServiceResult<bool>> DeleteAsync(int id, CancellationToken cancellationToken)
+    {
+        var drone = await dbContext.Drones.FindAsync([id], cancellationToken);
+        if (drone is null)
+        {
+            return ServiceResult<bool>.NotFound(Messages.UnknownDrone(id));
+        }
+
+        if (await dbContext.Loans.AnyAsync(loan => loan.DroneId == id, cancellationToken))
+        {
+            return ServiceResult<bool>.Conflict(Messages.DroneHasLoans(drone.Name));
+        }
+
+        dbContext.Drones.Remove(drone);
+
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException exception) when (exception.IsForeignKeyViolation())
+        {
+            // A loan was created after the check above; the database refuses the delete.
+            return ServiceResult<bool>.Conflict(Messages.DroneHasLoans(drone.Name));
+        }
+
+        return ServiceResult<bool>.Success(true);
+    }
+
     /// <summary>The name is required and unique. When editing, the drone itself may keep its name.</summary>
     private async Task<(string Name, ServiceResult<DroneResponse>? Error)> CheckNameAsync(
         string? requestedName,

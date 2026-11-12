@@ -26,5 +26,12 @@ public static class DroneEndpoints
 
             return result.Error is { } error ? error.ToProblem() : Results.Ok(result.Value);
         });
+
+        drones.MapDelete("/{id:int}", async (int id, DroneService service, CancellationToken cancellationToken) =>
+        {
+            var result = await service.DeleteAsync(id, cancellationToken);
+
+            return result.Error is { } error ? error.ToProblem() : Results.NoContent();
+        });
     }
 }
