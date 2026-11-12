@@ -8,7 +8,7 @@ Schulprojekt im Fach SYP, 4. INF, 2026/27, von Gschwendtner und Sonnleitner. Bet
 
 - Drohnen anlegen und mit ihrem Status anzeigen. Der Status „Available“ oder „Loaned“ ergibt sich aus der aktiven Ausleihe und wird nie eingegeben.
 - Schülergruppen anlegen und anzeigen.
-- Drohnen und Schülergruppen direkt im Strip bearbeiten. Löschen geht nur, solange sie nie ausgeliehen waren, damit die Historie vollständig bleibt.
+- Drohnen und Schülergruppen direkt in der Liste bearbeiten. Löschen geht nur, solange sie nie ausgeliehen waren, damit die Historie vollständig bleibt.
 - Eine verfügbare Drohne an eine Gruppe ausleihen, mit Akkus und Propellern als Mengenangabe.
 - Eine zweite aktive Ausleihe derselben Drohne und ungültige Mengen ablehnen, auch wenn zwei Anfragen gleichzeitig kommen.
 - Aktive Ausleihen anzeigen und zurückgeben. Ausleih- und Rückgabedatum setzt das System.

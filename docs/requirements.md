@@ -209,7 +209,7 @@ The drone page SHALL show the number of all drones, of available drones and of l
 - WHEN the drone page is shown
 - THEN the overview shows 3 drones, 2 available and 1 loaned
 
-## Vorgeschlagene Anforderungen (REQ-015 bis REQ-030)
+## Weitere Anforderungen (REQ-015 bis REQ-030)
 
 Diese Anforderungen sind als OpenSpec-Changes beschlossen (Freigabe am 2026-11-12) und werden der Reihe nach umgesetzt. Die vollständigen Szenarien stehen in den Delta-Specs des jeweiligen Change unter `openspec/changes/<change>/specs/`.
 
