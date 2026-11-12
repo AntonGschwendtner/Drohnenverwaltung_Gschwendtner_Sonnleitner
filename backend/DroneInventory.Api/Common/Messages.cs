@@ -84,5 +84,9 @@ public static class Messages
         $"The accessory type {type} appears more than once.",
         $"Der Zubehörtyp {type} kommt mehrfach vor.");
 
+    public static string DroneHasLoans(string name) => Pick(
+        $"The drone \"{name}\" has loans and cannot be deleted, so the loan history stays complete.",
+        $"Die Drohne „{name}“ hat Ausleihen und kann nicht gelöscht werden, damit die Historie vollständig bleibt.");
+
     private static string Pick(string english, string german) => IsGerman ? german : english;
 }
