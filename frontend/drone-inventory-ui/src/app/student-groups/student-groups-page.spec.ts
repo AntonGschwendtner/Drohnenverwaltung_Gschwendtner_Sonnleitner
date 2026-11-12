@@ -30,7 +30,7 @@ describe('StudentGroupsPage', () => {
   }
 
   function names(): string[] {
-    return Array.from(element().querySelectorAll('tbody td')).map((cell) => cell.textContent?.trim() ?? '');
+    return Array.from(element().querySelectorAll('tbody td:first-child')).map((cell) => cell.textContent?.trim() ?? '');
   }
 
   async function submitName(name: string): Promise<void> {
