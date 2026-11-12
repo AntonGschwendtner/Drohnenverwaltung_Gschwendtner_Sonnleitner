@@ -21,4 +21,4 @@
 
 ## 5. Documentation
 
-- [ ] 5.1 Update the README (features, API response fields) and check the walkthrough on the test example (#88)
+- [x] 5.1 Update the README (features, API response fields) and check the walkthrough on the test example (#88)
