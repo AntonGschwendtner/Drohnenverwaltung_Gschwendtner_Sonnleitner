@@ -8,6 +8,7 @@ Schulprojekt im Fach SYP, 4. INF, 2026/27, von Gschwendtner und Sonnleitner. Bet
 
 - Drohnen anlegen und mit ihrem Status anzeigen. Der Status „Available“ oder „Loaned“ ergibt sich aus der aktiven Ausleihe und wird nie eingegeben.
 - Schülergruppen anlegen und anzeigen.
+- Drohnen und Schülergruppen direkt in der Liste bearbeiten. Löschen geht nur, solange sie nie ausgeliehen waren, damit die Historie vollständig bleibt.
 - Eine verfügbare Drohne an eine Gruppe ausleihen, mit Akkus und Propellern als Mengenangabe.
 - Eine zweite aktive Ausleihe derselben Drohne und ungültige Mengen ablehnen, auch wenn zwei Anfragen gleichzeitig kommen.
 - Aktive Ausleihen anzeigen und zurückgeben. Ausleih- und Rückgabedatum setzt das System.
@@ -19,7 +20,7 @@ Schulprojekt im Fach SYP, 4. INF, 2026/27, von Gschwendtner und Sonnleitner. Bet
 
 Nicht enthalten sind Login und Rollen, einzeln erfasste Akkus, Reservierungen, Schadensverwaltung und Auswertungen. Sie können später als eigener Change Request folgen.
 
-Die Changes `initial-drone-lending-system` und `improve-lending-overview` sind abgeschlossen und archiviert. Die geltenden Anforderungen stehen in [openspec/specs](openspec/specs), die erledigten Aufgaben im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
+Die Changes `initial-drone-lending-system`, `improve-lending-overview` und `manage-drones-and-groups` sind abgeschlossen und archiviert. Die geltenden Anforderungen stehen in [openspec/specs](openspec/specs), die erledigten Aufgaben im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
 
 ## Technik
 
@@ -95,8 +96,12 @@ dotnet tool restore
 |---|---|
 | `GET /api/drones` | Drohnen mit Status |
 | `POST /api/drones` | Drohne anlegen |
+| `PUT /api/drones/{id}` | Name und Beschreibung ändern |
+| `DELETE /api/drones/{id}` | Drohne ohne Ausleihen löschen |
 | `GET /api/student-groups` | Schülergruppen |
 | `POST /api/student-groups` | Schülergruppe anlegen |
+| `PUT /api/student-groups/{id}` | Namen ändern |
+| `DELETE /api/student-groups/{id}` | Schülergruppe ohne Ausleihen löschen |
 | `POST /api/loans` | Drohne mit Zubehör ausleihen |
 | `GET /api/loans?status=Active` | Aktive Ausleihen |
 | `POST /api/loans/{id}/return` | Ausleihe zurückgeben |
@@ -104,13 +109,13 @@ dotnet tool restore
 
 Jede Ausleihe enthält `daysActive` (volle Tage seit dem Ausleihdatum, nur bei aktiven Ausleihen, sonst `null`) und `isLongRunning` (mehr als 7 Tage). Beides berechnet das Backend beim Lesen.
 
-Ablehnungen kommen als ProblemDetails mit lesbarer Meldung: 400 bei ungültiger Eingabe, 404 bei unbekannter Ausleihe, 409 bei doppeltem Namen, bereits ausgeliehener Drohne oder bereits zurückgegebener Ausleihe.
+Ablehnungen kommen als ProblemDetails mit lesbarer Meldung: 400 bei ungültiger Eingabe, 404 bei unbekannter Drohne, Gruppe oder Ausleihe, 409 bei doppeltem Namen, bereits ausgeliehener Drohne, bereits zurückgegebener Ausleihe oder beim Löschen mit vorhandenen Ausleihen. Nach dem Umbenennen zeigt auch die Historie den neuen Namen.
 
 ## Dokumentation
 
 | Dokument | Inhalt |
 |---|---|
-| [docs/requirements.md](docs/requirements.md) | Anforderungen mit Szenarien und Entscheidungen; REQ-001 bis REQ-014 sind umgesetzt, REQ-015 bis REQ-030 beschlossen |
+| [docs/requirements.md](docs/requirements.md) | Anforderungen mit Szenarien und Entscheidungen; REQ-001 bis REQ-017 sind umgesetzt, REQ-018 bis REQ-030 beschlossen |
 | [docs/domain-model.md](docs/domain-model.md) | Begriffe und Datenmodell |
 | [openspec/specs](openspec/specs) | Geltende Specs für `drone`, `student-group` und `loan` |
 | [proposal.md](openspec/changes/archive/2026-11-11-initial-drone-lending-system/proposal.md) | Warum es den ersten Change gab und was dazugehörte |
