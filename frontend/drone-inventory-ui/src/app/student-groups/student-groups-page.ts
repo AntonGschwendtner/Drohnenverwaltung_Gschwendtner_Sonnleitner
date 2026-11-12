@@ -1,6 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { afterNextRender, Component, computed, effect, inject, Injector, OnInit, signal, untracked } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { ApiService, readErrorMessage, StudentGroup } from '../api.service';
 import { I18nService } from '../i18n.service';
 import { ConfirmDialog } from '../shared/confirm-dialog';
@@ -11,7 +12,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-student-groups-page',
-  imports: [ConfirmDialog, EmptyState, PageHead, ReactiveFormsModule, SearchField, StripSkeleton],
+  imports: [ConfirmDialog, EmptyState, PageHead, ReactiveFormsModule, RouterLink, SearchField, StripSkeleton],
   template: `
     <app-page-head
       bay="02"
@@ -78,7 +79,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
               </tr>
             } @else {
               <tr [attr.data-group]="studentGroup.id">
-                <td>{{ studentGroup.name }}</td>
+                <td><a [routerLink]="['/student-groups', studentGroup.id]">{{ studentGroup.name }}</a></td>
                 <td class="row-actions">
                   <button type="button" class="quiet edit" (click)="startEdit(studentGroup)" [disabled]="busyId() !== null">
                     {{ i18n.t('action.edit') }}<span class="visually-hidden"> {{ studentGroup.name }}</span>

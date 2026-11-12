@@ -94,6 +94,10 @@ export class ApiService {
     return this.http.delete<void>(`/api/drones/${id}`);
   }
 
+  getStudentGroup(id: number): Observable<StudentGroup> {
+    return this.http.get<StudentGroup>(`/api/student-groups/${id}`);
+  }
+
   listStudentGroups(): Observable<StudentGroup[]> {
     return this.http.get<StudentGroup[]>('/api/student-groups');
   }

@@ -95,7 +95,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
           <tbody>
             @for (loan of activeLoans(); track loan.id) {
               <tr [class.long-loan]="loan.isLongRunning">
-                <td>{{ loan.studentGroupName }}</td>
+                <td><a [routerLink]="['/student-groups', loan.studentGroupId]">{{ loan.studentGroupName }}</a></td>
                 <td [attr.data-label]="i18n.t('field.drone')"><a [routerLink]="['/drones', loan.droneId]">{{ loan.droneName }}</a></td>
                 <td [attr.data-label]="i18n.t('field.batteries')">{{ loan.batteries }}</td>
                 <td [attr.data-label]="i18n.t('field.propellers')">{{ loan.propellers }}</td>

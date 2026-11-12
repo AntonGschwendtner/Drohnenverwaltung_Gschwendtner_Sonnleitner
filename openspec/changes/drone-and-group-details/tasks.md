@@ -8,7 +8,7 @@
 ## 2. Detail pages (REQ-018, REQ-019)
 
 - [x] 2.1 Drone detail page with active loan and history, linked from all lists; component tests for "Drone with an active and a returned loan" (#116)
-- [ ] 2.2 Student group detail page, linked from all lists; component tests for "Group with active and returned loans" (#117)
+- [x] 2.2 Student group detail page, linked from all lists; component tests for "Group with active and returned loans" (#117)
 
 ## 3. Sorting (REQ-020)
 

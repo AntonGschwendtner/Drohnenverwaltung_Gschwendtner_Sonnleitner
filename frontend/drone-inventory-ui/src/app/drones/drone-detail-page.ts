@@ -1,7 +1,8 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { catchError, forkJoin, map, of, switchMap, tap } from 'rxjs';
 import { ApiService, Drone, Loan, readErrorMessage } from '../api.service';
 import { I18nService } from '../i18n.service';
 import { EmptyState } from '../shared/empty-state';
@@ -108,25 +109,30 @@ export class DroneDetailPage implements OnInit {
   protected readonly activeLoan = computed(() => this.loans().find((loan) => loan.status === 'Active') ?? null);
   protected readonly returnedLoans = computed(() => this.loans().filter((loan) => loan.status === 'Returned'));
 
+  private readonly destroyRef = inject(DestroyRef);
+
   ngOnInit(): void {
-    this.route.paramMap.subscribe((params) => this.load(Number(params.get('id'))));
-  }
-
-  private load(id: number): void {
-    this.loading.set(true);
-    this.errorMessage.set(null);
-
-    forkJoin({ drone: this.api.getDrone(id), loans: this.api.listLoansFor({ droneId: id }) }).subscribe({
-      next: ({ drone, loans }) => {
-        this.drone.set(drone);
+    // switchMap drops the answer for an older id, so a fast change of the address never shows the wrong record.
+    this.route.paramMap
+      .pipe(
+        map((params) => Number(params.get('id'))),
+        tap(() => {
+          this.loading.set(true);
+          this.errorMessage.set(null);
+        }),
+        switchMap((id) =>
+          forkJoin({ record: this.api.getDrone(id), loans: this.api.listLoansFor({ droneId: id }) }).pipe(
+            map((result) => ({ ...result, error: null as unknown })),
+            catchError((error: unknown) => of({ record: null, loans: [] as Loan[], error })),
+          ),
+        ),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(({ record, loans, error }) => {
+        this.drone.set(record);
         this.loans.set(loans);
+        this.errorMessage.set(error === null ? null : readErrorMessage(error, this.i18n.t('error.fallback')));
         this.loading.set(false);
-      },
-      error: (error: unknown) => {
-        this.drone.set(null);
-        this.errorMessage.set(readErrorMessage(error, this.i18n.t('error.fallback')));
-        this.loading.set(false);
-      },
-    });
+      });
   }
 }
