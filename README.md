@@ -110,7 +110,7 @@ Ablehnungen kommen als ProblemDetails mit lesbarer Meldung: 400 bei ungültiger 
 
 | Dokument | Inhalt |
 |---|---|
-| [docs/requirements.md](docs/requirements.md) | Anforderungen REQ-001 bis REQ-030 mit Szenarien und Entscheidungen |
+| [docs/requirements.md](docs/requirements.md) | Anforderungen mit Szenarien und Entscheidungen; REQ-001 bis REQ-014 sind umgesetzt, REQ-015 bis REQ-030 beschlossen |
 | [docs/domain-model.md](docs/domain-model.md) | Begriffe und Datenmodell |
 | [openspec/specs](openspec/specs) | Geltende Specs für `drone`, `student-group` und `loan` |
 | [proposal.md](openspec/changes/archive/2026-11-11-initial-drone-lending-system/proposal.md) | Warum es den ersten Change gab und was dazugehörte |
