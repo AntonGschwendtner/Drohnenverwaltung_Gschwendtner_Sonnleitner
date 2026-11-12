@@ -37,6 +37,9 @@ _None._
 - Statistics over time, charts and exports (still out of scope, see `docs/requirements.md`).
 - Changing the 7-day threshold in the interface.
 
-## Open Point for the Team
+## Decisions (2026-11-12)
+
+The user approved the change with the suggestions below.
+
 
 REQ-014 touches the out-of-scope item "Auswertungen, Statistiken". This proposal treats it as a count of the current stock only. The team decides in the spec review whether that is acceptable.

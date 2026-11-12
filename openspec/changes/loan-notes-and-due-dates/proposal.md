@@ -32,6 +32,9 @@ _None._
 - Changing note or planned return date after the loan is created.
 - Reminders by e-mail.
 
-## Open Point for the Team
+## Decisions (2026-11-12)
+
+The user approved the change with the suggestions below.
+
 
 `improve-lending-overview` marks loans after 7 days as long-running (REQ-012). With a planned return date the team decides: does the overdue mark replace the 7-day mark for loans that have a planned return date (this proposal's suggestion), or are both shown?

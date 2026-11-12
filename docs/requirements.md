@@ -211,7 +211,7 @@ The drone page SHALL show the number of all drones, of available drones and of l
 
 ## Vorgeschlagene Anforderungen (REQ-015 bis REQ-030)
 
-Diese Anforderungen sind als OpenSpec-Changes vorgeschlagen und warten auf das Spec-Review. Die vollständigen Szenarien stehen in den Delta-Specs des jeweiligen Change unter `openspec/changes/<change>/specs/`.
+Diese Anforderungen sind als OpenSpec-Changes beschlossen (Freigabe am 2026-11-12) und werden der Reihe nach umgesetzt. Die vollständigen Szenarien stehen in den Delta-Specs des jeweiligen Change unter `openspec/changes/<change>/specs/`.
 
 | REQ | Titel | Kurz | Change |
 |---|---|---|---|
@@ -236,11 +236,10 @@ Diese Anforderungen sind als OpenSpec-Changes vorgeschlagen und warten auf das S
 
 - Login, Benutzerkonten und Rollen
 - Einzelinventarisierung von Akkus (BAT-001 ...)
-- Reservierungen im Voraus (Aufnahme vorgeschlagen in `reservations`)
-- Schadensverwaltung und Rückgabedifferenzen (Aufnahme vorgeschlagen in `return-check-and-damage`)
-- Auswertungen, Statistiken und Exporte (Aufnahme vorgeschlagen in `lending-statistics` und `export-and-qr-codes`)
 
-Diese Punkte kommen bei Bedarf später als eigener Change Request. Ob die vorgeschlagenen Aufnahmen gelten, entscheidet das Team im Spec-Review.
+Diese Punkte kommen bei Bedarf später als eigener Change Request.
+
+Am 2026-11-12 in den Scope aufgenommen: Reservierungen im Voraus (`reservations`), Schadensverwaltung und Rückgabedifferenzen (`return-check-and-damage`), Exporte (`export-and-qr-codes`) sowie Auswertungen und Statistiken (`lending-statistics`).
 
 ## Entscheidungen zu offenen Punkten
 
@@ -251,8 +250,14 @@ Die Folien lassen diese Punkte offen. So sind sie hier festgelegt:
 | Doppelte Namen | Drohnen und Gruppen haben eindeutige Namen | Die Listen zeigen nur den Namen, zwei gleiche "TELLO-07" wären nicht unterscheidbar |
 | Datum | Ausleih- und Rückgabedatum setzt das System | Ein eingegebenes Datum könnte die Historie verfälschen |
 | Ausleihe ohne Zubehör | Erlaubt, Mengen ab 0 | REQ-006 erlaubt Mengen >= 0 |
-| Mengen beim Zurückgeben | Werden nicht erfasst | Rückgabedifferenzen sind Out of Scope |
-| Lange Ausleihe (Vorschlag) | Ab mehr als 7 vollen Tagen | Eine Schulwoche plus Wochenende; wird im Spec-Review bestätigt |
+| Mengen beim Zurückgeben | Werden erfasst, Standard ist die ausgeliehene Menge | REQ-023 |
+| Lange Ausleihe | Ab mehr als 7 vollen Tagen | Eine Schulwoche plus Wochenende |
+| Statusübersicht | Zählt nur den aktuellen Bestand | Keine Auswertung über die Zeit, das macht REQ-030 |
+| Umbenennen | Die Historie zeigt den aktuellen Namen | Kein Kopieren der Namen in jede Ausleihe |
+| Überfällig und lange Ausleihe | Mit geplantem Rückgabedatum ersetzt „überfällig“ die 7-Tage-Markierung | Das vereinbarte Datum ist aussagekräftiger |
+| Reservieren | Verliehene Drohnen ja (mit Hinweis), defekte nicht | Eine Rückgabe vor dem Termin ist möglich, eine Reparatur ungewiss |
+| Löschen mit Reservierungen | Wird abgelehnt | Eine Gruppe verliert sonst still ihre Reservierung |
+| Schuljahr | Beginnt am 1. September | Österreichisches Schuljahr |
 
 ## Prüfbeispiel
 

@@ -34,6 +34,9 @@ _None._
 - Undo after deleting.
 - Editing loans.
 
-## Open Point for the Team
+## Decisions (2026-11-12)
+
+The user approved the change with the suggestions below.
+
 
 The loan history shows the current name of a drone or group. After a rename, old loans show the new name. This proposal accepts that; the alternative would be to copy the name into every loan.

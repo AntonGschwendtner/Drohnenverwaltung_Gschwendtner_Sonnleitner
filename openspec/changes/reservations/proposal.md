@@ -35,7 +35,10 @@ Groups that need a drone for a lesson or a project day cannot rely on it being t
 - Notifications when a reservation cannot be served.
 - Keeping cancelled or past reservations as history.
 
-## Open Points for the Team
+## Decisions (2026-11-12)
+
+The user approved the change with the suggestions below.
+
 
 - `docs/requirements.md` lists "Reservierungen im Voraus" as out of scope. This change moves it into scope.
 - Should a group be allowed to reserve a drone that is loaned right now (this proposal: yes, with a warning)?

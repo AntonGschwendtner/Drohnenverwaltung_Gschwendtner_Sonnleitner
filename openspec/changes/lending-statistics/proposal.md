@@ -34,7 +34,10 @@ _None._
 - Export of the statistics.
 - Statistics about accessories.
 
-## Open Points for the Team
+## Decisions (2026-11-12)
+
+The user approved the change with the suggestions below.
+
 
 - `docs/requirements.md` lists "Auswertungen, Statistiken" as out of scope. This change moves it into scope.
 - The school year starts on 1 September in this proposal. Is that right for your school?

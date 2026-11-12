@@ -34,7 +34,10 @@ _None._
 - A PDF generated on the server.
 - Scanning QR codes inside the app (the phone camera opens the link).
 
-## Open Point for the Team
+## Decisions (2026-11-12)
+
+The user approved the change with the suggestions below.
+
 
 `docs/requirements.md` lists "Exporte" as out of scope. This change moves the history export into scope.
 

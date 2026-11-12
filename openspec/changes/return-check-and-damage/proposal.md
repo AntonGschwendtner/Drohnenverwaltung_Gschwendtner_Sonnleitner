@@ -34,7 +34,10 @@ _None._
 - A repair history with several defects per drone.
 - Individual batteries (still out of scope).
 
-## Open Point for the Team
+## Decisions (2026-11-12)
+
+The user approved the change with the suggestions below.
+
 
 `docs/requirements.md` lists "Schadensverwaltung und Rückgabedifferenzen" as out of scope. This change moves both into scope. The team (and Herr Falkensteiner) decides in the spec review.
 
