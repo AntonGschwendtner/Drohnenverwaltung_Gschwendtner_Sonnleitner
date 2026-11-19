@@ -100,5 +100,21 @@ public static class Messages
         "The planned return date must not lie before the loan date.",
         "Das geplante Rückgabedatum darf nicht vor dem Ausleihdatum liegen.");
 
+    public static string DefectNeedsDescription => Pick(
+        "A defect needs a description.",
+        "Ein Schaden braucht eine Beschreibung.");
+
+    public static string DefectTooLong(int maxLength) => Pick(
+        $"A defect description can have at most {maxLength} characters.",
+        $"Eine Schadensbeschreibung darf höchstens {maxLength} Zeichen haben.");
+
+    public static string DefectWhileLoaned(string name) => Pick(
+        $"The drone \"{name}\" is loaned. Report the defect with its return.",
+        $"Die Drohne „{name}“ ist ausgeliehen. Melde den Schaden bei der Rückgabe.");
+
+    public static string DroneNotDefective(string name) => Pick(
+        $"The drone \"{name}\" has no reported defect.",
+        $"Für die Drohne „{name}“ ist kein Schaden gemeldet.");
+
     private static string Pick(string english, string german) => IsGerman ? german : english;
 }

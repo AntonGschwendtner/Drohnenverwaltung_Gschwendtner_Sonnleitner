@@ -6,4 +6,6 @@ public sealed record CreateDroneRequest(string? Name, string? Description);
 
 public sealed record UpdateDroneRequest(string? Name, string? Description);
 
+public sealed record ReportDefectRequest(string? Description);
+
 public sealed record DroneResponse(int Id, string Name, DroneStatus Status, string Description, string? DefectNote = null);
