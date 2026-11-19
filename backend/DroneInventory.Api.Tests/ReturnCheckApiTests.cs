@@ -105,6 +105,48 @@ public sealed class ReturnCheckApiTests : IDisposable
         await ApiResponseAssert.IsProblemAsync(response, HttpStatusCode.NotFound);
     }
 
+    [Fact]
+    public async Task Empty_body_counts_everything_as_returned()
+    {
+        var loanId = await LoanAsync(4, 8);
+
+        var response = await _client.PostAsJsonAsync($"/api/loans/{loanId}/return", new { });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(0, Assert.Single(await ListAsync("Returned")).GetProperty("missingBatteries").GetInt32());
+    }
+
+    [Fact]
+    public async Task Type_appears_twice()
+    {
+        var loanId = await LoanAsync(4, 8);
+
+        var response = await ReturnAsync(loanId, new[] { new { type = "Battery", returnedQuantity = 3 }, new { type = "Battery", returnedQuantity = 4 } });
+
+        await ApiResponseAssert.IsProblemAsync(response, HttpStatusCode.BadRequest);
+        Assert.Single(await ListAsync("Active"));
+    }
+
+    [Fact]
+    public async Task Returned_quantity_is_missing()
+    {
+        var loanId = await LoanAsync(4, 8);
+
+        var response = await ReturnAsync(loanId, new[] { new { type = "Battery", returnedQuantity = (int?)null } });
+
+        await ApiResponseAssert.IsProblemAsync(response, HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task Empty_item_is_rejected()
+    {
+        var loanId = await LoanAsync(4, 8);
+
+        var response = await _client.PostAsJsonAsync($"/api/loans/{loanId}/return", new { items = new object?[] { null } });
+
+        await ApiResponseAssert.IsProblemAsync(response, HttpStatusCode.BadRequest);
+    }
+
     public void Dispose()
     {
         _client.Dispose();

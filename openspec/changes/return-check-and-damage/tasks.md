@@ -13,7 +13,7 @@
 ## 3. Return check (REQ-023, REQ-024)
 
 - [x] 3.1 Return body with returned quantities, missing parts in the loan response; tests for "Everything returned", "Battery missing", "More returned than loaned", "Negative quantity" (#149)
-- [ ] 3.2 Defect with the return in one transaction; tests for "Return a loan" and "Return with a defect", plus the existing return tests (#150)
+- [x] 3.2 Defect with the return in one transaction; tests for "Return a loan" and "Return with a defect", plus the existing return tests (#150)
 
 ## 4. Frontend
 
