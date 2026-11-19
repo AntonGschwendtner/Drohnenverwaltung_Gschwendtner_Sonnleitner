@@ -34,6 +34,20 @@ public static class DroneEndpoints
             return result.Error is { } error ? error.ToProblem() : Results.Ok(result.Value);
         });
 
+        drones.MapPost("/{id:int}/defect", async (int id, ReportDefectRequest request, DroneService service, CancellationToken cancellationToken) =>
+        {
+            var result = await service.ReportDefectAsync(id, request, cancellationToken);
+
+            return result.Error is { } error ? error.ToProblem() : Results.Ok(result.Value);
+        });
+
+        drones.MapPost("/{id:int}/repair", async (int id, DroneService service, CancellationToken cancellationToken) =>
+        {
+            var result = await service.RepairAsync(id, cancellationToken);
+
+            return result.Error is { } error ? error.ToProblem() : Results.Ok(result.Value);
+        });
+
         drones.MapDelete("/{id:int}", async (int id, DroneService service, CancellationToken cancellationToken) =>
         {
             var result = await service.DeleteAsync(id, cancellationToken);

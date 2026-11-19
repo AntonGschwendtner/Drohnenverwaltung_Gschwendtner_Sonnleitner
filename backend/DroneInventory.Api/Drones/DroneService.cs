@@ -97,6 +97,67 @@ public class DroneService(DroneInventoryDbContext dbContext)
         return await GetAsync(id, cancellationToken);
     }
 
+    /// <summary>The longest defect description a drone accepts (REQ-024).</summary>
+    public const int MaxDefectLength = 500;
+
+    /// <summary>
+    /// Reports a defect for a drone that is not loaned (REQ-024). A defect found during a loan is reported with
+    /// the return. Reporting again replaces the description.
+    /// </summary>
+    public async Task<ServiceResult<DroneResponse>> ReportDefectAsync(
+        int id,
+        ReportDefectRequest request,
+        CancellationToken cancellationToken)
+    {
+        var drone = await dbContext.Drones.FindAsync([id], cancellationToken);
+        if (drone is null)
+        {
+            return ServiceResult<DroneResponse>.NotFound(Messages.UnknownDrone(id));
+        }
+
+        var description = request.Description?.Trim();
+        if (string.IsNullOrEmpty(description))
+        {
+            return ServiceResult<DroneResponse>.Invalid(Messages.DefectNeedsDescription);
+        }
+
+        if (description.Length > MaxDefectLength)
+        {
+            return ServiceResult<DroneResponse>.Invalid(Messages.DefectTooLong(MaxDefectLength));
+        }
+
+        var isLoaned = await dbContext.Loans.AnyAsync(
+            loan => loan.DroneId == id && loan.Status == LoanStatus.Active,
+            cancellationToken);
+        if (isLoaned)
+        {
+            return ServiceResult<DroneResponse>.Conflict(Messages.DefectWhileLoaned(drone.Name));
+        }
+
+        drone.DefectNote = description;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return await GetAsync(id, cancellationToken);
+    }
+
+    /// <summary>Marks a defective drone as repaired; it is available again (REQ-024).</summary>
+    public async Task<ServiceResult<DroneResponse>> RepairAsync(int id, CancellationToken cancellationToken)
+    {
+        var drone = await dbContext.Drones.FindAsync([id], cancellationToken);
+        if (drone is null)
+        {
+            return ServiceResult<DroneResponse>.NotFound(Messages.UnknownDrone(id));
+        }
+
+        if (drone.DefectNote is null)
+        {
+            return ServiceResult<DroneResponse>.Conflict(Messages.DroneNotDefective(drone.Name));
+        }
+
+        drone.DefectNote = null;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return await GetAsync(id, cancellationToken);
+    }
+
     /// <summary>
     /// Deletes a drone that never had a loan (REQ-016). A drone with any loan stays, so the history stays complete.
     /// </summary>
