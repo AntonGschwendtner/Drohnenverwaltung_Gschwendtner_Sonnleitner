@@ -96,5 +96,9 @@ public static class Messages
         $"A note can have at most {maxLength} characters.",
         $"Eine Notiz darf höchstens {maxLength} Zeichen haben.");
 
+    public static string DueDateBeforeLoanDate => Pick(
+        "The planned return date must not lie before the loan date.",
+        "Das geplante Rückgabedatum darf nicht vor dem Ausleihdatum liegen.");
+
     private static string Pick(string english, string german) => IsGerman ? german : english;
 }

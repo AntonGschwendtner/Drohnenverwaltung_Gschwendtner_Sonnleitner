@@ -8,7 +8,8 @@ public sealed record CreateLoanRequest(
     int? DroneId,
     int? StudentGroupId,
     IReadOnlyList<CreateLoanItemRequest?>? Items,
-    string? Note = null);
+    string? Note = null,
+    DateOnly? DueDate = null);
 
 public sealed record LoanResponse(
     int Id,
@@ -22,5 +23,7 @@ public sealed record LoanResponse(
     DateOnly? ReturnDate,
     LoanStatus Status,
     string? Note = null,
+    DateOnly? DueDate = null,
     int? DaysActive = null,
-    bool IsLongRunning = false);
+    bool IsLongRunning = false,
+    bool IsOverdue = false);
