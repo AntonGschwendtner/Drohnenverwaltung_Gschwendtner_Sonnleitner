@@ -2,7 +2,7 @@
 
 ## 1. Data (REQ-023, REQ-024)
 
-- [ ] 1.1 Add `Drone.DefectNote` and `LoanItem.ReturnedQuantity` with a migration that fills `ReturnedQuantity` for old returns; entity tests (#145)
+- [x] 1.1 Add `Drone.DefectNote` and `LoanItem.ReturnedQuantity` with a migration that fills `ReturnedQuantity` for old returns; entity tests (#145)
 
 ## 2. Defects (REQ-024)
 

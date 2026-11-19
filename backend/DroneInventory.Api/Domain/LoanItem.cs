@@ -9,4 +9,7 @@ public class LoanItem
     public LoanItemType Type { get; set; }
 
     public int Quantity { get; set; }
+
+    /// <summary>The quantity that came back with the return; empty while the loan is active (REQ-023).</summary>
+    public int? ReturnedQuantity { get; set; }
 }

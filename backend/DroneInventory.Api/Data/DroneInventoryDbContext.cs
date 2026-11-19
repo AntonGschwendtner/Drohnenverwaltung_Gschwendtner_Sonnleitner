@@ -18,6 +18,10 @@ public class DroneInventoryDbContext(DbContextOptions<DroneInventoryDbContext> o
             .HasIndex(drone => drone.Name)
             .IsUnique();
 
+        modelBuilder.Entity<Drone>()
+            .Property(drone => drone.DefectNote)
+            .HasMaxLength(500);
+
         modelBuilder.Entity<StudentGroup>()
             .HasIndex(studentGroup => studentGroup.Name)
             .IsUnique();
