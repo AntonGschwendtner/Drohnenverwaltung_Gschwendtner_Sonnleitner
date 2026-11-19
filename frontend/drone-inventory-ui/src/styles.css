@@ -929,6 +929,36 @@ thead th:first-child {
   padding-left: 1.75rem;
 }
 
+/* Sortable headers: the label is a button, the mark shows the order (REQ-020). */
+.sort-button {
+  gap: 0.4rem;
+  min-height: auto;
+  padding: 0.2rem 0.1rem;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+
+.sort-button:hover:not(:disabled) {
+  box-shadow: none;
+  color: var(--accent);
+  transform: none;
+}
+
+.sort-mark {
+  font-size: 0.65rem;
+  color: var(--line-strong);
+}
+
+th[aria-sort='ascending'] .sort-mark,
+th[aria-sort='descending'] .sort-mark {
+  color: var(--accent);
+}
+
 tbody {
   counter-reset: strip;
 }
