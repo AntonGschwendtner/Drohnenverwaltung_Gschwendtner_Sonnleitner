@@ -64,6 +64,14 @@ import { StripSkeleton } from '../shared/strip-skeleton';
           {{ i18n.t('field.propellers') }}
           <input type="number" formControlName="propellers" name="propellers" />
         </label>
+        <label>
+          {{ i18n.t('field.dueDate') }}
+          <input type="date" formControlName="dueDate" name="dueDate" [min]="today" />
+        </label>
+        <label class="wide">
+          {{ i18n.t('field.note') }}
+          <input formControlName="note" name="note" maxlength="500" autocomplete="off" [placeholder]="i18n.t('loans.noteHint')" />
+        </label>
         <button type="submit" [disabled]="saving()" [class.busy]="saving()">{{ i18n.t('loans.submit') }}</button>
       </form>
     </section>
@@ -146,7 +154,12 @@ export class LoansPage implements OnInit {
     studentGroupId: null as number | null,
     batteries: 0 as number | null,
     propellers: 0 as number | null,
+    dueDate: '',
+    note: '',
   });
+
+  /** Today as yyyy-MM-dd for the date field; the backend checks the date again (REQ-022). */
+  protected readonly today = LoansPage.localDate(new Date());
 
   protected readonly drones = signal<Drone[]>([]);
   protected readonly studentGroups = signal<StudentGroup[]>([]);
@@ -273,12 +286,14 @@ export class LoansPage implements OnInit {
           { type: 'Battery', quantity: value.batteries },
           { type: 'Propeller', quantity: value.propellers },
         ],
+        note: value.note?.trim() ? value.note : null,
+        dueDate: value.dueDate || null,
       })
       .subscribe({
         next: (loan) => {
           this.saving.set(false);
           this.savedMessage.set(this.i18n.t('loans.saved', { drone: loan.droneName, group: loan.studentGroupName }));
-          this.form.reset({ droneId: null, studentGroupId: null, batteries: 0, propellers: 0 });
+          this.form.reset({ droneId: null, studentGroupId: null, batteries: 0, propellers: 0, dueDate: '', note: '' });
           this.loadChoices();
           this.loadActiveLoans();
         },
@@ -291,5 +306,11 @@ export class LoansPage implements OnInit {
 
   private errorMessage(error: unknown): string {
     return readErrorMessage(error, this.i18n.t('error.fallback'));
+  }
+
+  private static localDate(date: Date): string {
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${date.getFullYear()}-${month}-${day}`;
   }
 }

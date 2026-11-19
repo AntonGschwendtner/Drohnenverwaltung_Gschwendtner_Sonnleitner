@@ -718,7 +718,8 @@ label {
   color: var(--muted);
 }
 
-label:has(textarea) {
+label:has(textarea),
+label.wide {
   grid-column: 1 / -1;
 }
 
