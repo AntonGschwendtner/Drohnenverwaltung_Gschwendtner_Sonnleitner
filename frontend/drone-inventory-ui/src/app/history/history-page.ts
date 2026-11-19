@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, DOCUMENT } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ApiService, Loan, readErrorMessage } from '../api.service';
@@ -31,7 +31,10 @@ import { StripSkeleton } from '../shared/strip-skeleton';
       <div class="list-tools">
         <app-search-field [label]="i18n.t('search.label')" [placeholder]="i18n.t('history.searchHint')" [(value)]="search" />
         <a class="tool-link export-link" [href]="exportUrl()" download>{{ i18n.t('history.export') }}</a>
+        <button type="button" class="tool-link print-button" (click)="print()">{{ i18n.t('history.print') }}</button>
       </div>
+
+      <p class="print-only print-date">{{ i18n.t('history.printedOn', { date: (today | date: 'dd.MM.yyyy') ?? '' }) }}</p>
 
       @if (visibleLoans().length === 0) {
         <app-empty-state>{{ i18n.t('history.noMatch') }}</app-empty-state>
@@ -81,6 +84,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
 })
 export class HistoryPage implements OnInit {
   private readonly api = inject(ApiService);
+  private readonly document = inject(DOCUMENT);
   protected readonly i18n = inject(I18nService);
 
   protected readonly loans = signal<Loan[]>([]);
@@ -95,6 +99,14 @@ export class HistoryPage implements OnInit {
     const language = this.i18n.language();
     return `/api/loans/export?culture=${language}&ui-culture=${language}`;
   });
+
+  /** The print date on the paper (REQ-025). */
+  protected readonly today = new Date();
+
+  /** The browser prints the page or saves it as PDF; the print stylesheet keeps only title, date and table. */
+  protected print(): void {
+    this.document.defaultView?.print();
+  }
 
   /** The search matches the drone or the student group of a loan (REQ-011). */
   protected readonly search = signal('');

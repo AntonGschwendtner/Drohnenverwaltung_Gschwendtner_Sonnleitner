@@ -1651,6 +1651,109 @@ td button.busy::after {
   }
 }
 
+/* ───────────── Print: only the title, the date and the table, in black on white (REQ-025) ───────────── */
+
+.print-only {
+  display: none;
+}
+
+.print-button::before {
+  content: '\2399';
+  color: var(--accent);
+}
+
+@media print {
+  :root,
+  :root[data-theme='dark'] {
+    --page: #ffffff;
+    --panel: #ffffff;
+    --strip: #ffffff;
+    --strip-hover: #ffffff;
+    --ink: #000000;
+    --muted: #333333;
+    --edge: #000000;
+    --hard: transparent;
+    --line: #999999;
+    --line-strong: #666666;
+  }
+
+  body,
+  html {
+    background: #ffffff !important;
+  }
+
+  body::before,
+  body::after,
+  .tower,
+  .marquee,
+  .footer,
+  .ruler,
+  .bay-number,
+  .lede,
+  .list-tools,
+  .kicker,
+  .back-link,
+  button:not(.sort-button),
+  h1::after,
+  .sort-mark {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block;
+    margin: 0 0 1rem;
+    font-family: var(--font-mono);
+    font-size: 10pt;
+  }
+
+  main {
+    padding: 0;
+    max-width: none;
+  }
+
+  h1 {
+    font-size: 20pt;
+    perspective: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+
+  table {
+    border-collapse: collapse;
+    margin: 0;
+    font-size: 10pt;
+  }
+
+  td,
+  td:first-child,
+  td:last-child,
+  thead th {
+    padding: 4pt 6pt;
+    border: 1px solid #000000;
+    background: #ffffff;
+    color: #000000;
+  }
+
+  td:first-child::before {
+    display: none;
+  }
+
+  td a {
+    color: #000000;
+    text-decoration: none;
+  }
+
+  tbody tr {
+    break-inside: avoid;
+  }
+}
+
 /* ───────────── Medium screens ───────────── */
 
 @media (max-width: 1340px) {

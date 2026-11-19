@@ -7,7 +7,7 @@
 
 ## 2. Print (REQ-025)
 
-- [ ] 2.1 Print stylesheet and print button for the history; test that the button calls print, screenshot check of the print preview for "Print the history" (#167)
+- [x] 2.1 Print stylesheet and print button for the history; test that the button calls print, screenshot check of the print preview for "Print the history" (#167)
 
 ## 3. QR code (REQ-026)
 
