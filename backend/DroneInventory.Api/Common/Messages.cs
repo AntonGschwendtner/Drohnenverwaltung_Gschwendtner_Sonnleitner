@@ -124,5 +124,9 @@ public static class Messages
         $"More {type} returned than loaned ({loaned}).",
         $"Mehr {type} zurückgegeben als ausgeliehen ({loaned}).");
 
+    public static string[] CsvHeader => IsGerman
+        ? ["Schülergruppe", "Drohne", "Akkus", "Propeller", "Ausleihdatum", "Rückgabedatum"]
+        : ["Student group", "Drone", "Batteries", "Propellers", "Loan date", "Return date"];
+
     private static string Pick(string english, string german) => IsGerman ? german : english;
 }
