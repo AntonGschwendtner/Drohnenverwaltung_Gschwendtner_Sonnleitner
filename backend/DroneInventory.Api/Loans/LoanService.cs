@@ -26,7 +26,11 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
         loan.ReturnDate,
         loan.Status,
         loan.Note,
-        loan.DueDate);
+        loan.DueDate,
+        loan.Items.Where(item => item.Type == LoanItemType.Battery)
+            .Sum(item => item.Quantity - (item.ReturnedQuantity ?? item.Quantity)),
+        loan.Items.Where(item => item.Type == LoanItemType.Propeller)
+            .Sum(item => item.Quantity - (item.ReturnedQuantity ?? item.Quantity)));
 
     /// <summary>
     /// Lists loans by status, by drone or by student group (REQ-007, REQ-010, REQ-018, REQ-019). Without a drone
@@ -171,9 +175,27 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             loan.LoanDate));
     }
 
-    public async Task<ServiceResult<LoanResponse>> ReturnAsync(int id, CancellationToken cancellationToken)
+    /// <summary>
+    /// Returns a loan (REQ-008) and records what came back (REQ-023). Without returned quantities the loaned
+    /// quantities count as returned. Status, return date and quantities change in one transaction.
+    /// </summary>
+    public async Task<ServiceResult<LoanResponse>> ReturnAsync(
+        int id,
+        ReturnLoanRequest? request,
+        CancellationToken cancellationToken)
     {
         DateOnly? returnDate = Today();
+
+        var items = await dbContext.Set<LoanItem>().Where(item => item.LoanId == id).ToListAsync(cancellationToken);
+        var (returned, itemError) = ReadReturnedQuantities(request?.Items, items);
+        if (itemError is not null)
+        {
+            return await dbContext.Loans.AnyAsync(loan => loan.Id == id, cancellationToken)
+                ? ServiceResult<LoanResponse>.Invalid(itemError)
+                : ServiceResult<LoanResponse>.NotFound(Messages.UnknownLoan(id));
+        }
+
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
 
         // One statement, so that of two returns at the same time only one changes the loan.
         var changedLoans = await dbContext.Loans
@@ -183,6 +205,17 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
                     .SetProperty(loan => loan.Status, LoanStatus.Returned)
                     .SetProperty(loan => loan.ReturnDate, returnDate),
                 cancellationToken);
+
+        if (changedLoans > 0)
+        {
+            foreach (var item in items)
+            {
+                item.ReturnedQuantity = returned.TryGetValue(item.Type, out var quantity) ? quantity : item.Quantity;
+            }
+
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+        }
 
         var returnedLoan = await dbContext.Loans
             .Where(loan => loan.Id == id)
@@ -260,6 +293,57 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
         }
 
         return (items, null);
+    }
+
+    /// <summary>
+    /// Reads the returned quantities: known types only, each once, a whole number from 0 up to the loaned quantity.
+    /// </summary>
+    private static (Dictionary<LoanItemType, int> Returned, string? Error) ReadReturnedQuantities(
+        IReadOnlyList<ReturnLoanItemRequest?>? requestedItems,
+        IReadOnlyList<LoanItem> loanedItems)
+    {
+        var returned = new Dictionary<LoanItemType, int>();
+
+        foreach (var requestedItem in requestedItems ?? [])
+        {
+            if (requestedItem is null)
+            {
+                return (returned, Messages.EmptyLoanItem);
+            }
+
+            // Enum.TryParse would also accept numbers such as "0", so only the exact names are allowed.
+            if (!Enum.GetNames<LoanItemType>().Contains(requestedItem.Type))
+            {
+                return (returned, Messages.UnknownLoanItemType(requestedItem.Type));
+            }
+
+            var type = Enum.Parse<LoanItemType>(requestedItem.Type!);
+
+            if (requestedItem.ReturnedQuantity is not { } quantity)
+            {
+                return (returned, Messages.LoanItemNeedsQuantity(type.ToString()));
+            }
+
+            if (quantity < 0)
+            {
+                return (returned, Messages.NegativeQuantity);
+            }
+
+            if (returned.ContainsKey(type))
+            {
+                return (returned, Messages.LoanItemTypeTwice(type.ToString()));
+            }
+
+            var loaned = loanedItems.Where(item => item.Type == type).Sum(item => item.Quantity);
+            if (quantity > loaned)
+            {
+                return (returned, Messages.MoreReturnedThanLoaned(type.ToString(), loaned));
+            }
+
+            returned[type] = quantity;
+        }
+
+        return (returned, null);
     }
 
     private static int QuantityOf(Loan loan, LoanItemType type) =>
