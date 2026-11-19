@@ -11,6 +11,9 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
     /// <summary>An active loan running longer than this many full days is long-running (REQ-012).</summary>
     public const int LongRunningAfterDays = 7;
 
+    /// <summary>The longest note a loan accepts (REQ-021).</summary>
+    public const int MaxNoteLength = 500;
+
     private static readonly Expression<Func<Loan, LoanResponse>> ToResponse = loan => new LoanResponse(
         loan.Id,
         loan.DroneId,
@@ -21,7 +24,8 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
         loan.Items.Where(item => item.Type == LoanItemType.Propeller).Sum(item => item.Quantity),
         loan.LoanDate,
         loan.ReturnDate,
-        loan.Status);
+        loan.Status,
+        loan.Note);
 
     /// <summary>
     /// Lists loans by status, by drone or by student group (REQ-007, REQ-010, REQ-018, REQ-019). Without a drone
@@ -87,6 +91,13 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             return ServiceResult<LoanResponse>.Invalid(itemError);
         }
 
+        // A blank note is no note, so "no note" has one form in the database.
+        var note = string.IsNullOrWhiteSpace(request.Note) ? null : request.Note.Trim();
+        if (note is { Length: > MaxNoteLength })
+        {
+            return ServiceResult<LoanResponse>.Invalid(Messages.NoteTooLong(MaxNoteLength));
+        }
+
         var drone = await dbContext.Drones.FindAsync([droneId], cancellationToken);
         if (drone is null)
         {
@@ -114,6 +125,7 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             LoanDate = Today(),
             Status = LoanStatus.Active,
             Items = items,
+            Note = note,
         };
         dbContext.Loans.Add(loan);
 
@@ -138,7 +150,8 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
                 QuantityOf(loan, LoanItemType.Propeller),
                 loan.LoanDate,
                 loan.ReturnDate,
-                loan.Status),
+                loan.Status,
+                loan.Note),
             loan.LoanDate));
     }
 
