@@ -25,9 +25,10 @@ public static class LoanEndpoints
                 : Results.Created($"/api/loans/{result.Value!.Id}", result.Value);
         });
 
-        loans.MapPost("/{id:int}/return", async (int id, LoanService service, CancellationToken cancellationToken) =>
+        // The body is optional: a return without quantities counts everything as returned.
+        loans.MapPost("/{id:int}/return", async (int id, ReturnLoanRequest? request, LoanService service, CancellationToken cancellationToken) =>
         {
-            var result = await service.ReturnAsync(id, cancellationToken);
+            var result = await service.ReturnAsync(id, request, cancellationToken);
 
             return result.Error is { } error ? error.ToProblem() : Results.Ok(result.Value);
         });

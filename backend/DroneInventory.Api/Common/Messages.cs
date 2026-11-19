@@ -120,5 +120,9 @@ public static class Messages
         $"The drone \"{name}\" is defective and cannot be loaned until it is repaired.",
         $"Die Drohne „{name}“ ist defekt und kann erst nach der Reparatur ausgeliehen werden.");
 
+    public static string MoreReturnedThanLoaned(string type, int loaned) => Pick(
+        $"More {type} returned than loaned ({loaned}).",
+        $"Mehr {type} zurückgegeben als ausgeliehen ({loaned}).");
+
     private static string Pick(string english, string german) => IsGerman ? german : english;
 }
