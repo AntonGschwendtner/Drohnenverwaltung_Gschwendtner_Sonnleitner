@@ -25,7 +25,8 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
         loan.LoanDate,
         loan.ReturnDate,
         loan.Status,
-        loan.Note);
+        loan.Note,
+        loan.DueDate);
 
     /// <summary>
     /// Lists loans by status, by drone or by student group (REQ-007, REQ-010, REQ-018, REQ-019). Without a drone
@@ -98,6 +99,13 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             return ServiceResult<LoanResponse>.Invalid(Messages.NoteTooLong(MaxNoteLength));
         }
 
+        // The loan date is today, so a planned return date before today lies before the loan date (REQ-022).
+        var today = Today();
+        if (request.DueDate is { } dueDate && dueDate < today)
+        {
+            return ServiceResult<LoanResponse>.Invalid(Messages.DueDateBeforeLoanDate);
+        }
+
         var drone = await dbContext.Drones.FindAsync([droneId], cancellationToken);
         if (drone is null)
         {
@@ -122,10 +130,11 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
         {
             DroneId = drone.Id,
             StudentGroupId = studentGroup.Id,
-            LoanDate = Today(),
+            LoanDate = today,
             Status = LoanStatus.Active,
             Items = items,
             Note = note,
+            DueDate = request.DueDate,
         };
         dbContext.Loans.Add(loan);
 
@@ -151,7 +160,8 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
                 loan.LoanDate,
                 loan.ReturnDate,
                 loan.Status,
-                loan.Note),
+                loan.Note,
+                loan.DueDate),
             loan.LoanDate));
     }
 
@@ -186,18 +196,24 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
     private DateOnly Today() => DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime);
 
     /// <summary>
-    /// Adds the full days an active loan has been running and whether it is long-running (REQ-012).
-    /// Computed when the loan is read, so the value never gets stale.
+    /// Adds the full days an active loan has been running and its marks (REQ-012, REQ-022): a loan with a
+    /// planned return date is overdue once that date has passed; only a loan without one becomes long-running.
+    /// Computed when the loan is read, so the values never get stale.
     /// </summary>
     private static LoanResponse WithDuration(LoanResponse loan, DateOnly today)
     {
         if (loan.Status != LoanStatus.Active)
         {
-            return loan with { DaysActive = null, IsLongRunning = false };
+            return loan with { DaysActive = null, IsLongRunning = false, IsOverdue = false };
         }
 
         var days = today.DayNumber - loan.LoanDate.DayNumber;
-        return loan with { DaysActive = days, IsLongRunning = days > LongRunningAfterDays };
+        return loan with
+        {
+            DaysActive = days,
+            IsLongRunning = loan.DueDate is null && days > LongRunningAfterDays,
+            IsOverdue = loan.DueDate is { } dueDate && today > dueDate,
+        };
     }
 
     private static (List<LoanItem> Items, string? Error) ReadItems(IReadOnlyList<CreateLoanItemRequest?>? requestedItems)
