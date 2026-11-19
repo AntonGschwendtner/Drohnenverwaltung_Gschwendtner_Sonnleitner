@@ -114,6 +114,7 @@ const english = {
   'history.searchHint': 'Drone or student group',
   'history.noMatch': 'No loan matches the search.',
   'history.planned': 'planned {date}',
+  'history.export': 'Export as CSV',
   'history.missing': '{count} missing',
 };
 
@@ -228,6 +229,7 @@ const german: Record<TextKey, string> = {
   'history.searchHint': 'Drohne oder Schülergruppe',
   'history.noMatch': 'Keine Ausleihe passt zur Suche.',
   'history.planned': 'geplant {date}',
+  'history.export': 'Als CSV exportieren',
   'history.missing': '{count} fehlen',
 };
 
