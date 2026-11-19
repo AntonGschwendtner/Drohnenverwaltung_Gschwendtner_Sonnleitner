@@ -38,6 +38,8 @@ erDiagram
         date LoanDate
         date ReturnDate "leer solange aktiv"
         string Status "Active oder Returned"
+        string Note "optional, hoechstens 500 Zeichen"
+        date DueDate "optional, geplantes Rueckgabedatum"
     }
     LoanItem {
         int Id
