@@ -16,6 +16,18 @@ public static class LoanEndpoints
             return result.Error is { } error ? error.ToProblem() : Results.Ok(result.Value);
         });
 
+        // The returned loans as a CSV file for Excel (REQ-025); the header follows the request language.
+        loans.MapGet("/export", async (LoanService service, TimeProvider timeProvider, CancellationToken cancellationToken) =>
+        {
+            var result = await service.ListAsync(LoanStatus.Returned, null, null, cancellationToken);
+            var today = DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime);
+
+            return Results.File(
+                LoanHistoryCsv.Write(result.Value!),
+                "text/csv; charset=utf-8",
+                $"loan-history-{today:yyyy-MM-dd}.csv");
+        });
+
         loans.MapPost("/", async (CreateLoanRequest request, LoanService service, CancellationToken cancellationToken) =>
         {
             var result = await service.CreateAsync(request, cancellationToken);
