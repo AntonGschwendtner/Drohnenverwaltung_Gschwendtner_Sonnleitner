@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ApiService, Drone, Loan, readErrorMessage, StudentGroup } from '../api.service';
@@ -7,11 +7,13 @@ import { I18nService } from '../i18n.service';
 import { ConfirmDialog } from '../shared/confirm-dialog';
 import { EmptyState } from '../shared/empty-state';
 import { PageHead } from '../shared/page-head';
+import { SortHeader } from '../shared/sort-header';
+import { loanSortValue, SortState, sortItems } from '../shared/sort';
 import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-loans-page',
-  imports: [ConfirmDialog, DatePipe, EmptyState, PageHead, ReactiveFormsModule, RouterLink, StripSkeleton],
+  imports: [ConfirmDialog, DatePipe, EmptyState, PageHead, ReactiveFormsModule, RouterLink, SortHeader, StripSkeleton],
   template: `
     <app-page-head
       bay="03"
@@ -83,17 +85,17 @@ import { StripSkeleton } from '../shared/strip-skeleton';
         <table>
           <thead>
             <tr>
-              <th>{{ i18n.t('field.studentGroup') }}</th>
-              <th>{{ i18n.t('field.drone') }}</th>
-              <th>{{ i18n.t('field.batteries') }}</th>
-              <th>{{ i18n.t('field.propellers') }}</th>
-              <th>{{ i18n.t('field.loanDate') }}</th>
-              <th>{{ i18n.t('field.duration') }}</th>
+              <th appSortHeader="group" [label]="i18n.t('field.studentGroup')" [(sort)]="sort"></th>
+              <th appSortHeader="drone" [label]="i18n.t('field.drone')" [(sort)]="sort"></th>
+              <th appSortHeader="batteries" [label]="i18n.t('field.batteries')" [(sort)]="sort"></th>
+              <th appSortHeader="propellers" [label]="i18n.t('field.propellers')" [(sort)]="sort"></th>
+              <th appSortHeader="loanDate" [label]="i18n.t('field.loanDate')" [(sort)]="sort"></th>
+              <th appSortHeader="duration" [label]="i18n.t('field.duration')" [(sort)]="sort"></th>
               <th><span class="visually-hidden">{{ i18n.t('field.action') }}</span></th>
             </tr>
           </thead>
           <tbody>
-            @for (loan of activeLoans(); track loan.id) {
+            @for (loan of sortedActiveLoans(); track loan.id) {
               <tr [class.long-loan]="loan.isLongRunning">
                 <td><a [routerLink]="['/student-groups', loan.studentGroupId]">{{ loan.studentGroupName }}</a></td>
                 <td [attr.data-label]="i18n.t('field.drone')"><a [routerLink]="['/drones', loan.droneId]">{{ loan.droneName }}</a></td>
@@ -153,6 +155,15 @@ export class LoansPage implements OnInit {
   protected readonly savedMessage = signal<string | null>(null);
   protected readonly saving = signal(false);
   protected readonly activeLoans = signal<Loan[]>([]);
+  /** Sorting by a column header (REQ-020); without a choice the newest loan stays first. */
+  protected readonly sort = signal<SortState<string> | null>(null);
+  protected readonly sortedActiveLoans = computed(() =>
+    sortItems(
+      this.activeLoans(),
+      this.sort(),
+      loanSortValue,
+    ),
+  );
   protected readonly activeLoansErrorMessage = signal<string | null>(null);
   protected readonly returnErrorMessage = signal<string | null>(null);
   protected readonly returningId = signal<number | null>(null);

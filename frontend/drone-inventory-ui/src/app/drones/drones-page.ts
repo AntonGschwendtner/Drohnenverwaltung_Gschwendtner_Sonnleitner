@@ -7,12 +7,14 @@ import { I18nService } from '../i18n.service';
 import { ConfirmDialog } from '../shared/confirm-dialog';
 import { EmptyState } from '../shared/empty-state';
 import { PageHead } from '../shared/page-head';
+import { SortHeader } from '../shared/sort-header';
+import { SortState, sortItems, SortValue } from '../shared/sort';
 import { matchesSearch, SearchField } from '../shared/search-field';
 import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-drones-page',
-  imports: [ConfirmDialog, EmptyState, PageHead, ReactiveFormsModule, RouterLink, SearchField, StripSkeleton],
+  imports: [ConfirmDialog, EmptyState, PageHead, ReactiveFormsModule, RouterLink, SearchField, SortHeader, StripSkeleton],
   template: `
     <app-page-head
       bay="01"
@@ -88,9 +90,9 @@ import { StripSkeleton } from '../shared/strip-skeleton';
       <table>
         <thead>
           <tr>
-            <th>{{ i18n.t('field.name') }}</th>
-            <th>{{ i18n.t('field.status') }}</th>
-            <th>{{ i18n.t('field.description') }}</th>
+            <th appSortHeader="name" [label]="i18n.t('field.name')" [(sort)]="sort"></th>
+            <th appSortHeader="status" [label]="i18n.t('field.status')" [(sort)]="sort"></th>
+            <th appSortHeader="description" [label]="i18n.t('field.description')" [(sort)]="sort"></th>
             <th><span class="visually-hidden">{{ i18n.t('field.action') }}</span></th>
           </tr>
         </thead>
@@ -196,11 +198,17 @@ export class DronesPage implements OnInit {
       loaned: drones.filter((drone) => drone.status === 'Loaned').length,
     };
   });
+  /** Sorting by a column header (REQ-020); without a choice the list keeps the order from the backend. */
+  protected readonly sort = signal<SortState<string> | null>(null);
   protected readonly visibleDrones = computed(() =>
-    this.drones().filter(
-      (drone) =>
-        matchesSearch(drone.name, this.search()) &&
-        (this.statusFilter() === 'All' || drone.status === this.statusFilter()),
+    sortItems(
+      this.drones().filter(
+        (drone) =>
+          matchesSearch(drone.name, this.search()) &&
+          (this.statusFilter() === 'All' || drone.status === this.statusFilter()),
+      ),
+      this.sort(),
+      (drone, column): SortValue => (column === 'status' ? drone.status : column === 'description' ? drone.description : drone.name),
     ),
   );
 

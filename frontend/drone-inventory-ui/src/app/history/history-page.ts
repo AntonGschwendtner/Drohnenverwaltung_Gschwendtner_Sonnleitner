@@ -5,12 +5,14 @@ import { ApiService, Loan, readErrorMessage } from '../api.service';
 import { I18nService } from '../i18n.service';
 import { EmptyState } from '../shared/empty-state';
 import { PageHead } from '../shared/page-head';
+import { SortHeader } from '../shared/sort-header';
+import { loanSortValue, SortState, sortItems } from '../shared/sort';
 import { matchesSearch, SearchField } from '../shared/search-field';
 import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-history-page',
-  imports: [DatePipe, EmptyState, PageHead, RouterLink, SearchField, StripSkeleton],
+  imports: [DatePipe, EmptyState, PageHead, RouterLink, SearchField, SortHeader, StripSkeleton],
   template: `
     <app-page-head
       bay="04"
@@ -36,12 +38,12 @@ import { StripSkeleton } from '../shared/strip-skeleton';
       <table>
         <thead>
           <tr>
-            <th>{{ i18n.t('field.studentGroup') }}</th>
-            <th>{{ i18n.t('field.drone') }}</th>
-            <th>{{ i18n.t('field.batteries') }}</th>
-            <th>{{ i18n.t('field.propellers') }}</th>
-            <th>{{ i18n.t('field.loanDate') }}</th>
-            <th>{{ i18n.t('field.returnDate') }}</th>
+            <th appSortHeader="group" [label]="i18n.t('field.studentGroup')" [(sort)]="sort"></th>
+            <th appSortHeader="drone" [label]="i18n.t('field.drone')" [(sort)]="sort"></th>
+            <th appSortHeader="batteries" [label]="i18n.t('field.batteries')" [(sort)]="sort"></th>
+            <th appSortHeader="propellers" [label]="i18n.t('field.propellers')" [(sort)]="sort"></th>
+            <th appSortHeader="loanDate" [label]="i18n.t('field.loanDate')" [(sort)]="sort"></th>
+            <th appSortHeader="returnDate" [label]="i18n.t('field.returnDate')" [(sort)]="sort"></th>
           </tr>
         </thead>
         <tbody>
@@ -71,9 +73,15 @@ export class HistoryPage implements OnInit {
 
   /** The search matches the drone or the student group of a loan (REQ-011). */
   protected readonly search = signal('');
+  /** Sorting by a column header (REQ-020); without a choice the newest return stays first. */
+  protected readonly sort = signal<SortState<string> | null>(null);
   protected readonly visibleLoans = computed(() =>
-    this.loans().filter(
-      (loan) => matchesSearch(loan.droneName, this.search()) || matchesSearch(loan.studentGroupName, this.search()),
+    sortItems(
+      this.loans().filter(
+        (loan) => matchesSearch(loan.droneName, this.search()) || matchesSearch(loan.studentGroupName, this.search()),
+      ),
+      this.sort(),
+      loanSortValue,
     ),
   );
 

@@ -7,12 +7,14 @@ import { I18nService } from '../i18n.service';
 import { ConfirmDialog } from '../shared/confirm-dialog';
 import { EmptyState } from '../shared/empty-state';
 import { PageHead } from '../shared/page-head';
+import { SortHeader } from '../shared/sort-header';
+import { SortState, sortItems, SortValue } from '../shared/sort';
 import { matchesSearch, SearchField } from '../shared/search-field';
 import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-student-groups-page',
-  imports: [ConfirmDialog, EmptyState, PageHead, ReactiveFormsModule, RouterLink, SearchField, StripSkeleton],
+  imports: [ConfirmDialog, EmptyState, PageHead, ReactiveFormsModule, RouterLink, SearchField, SortHeader, StripSkeleton],
   template: `
     <app-page-head
       bay="02"
@@ -58,7 +60,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
       <table>
         <thead>
           <tr>
-            <th>{{ i18n.t('field.name') }}</th>
+            <th appSortHeader="name" [label]="i18n.t('field.name')" [(sort)]="sort"></th>
             <th><span class="visually-hidden">{{ i18n.t('field.action') }}</span></th>
           </tr>
         </thead>
@@ -132,8 +134,14 @@ export class StudentGroupsPage implements OnInit {
 
   /** The search narrows the loaded list in the browser (REQ-011). */
   protected readonly search = signal('');
+  /** Sorting by the name header (REQ-020). */
+  protected readonly sort = signal<SortState<string> | null>(null);
   protected readonly visibleStudentGroups = computed(() =>
-    this.studentGroups().filter((studentGroup) => matchesSearch(studentGroup.name, this.search())),
+    sortItems(
+      this.studentGroups().filter((studentGroup) => matchesSearch(studentGroup.name, this.search())),
+      this.sort(),
+      (studentGroup): SortValue => studentGroup.name,
+    ),
   );
 
   constructor() {
