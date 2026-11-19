@@ -46,3 +46,28 @@ A loan SHALL accept an optional planned return date (REQ-022). The planned retur
 - **GIVEN** a loan with the planned return date 26.08.2026 was returned on 28.08.2026
 - **WHEN** the history is listed
 - **THEN** the loan shows its planned return date and is not marked as overdue
+
+## MODIFIED Requirements
+
+### Requirement: Loan duration
+Every active loan SHALL show how many full days have passed since its loan date (REQ-012). An active loan without a planned return date running longer than 7 full days SHALL be marked as long-running. An active loan with a planned return date SHALL NOT be marked as long-running; the overdue mark replaces it (REQ-022). Returned loans SHALL NOT be marked.
+
+#### Scenario: New loan
+- **GIVEN** "TELLO-07" was loaned to "Group 3" today
+- **WHEN** the active loans are listed
+- **THEN** the loan shows 0 days and is not marked as long-running
+
+#### Scenario: Loan running exactly 7 days
+- **GIVEN** "TELLO-07" was loaned to "Group 3" 7 days ago
+- **WHEN** the active loans are listed
+- **THEN** the loan shows 7 days and is not marked as long-running
+
+#### Scenario: Long-running loan
+- **GIVEN** "TELLO-07" was loaned to "Group 3" 9 days ago
+- **WHEN** the active loans are listed
+- **THEN** the loan shows 9 days and is marked as long-running
+
+#### Scenario: Long loan with a planned return date
+- **GIVEN** "TELLO-07" was loaned to "Group 3" 9 days ago with a planned return date that has not passed
+- **WHEN** the active loans are listed
+- **THEN** the loan shows 9 days and is neither long-running nor overdue
