@@ -8,7 +8,7 @@
 
 - [x] 2.1 Status Defective in the drone list; tests for all three "List drones" scenarios (#146)
 - [x] 2.2 `POST /api/drones/{id}/defect` and `/repair`; tests for "Report a defect", "Description is missing", "Drone is loaned", "Repair a drone" (#147)
-- [ ] 2.3 Reject loans of defective drones; test for "Loan a defective drone" (#148)
+- [x] 2.3 Reject loans of defective drones; test for "Loan a defective drone" (#148)
 
 ## 3. Return check (REQ-023, REQ-024)
 

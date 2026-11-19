@@ -118,6 +118,12 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             return ServiceResult<LoanResponse>.Invalid(Messages.UnknownStudentGroup(studentGroupId));
         }
 
+        // A defective drone is not available and cannot be loaned until it is repaired (REQ-024).
+        if (drone.DefectNote is not null)
+        {
+            return ServiceResult<LoanResponse>.Conflict(Messages.DroneIsDefective(drone.Name));
+        }
+
         var isLoaned = await dbContext.Loans.AnyAsync(
             loan => loan.DroneId == drone.Id && loan.Status == LoanStatus.Active,
             cancellationToken);

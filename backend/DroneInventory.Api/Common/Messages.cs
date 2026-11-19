@@ -116,5 +116,9 @@ public static class Messages
         $"The drone \"{name}\" has no reported defect.",
         $"Für die Drohne „{name}“ ist kein Schaden gemeldet.");
 
+    public static string DroneIsDefective(string name) => Pick(
+        $"The drone \"{name}\" is defective and cannot be loaned until it is repaired.",
+        $"Die Drohne „{name}“ ist defekt und kann erst nach der Reparatur ausgeliehen werden.");
+
     private static string Pick(string english, string german) => IsGerman ? german : english;
 }
