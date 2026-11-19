@@ -25,6 +25,7 @@ public class DroneInventoryDbContext(DbContextOptions<DroneInventoryDbContext> o
         modelBuilder.Entity<Loan>(loan =>
         {
             loan.Property(l => l.Status).HasConversion<string>();
+            loan.Property(l => l.Note).HasMaxLength(500);
 
             // Returned loans must stay in the history, so a drone or student group
             // that is part of a loan cannot be deleted.

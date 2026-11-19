@@ -2,7 +2,7 @@
 
 ## 1. Data (REQ-021, REQ-022)
 
-- [ ] 1.1 Add `Note` and `DueDate` to `Loan` with a migration; entity test that both are optional (#131)
+- [x] 1.1 Add `Note` and `DueDate` to `Loan` with a migration; entity test that both are optional (#131)
 
 ## 2. Backend (REQ-021, REQ-022)
 
