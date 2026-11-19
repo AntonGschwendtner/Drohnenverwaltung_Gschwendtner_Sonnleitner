@@ -26,6 +26,24 @@ An active loan SHALL be able to be returned. The return SHALL change the loan fr
 - **WHEN** the loan is returned
 - **THEN** the return is rejected
 
+### Requirement: Confirm return
+Before a loan is returned, the system SHALL ask for confirmation in a dialog that names the drone and the student group (REQ-013). The dialog SHALL offer the returned quantities, prefilled with the loaned quantities, and an optional defect (REQ-023, REQ-024). Only a confirmed return SHALL be saved.
+
+#### Scenario: Confirm the return
+- **GIVEN** "TELLO-07" is loaned to "Group 3"
+- **WHEN** the user chooses Return and confirms
+- **THEN** the loan is returned
+
+#### Scenario: Cancel the return
+- **GIVEN** "TELLO-07" is loaned to "Group 3"
+- **WHEN** the user chooses Return and then cancels
+- **THEN** the loan stays active and nothing is sent to the server
+
+#### Scenario: Dialog suggests the loaned quantities
+- **GIVEN** "TELLO-07" was loaned to "Group 3" with 4 batteries and 8 propellers
+- **WHEN** the user chooses Return
+- **THEN** the dialog shows 4 batteries and 8 propellers as returned quantities
+
 ## ADDED Requirements
 
 ### Requirement: Check accessories on return
