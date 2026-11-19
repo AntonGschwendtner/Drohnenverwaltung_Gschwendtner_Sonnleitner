@@ -90,6 +90,8 @@ const english = {
   'loans.days': '{days} days',
   'loans.longRunning': 'Long loan',
   'loans.noteHint': 'For example the project, optional',
+  'loans.overdue': 'Overdue',
+  'loans.dueOn': 'due {date}',
   'loans.confirmTitle': 'Return {drone}?',
   'loans.confirmText': '{drone} comes back from {group}. The loan is then closed and moves to the history.',
   'dialog.cancel': 'Cancel',
@@ -99,6 +101,7 @@ const english = {
   'history.empty': 'No returned loans yet.',
   'history.searchHint': 'Drone or student group',
   'history.noMatch': 'No loan matches the search.',
+  'history.planned': 'planned {date}',
 };
 
 export type TextKey = keyof typeof english;
@@ -188,6 +191,8 @@ const german: Record<TextKey, string> = {
   'loans.days': '{days} Tage',
   'loans.longRunning': 'Lange Ausleihe',
   'loans.noteHint': 'Zum Beispiel das Projekt, optional',
+  'loans.overdue': 'Überfällig',
+  'loans.dueOn': 'fällig am {date}',
   'loans.confirmTitle': '{drone} zurückgeben?',
   'loans.confirmText': '{drone} kommt von {group} zurück. Die Ausleihe wird damit abgeschlossen und landet in der Historie.',
   'dialog.cancel': 'Abbrechen',
@@ -197,6 +202,7 @@ const german: Record<TextKey, string> = {
   'history.empty': 'Noch keine zurückgegebenen Ausleihen.',
   'history.searchHint': 'Drohne oder Schülergruppe',
   'history.noMatch': 'Keine Ausleihe passt zur Suche.',
+  'history.planned': 'geplant {date}',
 };
 
 const texts: Record<Language, Record<TextKey, string>> = { en: english, de: german };

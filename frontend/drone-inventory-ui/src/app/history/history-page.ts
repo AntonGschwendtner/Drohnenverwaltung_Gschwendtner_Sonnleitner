@@ -50,11 +50,16 @@ import { StripSkeleton } from '../shared/strip-skeleton';
           @for (loan of visibleLoans(); track loan.id) {
             <tr>
               <td><a [routerLink]="['/student-groups', loan.studentGroupId]">{{ loan.studentGroupName }}</a></td>
-              <td [attr.data-label]="i18n.t('field.drone')"><a [routerLink]="['/drones', loan.droneId]">{{ loan.droneName }}</a></td>
+              <td [attr.data-label]="i18n.t('field.drone')"><a [routerLink]="['/drones', loan.droneId]">{{ loan.droneName }}</a>@if (loan.note) {<span class="strip-note">{{ loan.note }}</span>}</td>
               <td [attr.data-label]="i18n.t('field.batteries')">{{ loan.batteries }}</td>
               <td [attr.data-label]="i18n.t('field.propellers')">{{ loan.propellers }}</td>
               <td [attr.data-label]="i18n.t('field.loanDate')">{{ loan.loanDate | date: 'dd.MM.yyyy' }}</td>
-              <td [attr.data-label]="i18n.t('field.returnDate')">{{ loan.returnDate | date: 'dd.MM.yyyy' }}</td>
+              <td [attr.data-label]="i18n.t('field.returnDate')">
+                {{ loan.returnDate | date: 'dd.MM.yyyy' }}
+                @if (loan.dueDate) {
+                  <span class="due">{{ i18n.t('history.planned', { date: (loan.dueDate | date: 'dd.MM.yyyy') ?? '' }) }}</span>
+                }
+              </td>
             </tr>
           }
         </tbody>

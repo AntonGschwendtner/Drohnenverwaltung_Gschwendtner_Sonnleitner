@@ -104,9 +104,9 @@ import { StripSkeleton } from '../shared/strip-skeleton';
           </thead>
           <tbody>
             @for (loan of sortedActiveLoans(); track loan.id) {
-              <tr [class.long-loan]="loan.isLongRunning">
+              <tr [class.long-loan]="loan.isLongRunning || loan.isOverdue">
                 <td><a [routerLink]="['/student-groups', loan.studentGroupId]">{{ loan.studentGroupName }}</a></td>
-                <td [attr.data-label]="i18n.t('field.drone')"><a [routerLink]="['/drones', loan.droneId]">{{ loan.droneName }}</a></td>
+                <td [attr.data-label]="i18n.t('field.drone')"><a [routerLink]="['/drones', loan.droneId]">{{ loan.droneName }}</a>@if (loan.note) {<span class="strip-note">{{ loan.note }}</span>}</td>
                 <td [attr.data-label]="i18n.t('field.batteries')">{{ loan.batteries }}</td>
                 <td [attr.data-label]="i18n.t('field.propellers')">{{ loan.propellers }}</td>
                 <td [attr.data-label]="i18n.t('field.loanDate')">{{ loan.loanDate | date: 'dd.MM.yyyy' }}</td>
@@ -114,6 +114,12 @@ import { StripSkeleton } from '../shared/strip-skeleton';
                   <span>{{ i18n.t(loan.daysActive === 1 ? 'loans.day' : 'loans.days', { days: '' + (loan.daysActive ?? 0) }) }}</span>
                   @if (loan.isLongRunning) {
                     <span class="long-running">{{ i18n.t('loans.longRunning') }}</span>
+                  }
+                  @if (loan.isOverdue) {
+                    <span class="long-running overdue">{{ i18n.t('loans.overdue') }}</span>
+                  }
+                  @if (loan.dueDate) {
+                    <span class="due">{{ i18n.t('loans.dueOn', { date: (loan.dueDate | date: 'dd.MM.yyyy') ?? '' }) }}</span>
                   }
                 </td>
                 <td>
