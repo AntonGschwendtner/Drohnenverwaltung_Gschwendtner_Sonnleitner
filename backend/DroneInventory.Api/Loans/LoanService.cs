@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using DroneInventory.Api.Common;
 using DroneInventory.Api.Data;
 using DroneInventory.Api.Domain;
+using DroneInventory.Api.Drones;
 using Microsoft.EntityFrameworkCore;
 
 namespace DroneInventory.Api.Loans;
@@ -186,13 +187,27 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
     {
         DateOnly? returnDate = Today();
 
+        var droneId = await dbContext.Loans
+            .Where(loan => loan.Id == id)
+            .Select(loan => (int?)loan.DroneId)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (droneId is null)
+        {
+            return ServiceResult<LoanResponse>.NotFound(Messages.UnknownLoan(id));
+        }
+
         var items = await dbContext.Set<LoanItem>().Where(item => item.LoanId == id).ToListAsync(cancellationToken);
         var (returned, itemError) = ReadReturnedQuantities(request?.Items, items);
         if (itemError is not null)
         {
-            return await dbContext.Loans.AnyAsync(loan => loan.Id == id, cancellationToken)
-                ? ServiceResult<LoanResponse>.Invalid(itemError)
-                : ServiceResult<LoanResponse>.NotFound(Messages.UnknownLoan(id));
+            return ServiceResult<LoanResponse>.Invalid(itemError);
+        }
+
+        // A blank defect is no defect.
+        var defect = string.IsNullOrWhiteSpace(request?.Defect) ? null : request.Defect.Trim();
+        if (defect is { Length: > DroneService.MaxDefectLength })
+        {
+            return ServiceResult<LoanResponse>.Invalid(Messages.DefectTooLong(DroneService.MaxDefectLength));
         }
 
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
@@ -214,6 +229,15 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             }
 
             await dbContext.SaveChangesAsync(cancellationToken);
+
+            // The drone comes back damaged: it is Defective instead of available (REQ-024).
+            if (defect is not null)
+            {
+                await dbContext.Drones
+                    .Where(drone => drone.Id == droneId)
+                    .ExecuteUpdateAsync(setters => setters.SetProperty(drone => drone.DefectNote, defect), cancellationToken);
+            }
+
             await transaction.CommitAsync(cancellationToken);
         }
 

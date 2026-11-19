@@ -6,8 +6,11 @@ public sealed record CreateLoanItemRequest(string? Type, int? Quantity);
 
 public sealed record ReturnLoanItemRequest(string? Type, int? ReturnedQuantity);
 
-/// <summary>Optional body of a return; without it everything counts as returned (REQ-023).</summary>
-public sealed record ReturnLoanRequest(IReadOnlyList<ReturnLoanItemRequest?>? Items);
+/// <summary>
+/// Optional body of a return; without it everything counts as returned (REQ-023). A defect makes the drone
+/// Defective (REQ-024).
+/// </summary>
+public sealed record ReturnLoanRequest(IReadOnlyList<ReturnLoanItemRequest?>? Items, string? Defect = null);
 
 public sealed record CreateLoanRequest(
     int? DroneId,
