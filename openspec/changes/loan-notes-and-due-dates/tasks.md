@@ -16,4 +16,4 @@
 
 ## 4. Documentation
 
-- [ ] 4.1 Domain model and README (#136)
+- [x] 4.1 Domain model and README (#136)
