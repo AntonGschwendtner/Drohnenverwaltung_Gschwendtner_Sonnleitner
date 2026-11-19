@@ -55,6 +55,18 @@ public sealed class LoanExportApiTests : IDisposable
     }
 
     [Fact]
+    public async Task Value_with_a_line_break_and_a_formula()
+    {
+        var loanId = await LoanAsync("=SUM(A1)", "TELLO\nZwei", 0, 0);
+        await _client.PostAsync($"/api/loans/{loanId}/return", null);
+
+        var response = await _client.GetAsync("/api/loans/export");
+        var text = System.Text.Encoding.UTF8.GetString(await response.Content.ReadAsByteArrayAsync());
+
+        Assert.Contains("'=SUM(A1);\"TELLO\nZwei\";0;0;", text);
+    }
+
+    [Fact]
     public async Task Header_and_umlauts_in_German()
     {
         var loanId = await LoanAsync("Gruppe Größe", "TELLO-07", 1, 2);

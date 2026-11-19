@@ -40,6 +40,9 @@ public static class LoanHistoryCsv
         csv.Append("\r\n");
     }
 
-    private static string Quote(string value) =>
+    // A value starting like a formula is shown as text, so Excel never runs it (CSV injection).
+    private static string Quote(string value) => QuoteSeparators(value.Length > 0 && "=+-@".Contains(value[0]) ? "'" + value : value);
+
+    private static string QuoteSeparators(string value) =>
         value.IndexOfAny([';', '"', '\r', '\n']) >= 0 ? $"\"{value.Replace("\"", "\"\"")}\"" : value;
 }
