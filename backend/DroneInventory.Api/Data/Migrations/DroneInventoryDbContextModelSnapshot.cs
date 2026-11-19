@@ -48,7 +48,14 @@ namespace DroneInventory.Api.Data.Migrations
                     b.Property<int>("DroneId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateOnly?>("DueDate")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateOnly>("LoanDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
                     b.Property<DateOnly?>("ReturnDate")

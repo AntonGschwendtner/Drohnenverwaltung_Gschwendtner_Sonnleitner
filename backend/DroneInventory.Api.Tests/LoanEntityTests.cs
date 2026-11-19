@@ -85,6 +85,46 @@ public sealed class LoanEntityTests : IDisposable
     }
 
     [Fact]
+    public async Task Note_and_planned_return_date_are_optional()
+    {
+        var (droneId, studentGroupId) = await SeedDroneAndStudentGroupAsync();
+        await SaveLoanAsync(droneId, studentGroupId, LoanStatus.Active);
+
+        using var scope = _factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<DroneInventoryDbContext>();
+        var loan = await dbContext.Loans.SingleAsync();
+
+        Assert.Null(loan.Note);
+        Assert.Null(loan.DueDate);
+    }
+
+    [Fact]
+    public async Task Note_and_planned_return_date_are_stored()
+    {
+        var (droneId, studentGroupId) = await SeedDroneAndStudentGroupAsync();
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<DroneInventoryDbContext>();
+            dbContext.Loans.Add(new Loan
+            {
+                DroneId = droneId,
+                StudentGroupId = studentGroupId,
+                LoanDate = LoanDate,
+                Status = LoanStatus.Active,
+                Note = "Projekt Vermessung",
+                DueDate = new DateOnly(2026, 8, 26),
+            });
+            await dbContext.SaveChangesAsync();
+        }
+
+        using var readScope = _factory.Services.CreateScope();
+        var loan = await readScope.ServiceProvider.GetRequiredService<DroneInventoryDbContext>().Loans.SingleAsync();
+
+        Assert.Equal("Projekt Vermessung", loan.Note);
+        Assert.Equal(new DateOnly(2026, 8, 26), loan.DueDate);
+    }
+
+    [Fact]
     public async Task Database_refuses_a_loan_for_an_unknown_drone()
     {
         var (_, studentGroupId) = await SeedDroneAndStudentGroupAsync();
