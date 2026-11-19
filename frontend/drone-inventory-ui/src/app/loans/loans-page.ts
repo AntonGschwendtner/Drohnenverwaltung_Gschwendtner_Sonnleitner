@@ -246,14 +246,14 @@ export class LoansPage implements OnInit {
    * A QR code on a drone case opens /loans?drone=<id> (REQ-026). An available drone is chosen in the form,
    * otherwise the page says why it cannot be loaned. The address is read once, when the page opens.
    */
-  private readonly requestedDroneId = (() => {
+  private readonly requestedDroneId = signal((() => {
     const value = Number(inject(ActivatedRoute).snapshot.queryParamMap.get('drone'));
     return Number.isInteger(value) && value > 0 ? value : null;
-  })();
+  })());
   private preselectDone = false;
 
   protected readonly preselectHint = computed(() => {
-    const id = this.requestedDroneId;
+    const id = this.requestedDroneId();
     const drones = this.drones();
     if (id === null || drones.length === 0) {
       return null;
@@ -276,12 +276,12 @@ export class LoansPage implements OnInit {
   });
 
   private preselectRequestedDrone(drones: Drone[]): void {
-    if (this.preselectDone || this.requestedDroneId === null) {
+    if (this.preselectDone || this.requestedDroneId() === null) {
       return;
     }
 
     this.preselectDone = true;
-    const drone = drones.find((candidate) => candidate.id === this.requestedDroneId);
+    const drone = drones.find((candidate) => candidate.id === this.requestedDroneId());
     if (drone?.status === 'Available') {
       this.form.controls.droneId.setValue(drone.id);
     }
@@ -386,6 +386,8 @@ export class LoansPage implements OnInit {
         next: (loan) => {
           this.saving.set(false);
           this.savedMessage.set(this.i18n.t('loans.saved', { drone: loan.droneName, group: loan.studentGroupName }));
+          // The QR code has done its job; its hint would now only confuse.
+          this.requestedDroneId.set(null);
           this.form.reset({ droneId: null, studentGroupId: null, batteries: 0, propellers: 0, dueDate: '', note: '' });
           this.loadChoices();
           this.loadActiveLoans();

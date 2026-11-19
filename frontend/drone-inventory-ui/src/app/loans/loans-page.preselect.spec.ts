@@ -82,6 +82,27 @@ describe('LoansPage opened for one drone', () => {
     expect(element.querySelector('[role="alert"]')?.textContent).toContain('does not exist');
   });
 
+  it('drops the hint once the chosen drone has been loaned', async () => {
+    const element = await open('/loans?drone=7');
+    const group = element.querySelector('select[name="studentGroupId"]') as HTMLSelectElement;
+    group.selectedIndex = 1;
+    group.dispatchEvent(new Event('change'));
+    (element.querySelector('form') as HTMLFormElement).dispatchEvent(new Event('submit'));
+    await harness.fixture.whenStable();
+
+    http
+      .expectOne({ method: 'POST', url: '/api/loans' })
+      .flush({ ...activeLoan, id: 2, droneId: 7, droneName: 'TELLO-07' });
+    http.expectOne('/api/drones').flush([{ ...drones[0], status: 'Loaned' }, drones[1], drones[2]]);
+    http.expectOne('/api/student-groups').flush([{ id: 3, name: 'Group 3' }]);
+    http.expectOne('/api/loans?status=Active').flush([activeLoan, { ...activeLoan, id: 2, droneId: 7, droneName: 'TELLO-07' }]);
+    await harness.fixture.whenStable();
+    harness.detectChanges();
+
+    expect(element.querySelector('[role="status"]')?.textContent).toContain('TELLO-07');
+    expect(element.querySelector('[role="alert"]')).toBeNull();
+  });
+
   it('chooses nothing without a drone in the address', async () => {
     const element = await open('/loans');
 
