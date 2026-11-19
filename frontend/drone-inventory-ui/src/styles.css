@@ -1379,6 +1379,17 @@ td button.busy::after {
   color: var(--muted);
 }
 
+.dialog-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem 1rem;
+  margin: 0 0 1.5rem;
+}
+
+.dialog-fields .wide {
+  grid-column: 1 / -1;
+}
+
 .dialog-actions {
   display: flex;
   flex-wrap: wrap;

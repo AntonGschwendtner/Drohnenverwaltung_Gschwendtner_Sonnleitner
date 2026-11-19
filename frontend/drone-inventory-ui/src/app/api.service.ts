@@ -47,6 +47,14 @@ export interface Loan {
   dueDate?: string | null;
   /** True when an active loan is past its planned return date (REQ-022). */
   isOverdue?: boolean;
+  /** Accessories that did not come back with the return (REQ-023). */
+  missingBatteries?: number;
+  missingPropellers?: number;
+}
+
+export interface ReturnLoanRequest {
+  items: { type: LoanItemType; returnedQuantity: number | null }[];
+  defect: string | null;
 }
 
 export interface CreateLoanItemRequest {
@@ -143,7 +151,8 @@ export class ApiService {
     return this.http.post<Loan>('/api/loans', request);
   }
 
-  returnLoan(id: number): Observable<Loan> {
-    return this.http.post<Loan>(`/api/loans/${id}/return`, null);
+  /** Without a request everything counts as returned (REQ-023); a defect makes the drone Defective (REQ-024). */
+  returnLoan(id: number, request: ReturnLoanRequest | null = null): Observable<Loan> {
+    return this.http.post<Loan>(`/api/loans/${id}/return`, request);
   }
 }
