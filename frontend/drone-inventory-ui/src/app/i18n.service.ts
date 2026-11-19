@@ -115,6 +115,8 @@ const english = {
   'history.noMatch': 'No loan matches the search.',
   'history.planned': 'planned {date}',
   'history.export': 'Export as CSV',
+  'history.print': 'Print or save as PDF',
+  'history.printedOn': 'Printed on {date}',
   'history.missing': '{count} missing',
 };
 
@@ -230,6 +232,8 @@ const german: Record<TextKey, string> = {
   'history.noMatch': 'Keine Ausleihe passt zur Suche.',
   'history.planned': 'geplant {date}',
   'history.export': 'Als CSV exportieren',
+  'history.print': 'Drucken oder als PDF speichern',
+  'history.printedOn': 'Gedruckt am {date}',
   'history.missing': '{count} fehlen',
 };
 
