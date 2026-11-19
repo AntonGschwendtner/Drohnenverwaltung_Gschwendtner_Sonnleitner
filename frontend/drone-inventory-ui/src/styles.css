@@ -809,6 +809,39 @@ textarea:focus-visible {
     var(--field);
 }
 
+/* A link that looks like a quiet tool button, for downloads and print (REQ-025). */
+.tool-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.6rem;
+  padding: 0.45rem 1rem;
+  border: 2px solid var(--edge);
+  background: var(--field);
+  box-shadow: 4px 4px 0 var(--hard);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    transform 0.12s var(--ease),
+    box-shadow 0.12s var(--ease);
+}
+
+.tool-link:hover {
+  box-shadow: 6px 6px 0 var(--hard);
+  transform: translate(-2px, -2px);
+}
+
+.export-link::before {
+  content: '\2193';
+  color: var(--accent);
+}
+
 .segmented {
   display: inline-flex;
   border: 2px solid var(--edge);

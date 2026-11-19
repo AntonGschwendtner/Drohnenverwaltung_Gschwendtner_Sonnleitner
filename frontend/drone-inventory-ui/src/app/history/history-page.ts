@@ -30,6 +30,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
     } @else {
       <div class="list-tools">
         <app-search-field [label]="i18n.t('search.label')" [placeholder]="i18n.t('history.searchHint')" [(value)]="search" />
+        <a class="tool-link export-link" [href]="exportUrl()" download>{{ i18n.t('history.export') }}</a>
       </div>
 
       @if (visibleLoans().length === 0) {
@@ -85,6 +86,15 @@ export class HistoryPage implements OnInit {
   protected readonly loans = signal<Loan[]>([]);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly loading = signal(true);
+
+  /**
+   * The CSV export of the backend (REQ-025). A plain link sends no Accept-Language from the app, so the
+   * chosen language goes into the address and the header row of the file follows it.
+   */
+  protected readonly exportUrl = computed(() => {
+    const language = this.i18n.language();
+    return `/api/loans/export?culture=${language}&ui-culture=${language}`;
+  });
 
   /** The search matches the drone or the student group of a loan (REQ-011). */
   protected readonly search = signal('');

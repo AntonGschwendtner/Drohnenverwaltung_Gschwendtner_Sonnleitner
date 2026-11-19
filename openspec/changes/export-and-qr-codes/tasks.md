@@ -3,7 +3,7 @@
 ## 1. Export (REQ-025)
 
 - [x] 1.1 `GET /api/loans/export` as CSV; tests for "Export the history", "Export without returned loans", "Value with a separator" and the German header (#165)
-- [ ] 1.2 Export button on the history page; component test that it links to the export (#166)
+- [x] 1.2 Export button on the history page; component test that it links to the export (#166)
 
 ## 2. Print (REQ-025)
 
