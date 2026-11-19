@@ -7,6 +7,7 @@ import { ApiService, Drone, Loan, readErrorMessage } from '../api.service';
 import { I18nService } from '../i18n.service';
 import { EmptyState } from '../shared/empty-state';
 import { PageHead } from '../shared/page-head';
+import { statusKey } from '../shared/status';
 import { StripSkeleton } from '../shared/strip-skeleton';
 
 /**
@@ -33,8 +34,11 @@ import { StripSkeleton } from '../shared/strip-skeleton';
       <p class="detail-status">
         {{ i18n.t('field.status') }}:
         <span [class]="'status-' + drone.status.toLowerCase()">
-          {{ i18n.t(drone.status === 'Loaned' ? 'status.loaned' : 'status.available') }}
+          {{ i18n.t(statusKey(drone.status)) }}
         </span>
+        @if (drone.defectNote) {
+          <span class="strip-note defect-note">{{ i18n.t('drones.defectLabel', { defect: drone.defectNote }) }}</span>
+        }
       </p>
 
       <section aria-labelledby="drone-active-loan">
@@ -99,6 +103,7 @@ export class DroneDetailPage implements OnInit {
   private readonly api = inject(ApiService);
   private readonly route = inject(ActivatedRoute);
   protected readonly i18n = inject(I18nService);
+  protected readonly statusKey = statusKey;
 
   protected readonly drone = signal<Drone | null>(null);
   protected readonly loans = signal<Loan[]>([]);

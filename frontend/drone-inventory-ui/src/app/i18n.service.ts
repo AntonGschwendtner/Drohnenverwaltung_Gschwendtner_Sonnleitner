@@ -35,6 +35,7 @@ const english = {
   'field.note': 'Note',
   'status.available': 'Available',
   'status.loaned': 'Loaned',
+  'status.defective': 'Defective',
   'error.fallback': 'The request failed. Check that the backend is running and try again.',
   'state.loading': 'Loading',
   'search.label': 'Search',
@@ -59,6 +60,13 @@ const english = {
   'details.noActiveLoan': 'Not loaned right now.',
   'details.noHistory': 'No returned loans yet.',
   'drones.deleteTitle': 'Delete {drone}?',
+  'drones.reportDefect': 'Report damage',
+  'drones.reportTitle': 'Report damage on {drone}?',
+  'drones.reportText': '{drone} is then defective and cannot be loaned until it is repaired.',
+  'drones.repair': 'Repaired',
+  'drones.repairTitle': 'Is {drone} repaired?',
+  'drones.repairText': 'The defect is removed and {drone} can be loaned again.',
+  'drones.defectLabel': 'Damage: {defect}',
   'drones.deleteText': '{drone} is removed from the fleet. This is only possible while it has never been loaned.',
 
   'groups.kicker': 'Bay 02 · Crews',
@@ -106,6 +114,7 @@ const english = {
   'history.searchHint': 'Drone or student group',
   'history.noMatch': 'No loan matches the search.',
   'history.planned': 'planned {date}',
+  'history.missing': '{count} missing',
 };
 
 export type TextKey = keyof typeof english;
@@ -140,6 +149,7 @@ const german: Record<TextKey, string> = {
   'field.note': 'Notiz',
   'status.available': 'Verfügbar',
   'status.loaned': 'Ausgeliehen',
+  'status.defective': 'Defekt',
   'error.fallback': 'Die Anfrage ist fehlgeschlagen. Prüfe, ob das Backend läuft, und versuche es noch einmal.',
   'state.loading': 'Wird geladen',
   'search.label': 'Suche',
@@ -164,6 +174,13 @@ const german: Record<TextKey, string> = {
   'details.noActiveLoan': 'Gerade nicht ausgeliehen.',
   'details.noHistory': 'Noch keine zurückgegebenen Ausleihen.',
   'drones.deleteTitle': '{drone} löschen?',
+  'drones.reportDefect': 'Schaden melden',
+  'drones.reportTitle': 'Schaden an {drone} melden?',
+  'drones.reportText': '{drone} ist dann defekt und kann erst nach der Reparatur wieder ausgeliehen werden.',
+  'drones.repair': 'Repariert',
+  'drones.repairTitle': 'Ist {drone} repariert?',
+  'drones.repairText': 'Der Schaden wird entfernt, und {drone} kann wieder ausgeliehen werden.',
+  'drones.defectLabel': 'Schaden: {defect}',
   'drones.deleteText': '{drone} wird aus der Flotte entfernt. Das geht nur, solange sie nie ausgeliehen war.',
 
   'groups.kicker': 'Platz 02 · Crews',
@@ -211,6 +228,7 @@ const german: Record<TextKey, string> = {
   'history.searchHint': 'Drohne oder Schülergruppe',
   'history.noMatch': 'Keine Ausleihe passt zur Suche.',
   'history.planned': 'geplant {date}',
+  'history.missing': '{count} fehlen',
 };
 
 const texts: Record<Language, Record<TextKey, string>> = { en: english, de: german };

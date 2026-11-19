@@ -46,7 +46,7 @@ describe('DronesPage status overview', () => {
   it('Overview after a loan', async () => {
     await respondWith(threeDrones);
 
-    expect(overview()).toEqual({ Drones: '3', Available: '2', Loaned: '1' });
+    expect(overview()).toEqual({ Drones: '3', Available: '2', Loaned: '1', Defective: '0' });
   });
 
   it('Overview ignores the search', async () => {
@@ -58,7 +58,7 @@ describe('DronesPage status overview', () => {
     fixture.detectChanges();
 
     expect(element.querySelectorAll('tbody tr')).toHaveLength(1);
-    expect(overview()).toEqual({ Drones: '3', Available: '2', Loaned: '1' });
+    expect(overview()).toEqual({ Drones: '3', Available: '2', Loaned: '1', Defective: '0' });
   });
 
   it('is hidden while the drones load and when they cannot be loaded', async () => {
