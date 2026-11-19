@@ -8,7 +8,7 @@ import { ConfirmDialog } from '../shared/confirm-dialog';
 import { EmptyState } from '../shared/empty-state';
 import { PageHead } from '../shared/page-head';
 import { SortHeader } from '../shared/sort-header';
-import { SortState, sortItems, SortValue } from '../shared/sort';
+import { loanSortValue, SortState, sortItems } from '../shared/sort';
 import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
@@ -161,24 +161,7 @@ export class LoansPage implements OnInit {
     sortItems(
       this.activeLoans(),
       this.sort(),
-      (loan, column): SortValue => {
-        switch (column) {
-          case 'drone':
-            return loan.droneName;
-          case 'batteries':
-            return loan.batteries;
-          case 'propellers':
-            return loan.propellers;
-          case 'loanDate':
-            return loan.loanDate;
-          case 'returnDate':
-            return loan.returnDate;
-          case 'duration':
-            return loan.daysActive;
-          default:
-            return loan.studentGroupName;
-        }
-      },
+      loanSortValue,
     ),
   );
   protected readonly activeLoansErrorMessage = signal<string | null>(null);

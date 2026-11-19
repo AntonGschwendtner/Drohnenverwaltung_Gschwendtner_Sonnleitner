@@ -6,7 +6,7 @@ import { I18nService } from '../i18n.service';
 import { EmptyState } from '../shared/empty-state';
 import { PageHead } from '../shared/page-head';
 import { SortHeader } from '../shared/sort-header';
-import { SortState, sortItems, SortValue } from '../shared/sort';
+import { loanSortValue, SortState, sortItems } from '../shared/sort';
 import { matchesSearch, SearchField } from '../shared/search-field';
 import { StripSkeleton } from '../shared/strip-skeleton';
 
@@ -81,24 +81,7 @@ export class HistoryPage implements OnInit {
         (loan) => matchesSearch(loan.droneName, this.search()) || matchesSearch(loan.studentGroupName, this.search()),
       ),
       this.sort(),
-      (loan, column): SortValue => {
-        switch (column) {
-          case 'drone':
-            return loan.droneName;
-          case 'batteries':
-            return loan.batteries;
-          case 'propellers':
-            return loan.propellers;
-          case 'loanDate':
-            return loan.loanDate;
-          case 'returnDate':
-            return loan.returnDate;
-          case 'duration':
-            return loan.daysActive;
-          default:
-            return loan.studentGroupName;
-        }
-      },
+      loanSortValue,
     ),
   );
 

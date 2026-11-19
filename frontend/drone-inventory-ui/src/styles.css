@@ -943,7 +943,8 @@ thead th:first-child {
   text-transform: inherit;
 }
 
-.sort-button:hover:not(:disabled) {
+.sort-button:hover:not(:disabled),
+.sort-button:active:not(:disabled) {
   box-shadow: none;
   color: var(--accent);
   transform: none;

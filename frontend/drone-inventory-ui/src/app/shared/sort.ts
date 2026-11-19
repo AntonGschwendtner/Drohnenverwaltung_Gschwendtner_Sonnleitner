@@ -1,3 +1,5 @@
+import { Loan } from '../api.service';
+
 /** Sorting of the loaded lists in the browser (REQ-020). */
 
 export type SortDirection = 'asc' | 'desc';
@@ -80,4 +82,24 @@ export function ariaSort<Column extends string>(
   }
 
   return current.direction === 'asc' ? 'ascending' : 'descending';
+}
+
+/** The value of a loan in a sortable column of the loan lists. */
+export function loanSortValue(loan: Loan, column: string): SortValue {
+  switch (column) {
+    case 'drone':
+      return loan.droneName;
+    case 'batteries':
+      return loan.batteries;
+    case 'propellers':
+      return loan.propellers;
+    case 'loanDate':
+      return loan.loanDate;
+    case 'returnDate':
+      return loan.returnDate;
+    case 'duration':
+      return loan.daysActive;
+    default:
+      return loan.studentGroupName;
+  }
 }
