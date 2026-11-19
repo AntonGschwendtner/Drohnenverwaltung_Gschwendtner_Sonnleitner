@@ -18,6 +18,24 @@ The system SHALL list all drones with name, status and description. The status S
 - **WHEN** the drones are listed
 - **THEN** "TELLO-07" is shown as Defective with the defect description
 
+### Requirement: Drone status overview
+The drone page SHALL show the number of all drones, of available drones, of loaned drones and of defective drones (REQ-014, REQ-024). The numbers SHALL count all drones, independent of the search and the filter.
+
+#### Scenario: Overview after a loan
+- **GIVEN** three drones exist and one of them is loaned
+- **WHEN** the drone page is shown
+- **THEN** the overview shows 3 drones, 2 available and 1 loaned
+
+#### Scenario: Overview ignores the search
+- **GIVEN** three drones exist
+- **WHEN** the user searches for a name that matches one drone
+- **THEN** the overview still shows 3 drones
+
+#### Scenario: Overview counts defective drones
+- **GIVEN** three drones exist, one is loaned and one is Defective
+- **WHEN** the drone page is shown
+- **THEN** the overview shows 3 drones, 1 available, 1 loaned and 1 defective
+
 ## ADDED Requirements
 
 ### Requirement: Report and repair a defect

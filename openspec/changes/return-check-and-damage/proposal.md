@@ -39,7 +39,7 @@ _None._
 The user approved the change with the suggestions below.
 
 
-`docs/requirements.md` lists "Schadensverwaltung und Rückgabedifferenzen" as out of scope. This change moves both into scope. The team (and Herr Falkensteiner) decides in the spec review.
+Schadensverwaltung und Rückgabedifferenzen are in scope (user decision 2026-11-12). The status overview counts defective drones separately, and the return confirmation of REQ-013 becomes the return dialog with quantities and defect (requirements "Drone status overview" and "Confirm return" modified).
 
 ## Dependencies
 
