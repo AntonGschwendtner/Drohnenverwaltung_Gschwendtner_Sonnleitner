@@ -45,6 +45,19 @@ public sealed class PlannedReturnDateApiTests : IDisposable
         Assert.Empty(await ListAsync("Active"));
     }
 
+    [Theory]
+    [InlineData("not-a-date")]
+    [InlineData("2026-13-40")]
+    public async Task Malformed_planned_return_date_is_rejected(string dueDate)
+    {
+        var (droneId, studentGroupId) = await SeedAsync();
+
+        var response = await _client.PostAsJsonAsync("/api/loans", new { droneId, studentGroupId, dueDate });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Empty(await ListAsync("Active"));
+    }
+
     [Fact]
     public async Task Return_on_the_planned_day()
     {
