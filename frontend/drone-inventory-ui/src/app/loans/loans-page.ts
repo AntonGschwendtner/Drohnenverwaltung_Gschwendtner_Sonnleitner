@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { ApiService, Drone, Loan, readErrorMessage, StudentGroup } from '../api.service';
+import { ApiService, Drone, Loan, readErrorMessage, ReturnLoanRequest, StudentGroup } from '../api.service';
 import { I18nService } from '../i18n.service';
 import { ConfirmDialog } from '../shared/confirm-dialog';
 import { EmptyState } from '../shared/empty-state';
@@ -147,7 +147,22 @@ import { StripSkeleton } from '../shared/strip-skeleton';
         [cancelLabel]="i18n.t('dialog.cancel')"
         (confirmed)="confirmReturn()"
         (cancelled)="cancelReturn()"
-      />
+      >
+        <div class="dialog-fields">
+          <label>
+            {{ i18n.t('loans.returnedBatteries') }}
+            <input type="number" name="returnedBatteries" min="0" [max]="loan.batteries" [value]="returnedBatteries()" (input)="returnedBatteries.set(numberOf($event))" />
+          </label>
+          <label>
+            {{ i18n.t('loans.returnedPropellers') }}
+            <input type="number" name="returnedPropellers" min="0" [max]="loan.propellers" [value]="returnedPropellers()" (input)="returnedPropellers.set(numberOf($event))" />
+          </label>
+          <label class="wide">
+            {{ i18n.t('loans.defect') }}
+            <textarea name="defect" rows="2" maxlength="500" [placeholder]="i18n.t('loans.defectHint')" [value]="defect()" (input)="defect.set($any($event.target).value)"></textarea>
+          </label>
+        </div>
+      </app-confirm-dialog>
     }
   `,
 })
@@ -229,6 +244,10 @@ export class LoansPage implements OnInit {
     }
 
     this.returnTrigger = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+    // The dialog suggests the loaned quantities; the user corrects what is missing (REQ-023).
+    this.returnedBatteries.set(loan.batteries);
+    this.returnedPropellers.set(loan.propellers);
+    this.defect.set('');
     this.pendingReturn.set(loan);
   }
 
@@ -237,7 +256,13 @@ export class LoansPage implements OnInit {
     this.pendingReturn.set(null);
     this.returnTrigger = null;
     if (loan) {
-      this.returnLoan(loan);
+      this.returnLoan(loan, {
+        items: [
+          { type: 'Battery', returnedQuantity: this.returnedBatteries() },
+          { type: 'Propeller', returnedQuantity: this.returnedPropellers() },
+        ],
+        defect: this.defect().trim() ? this.defect() : null,
+      });
     }
   }
 
@@ -249,7 +274,16 @@ export class LoansPage implements OnInit {
   }
 
   // The backend decides whether the loan can still be returned, so the view only shows its answer.
-  private returnLoan(loan: Loan): void {
+  protected readonly returnedBatteries = signal<number | null>(0);
+  protected readonly returnedPropellers = signal<number | null>(0);
+  protected readonly defect = signal('');
+
+  protected numberOf(event: Event): number | null {
+    const value = (event.target as HTMLInputElement).value;
+    return value === '' ? null : Number(value);
+  }
+
+  private returnLoan(loan: Loan, request: ReturnLoanRequest): void {
     if (this.returningId() !== null) {
       return;
     }
@@ -258,7 +292,7 @@ export class LoansPage implements OnInit {
     this.returnErrorMessage.set(null);
     this.savedMessage.set(null);
 
-    this.api.returnLoan(loan.id).subscribe({
+    this.api.returnLoan(loan.id, request).subscribe({
       next: (returnedLoan) => {
         this.returningId.set(null);
         this.savedMessage.set(this.i18n.t('loans.returned', { drone: returnedLoan.droneName }));
