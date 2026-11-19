@@ -6,7 +6,7 @@
 
 ## 2. Backend (REQ-021, REQ-022)
 
-- [ ] 2.1 Accept and validate `note` on create, return it in the loan response; tests for "Loan with a note", "Loan without a note", "Note too long" (#132)
+- [x] 2.1 Accept and validate `note` on create, return it in the loan response; tests for "Loan with a note", "Loan without a note", "Note too long" (#132)
 - [ ] 2.2 Accept and validate `dueDate`, compute `isOverdue`; tests for "Loan with a planned return date", "Planned return date in the past", "Return on the planned day", "Overdue loan", "Returned late" and "Long loan with a planned return date" (#133)
 
 ## 3. Frontend (REQ-021, REQ-022)

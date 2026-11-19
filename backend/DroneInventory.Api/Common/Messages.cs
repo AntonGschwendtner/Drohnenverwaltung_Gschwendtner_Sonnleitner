@@ -92,5 +92,9 @@ public static class Messages
         $"The student group \"{name}\" has loans and cannot be deleted, so the loan history stays complete.",
         $"Die Schülergruppe „{name}“ hat Ausleihen und kann nicht gelöscht werden, damit die Historie vollständig bleibt.");
 
+    public static string NoteTooLong(int maxLength) => Pick(
+        $"A note can have at most {maxLength} characters.",
+        $"Eine Notiz darf höchstens {maxLength} Zeichen haben.");
+
     private static string Pick(string english, string german) => IsGerman ? german : english;
 }
