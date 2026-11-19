@@ -22,4 +22,4 @@
 
 ## 5. Documentation
 
-- [ ] 5.1 Domain model, domain rules in `openspec/config.yaml`, Out of Scope in `docs/requirements.md`, README (#153)
+- [x] 5.1 Domain model, domain rules in `openspec/config.yaml`, Out of Scope in `docs/requirements.md`, README (#153)

@@ -18,12 +18,14 @@ Schulprojekt im Fach SYP, 4. INF, 2026/27, von Gschwendtner und Sonnleitner. Bet
 - Eine Detailseite pro Drohne und pro Schülergruppe mit aktiver Ausleihe und allen früheren Ausleihen. Die Namen in den Listen führen dorthin.
 - Bei jeder aktiven Ausleihe anzeigen, seit wie vielen Tagen sie läuft. Ausleihen über 7 Tage werden als „Long loan“ markiert.
 - Vor der Rückgabe in einem Dialog mit Drohne und Gruppe nachfragen.
+- Bei der Rückgabe die zurückgegebenen Akkus und Propeller erfassen. Fehlteile stehen danach in der Historie.
+- Einen Schaden melden, bei der Rückgabe oder jederzeit auf der Drohnenseite. Eine defekte Drohne hat den Status „Defective“ und lässt sich erst nach „Repaired“ wieder ausleihen.
 - Beim Ausleihen eine Notiz (zum Beispiel das Projekt) und ein geplantes Rückgabedatum angeben. Ist das Datum vorbei, wird die Ausleihe als „Overdue“ markiert. Mit geplantem Datum ersetzt das die 7-Tage-Markierung.
 - Über der Drohnenliste zählen, wie viele Drohnen es gibt und wie viele davon verfügbar und ausgeliehen sind.
 
-Nicht enthalten sind Login und Rollen, einzeln erfasste Akkus, Reservierungen, Schadensverwaltung und Auswertungen. Sie können später als eigener Change Request folgen.
+Nicht enthalten sind Login und Rollen sowie einzeln erfasste Akkus. Sie können später als eigener Change Request folgen.
 
-Die Changes `initial-drone-lending-system`, `improve-lending-overview`, `manage-drones-and-groups`, `drone-and-group-details` und `loan-notes-and-due-dates` sind abgeschlossen und archiviert. Die geltenden Anforderungen stehen in [openspec/specs](openspec/specs), die erledigten Aufgaben im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
+Die Changes `initial-drone-lending-system`, `improve-lending-overview`, `manage-drones-and-groups`, `drone-and-group-details`, `loan-notes-and-due-dates` und `return-check-and-damage` sind abgeschlossen und archiviert. Die geltenden Anforderungen stehen in [openspec/specs](openspec/specs), die erledigten Aufgaben im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
 
 ## Technik
 
@@ -102,6 +104,8 @@ dotnet tool restore
 | `POST /api/drones` | Drohne anlegen |
 | `PUT /api/drones/{id}` | Name und Beschreibung ändern |
 | `DELETE /api/drones/{id}` | Drohne ohne Ausleihen löschen |
+| `POST /api/drones/{id}/defect` | Schaden melden (`{ description }`), nicht bei verliehener Drohne |
+| `POST /api/drones/{id}/repair` | Defekte Drohne als repariert markieren |
 | `GET /api/student-groups` | Schülergruppen |
 | `GET /api/student-groups/{id}` | Eine Schülergruppe |
 | `POST /api/student-groups` | Schülergruppe anlegen |
@@ -109,11 +113,11 @@ dotnet tool restore
 | `DELETE /api/student-groups/{id}` | Schülergruppe ohne Ausleihen löschen |
 | `POST /api/loans` | Drohne mit Zubehör ausleihen |
 | `GET /api/loans?status=Active` | Aktive Ausleihen |
-| `POST /api/loans/{id}/return` | Ausleihe zurückgeben |
+| `POST /api/loans/{id}/return` | Ausleihe zurückgeben, optional mit `{ items: [{ type, returnedQuantity }], defect }` |
 | `GET /api/loans?status=Returned` | Historie, neueste Rückgabe zuerst |
 | `GET /api/loans?droneId=7` oder `?studentGroupId=3` | Ausleihen einer Drohne oder Gruppe, aktive zuerst; mit `status` kombinierbar |
 
-Jede Ausleihe enthält `daysActive` (volle Tage seit dem Ausleihdatum, nur bei aktiven Ausleihen, sonst `null`), `isLongRunning` (mehr als 7 Tage, nur ohne geplantes Rückgabedatum), `note`, `dueDate` und `isOverdue` (aktiv und das geplante Datum ist vorbei). Die Markierungen berechnet das Backend beim Lesen. Beim Anlegen sind `note` (höchstens 500 Zeichen) und `dueDate` (nicht vor heute) optional.
+Jede Ausleihe enthält `daysActive` (volle Tage seit dem Ausleihdatum, nur bei aktiven Ausleihen, sonst `null`), `isLongRunning` (mehr als 7 Tage, nur ohne geplantes Rückgabedatum), `note`, `dueDate` und `isOverdue` (aktiv und das geplante Datum ist vorbei). Die Markierungen berechnet das Backend beim Lesen. Beim Anlegen sind `note` (höchstens 500 Zeichen) und `dueDate` (nicht vor heute) optional. Nach der Rückgabe zeigen `missingBatteries` und `missingPropellers` die Fehlteile. Drohnen haben den Status `Available`, `Loaned` oder `Defective` und bei einem Schaden `defectNote`.
 
 Ablehnungen kommen als ProblemDetails mit lesbarer Meldung: 400 bei ungültiger Eingabe, 404 bei unbekannter Drohne, Gruppe oder Ausleihe, 409 bei doppeltem Namen, bereits ausgeliehener Drohne, bereits zurückgegebener Ausleihe oder beim Löschen mit vorhandenen Ausleihen. Nach dem Umbenennen zeigt auch die Historie den neuen Namen.
 
@@ -121,7 +125,7 @@ Ablehnungen kommen als ProblemDetails mit lesbarer Meldung: 400 bei ungültiger 
 
 | Dokument | Inhalt |
 |---|---|
-| [docs/requirements.md](docs/requirements.md) | Anforderungen mit Szenarien und Entscheidungen; REQ-001 bis REQ-022 sind umgesetzt, REQ-023 bis REQ-030 beschlossen |
+| [docs/requirements.md](docs/requirements.md) | Anforderungen mit Szenarien und Entscheidungen; REQ-001 bis REQ-024 sind umgesetzt, REQ-025 bis REQ-030 beschlossen |
 | [docs/domain-model.md](docs/domain-model.md) | Begriffe und Datenmodell |
 | [openspec/specs](openspec/specs) | Geltende Specs für `drone`, `student-group` und `loan` |
 | [proposal.md](openspec/changes/archive/2026-11-11-initial-drone-lending-system/proposal.md) | Warum es den ersten Change gab und was dazugehörte |

@@ -31,11 +31,13 @@ context: |
   - Accessory quantities must not be negative.
   - Returned loans stay stored and are never deleted.
   - Batteries and propellers are tracked as quantities only.
-  - Drone availability follows from the active loan and is never entered by a user.
+  - A drone with a reported defect is Defective and cannot be loaned until it is repaired.
+  - Otherwise drone availability follows from the active loan and is never entered by a user.
+  - A return records the returned quantities; missing parts stay visible in the history.
 
-  Out of scope for the initial version: login, user accounts and roles; individual
-  batteries with their own identity; reservations in advance; damage management and
-  return differences; reports, statistics and exports.
+  Out of scope: login, user accounts and roles; individual batteries with their own
+  identity. Damage management, return differences, reservations, statistics and the
+  history export were moved into scope on 2026-11-12.
 
 rules:
   proposal:

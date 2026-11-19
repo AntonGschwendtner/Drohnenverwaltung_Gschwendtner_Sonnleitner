@@ -11,7 +11,7 @@ Diese Begriffe gelten überall: in Anforderung, Spec, Code, Datenbank und im Ges
 | Loan | Ein Ausleihvorgang mit Gruppe, Drohne, Datum und Status |
 | LoanItem | Eine Zubehörposition einer Ausleihe: Typ und Menge |
 | Active / Returned | Zustand eines Loan |
-| Available / Loaned | Zustand einer Drone, ergibt sich aus der aktiven Ausleihe |
+| Available / Loaned / Defective | Zustand einer Drone: Defective bei gemeldetem Schaden, sonst ergibt er sich aus der aktiven Ausleihe |
 | Battery / Propeller | Erlaubte Typen eines LoanItem |
 
 ## Modell
@@ -26,6 +26,7 @@ erDiagram
         int Id
         string Name
         string Description
+        string DefectNote "optional, gemeldeter Schaden"
     }
     StudentGroup {
         int Id
@@ -46,6 +47,7 @@ erDiagram
         int LoanId
         string Type "Battery oder Propeller"
         int Quantity ">= 0"
+        int ReturnedQuantity "optional, bei der Rückgabe"
     }
 ```
 
@@ -60,11 +62,12 @@ erDiagram
 
 1. Eine Drohne hat höchstens eine aktive Ausleihe.
 2. Nur verfügbare Drohnen dürfen ausgeliehen werden.
-3. Eine Rückgabe macht die Drohne wieder verfügbar.
+3. Eine Rückgabe macht die Drohne wieder verfügbar, außer es wird dabei ein Schaden gemeldet.
 4. Zubehörmengen sind nie negativ.
 5. Zurückgegebene Ausleihen bleiben gespeichert.
 6. Akkus und Propeller werden nur als Menge geführt.
-7. Die Verfügbarkeit ergibt sich aus der aktiven Ausleihe.
+7. Die Verfügbarkeit ergibt sich aus dem gemeldeten Schaden und der aktiven Ausleihe. Eine defekte Drohne wird erst nach der Reparatur wieder ausgeliehen.
+8. Bei der Rückgabe werden die zurückgegebenen Mengen erfasst. Fehlteile bleiben in der Historie sichtbar.
 
 Alle Regeln erzwingt das Backend. Das Frontend darf sie zusätzlich anzeigen, aber nicht als einzige Absicherung enthalten.
 
