@@ -89,13 +89,19 @@ The system SHALL list all active loans with student group, drone, number of batt
 - **THEN** the returned loan is not shown
 
 ### Requirement: Return loan
-An active loan SHALL be able to be returned. The return SHALL change the loan from Active to Returned and make the drone available again (REQ-008).
+An active loan SHALL be able to be returned. The return SHALL change the loan from Active to Returned (REQ-008). The drone SHALL become available again, unless a defect is reported with the return; then the drone SHALL become Defective (REQ-024).
 
 #### Scenario: Return a loan
 - **GIVEN** "TELLO-07" is loaned to "Group 3"
 - **WHEN** the loan is returned
 - **THEN** the loan is marked as returned
 - **AND** "TELLO-07" becomes available again
+
+#### Scenario: Return with a defect
+- **GIVEN** "TELLO-07" is loaned to "Group 3"
+- **WHEN** the loan is returned with the defect "Propeller gebrochen"
+- **THEN** the loan is marked as returned
+- **AND** "TELLO-07" is Defective
 
 #### Scenario: Loan is already returned
 - **GIVEN** a loan has been returned
@@ -165,7 +171,7 @@ Every active loan SHALL show how many full days have passed since its loan date 
 - **THEN** the loan shows 9 days and is neither long-running nor overdue
 
 ### Requirement: Confirm return
-Before a loan is returned, the system SHALL ask for confirmation and name the drone and the student group (REQ-013). Only a confirmed return SHALL be saved.
+Before a loan is returned, the system SHALL ask for confirmation in a dialog that names the drone and the student group (REQ-013). The dialog SHALL offer the returned quantities, prefilled with the loaned quantities, and an optional defect (REQ-023, REQ-024). Only a confirmed return SHALL be saved.
 
 #### Scenario: Confirm the return
 - **GIVEN** "TELLO-07" is loaned to "Group 3"
@@ -176,6 +182,11 @@ Before a loan is returned, the system SHALL ask for confirmation and name the dr
 - **GIVEN** "TELLO-07" is loaned to "Group 3"
 - **WHEN** the user chooses Return and then cancels
 - **THEN** the loan stays active and nothing is sent to the server
+
+#### Scenario: Dialog suggests the loaned quantities
+- **GIVEN** "TELLO-07" was loaned to "Group 3" with 4 batteries and 8 propellers
+- **WHEN** the user chooses Return
+- **THEN** the dialog shows 4 batteries and 8 propellers as returned quantities
 
 ### Requirement: Search loan history
 The loan history SHALL be narrowed by a search that matches the drone name or the student group name, ignoring upper and lower case (REQ-011). When no loan matches, the history SHALL say so.
@@ -267,3 +278,27 @@ A loan SHALL accept an optional planned return date (REQ-022). The planned retur
 - **GIVEN** a loan with the planned return date 26.08.2026 was returned on 28.08.2026
 - **WHEN** the history is listed
 - **THEN** the loan shows its planned return date and is not marked as overdue
+
+### Requirement: Check accessories on return
+A return SHALL accept the returned quantity of each loaned accessory type (REQ-023). Without a returned quantity, the loaned quantity SHALL be assumed. A returned quantity SHALL be a whole number from 0 up to the loaned quantity. The history SHALL show the missing quantity of each type.
+
+#### Scenario: Everything returned
+- **GIVEN** "TELLO-07" was loaned with 4 batteries and 8 propellers
+- **WHEN** the loan is returned without quantities
+- **THEN** the history shows no missing parts
+
+#### Scenario: Battery missing
+- **GIVEN** "TELLO-07" was loaned with 4 batteries and 8 propellers
+- **WHEN** the loan is returned with 3 batteries and 8 propellers
+- **THEN** the history shows 1 missing battery
+
+#### Scenario: More returned than loaned
+- **GIVEN** "TELLO-07" was loaned with 4 batteries
+- **WHEN** the loan is returned with 5 batteries
+- **THEN** the return is rejected
+- **AND** the loan stays active
+
+#### Scenario: Negative quantity
+- **GIVEN** "TELLO-07" was loaned with 4 batteries
+- **WHEN** the loan is returned with -1 batteries
+- **THEN** the return is rejected
