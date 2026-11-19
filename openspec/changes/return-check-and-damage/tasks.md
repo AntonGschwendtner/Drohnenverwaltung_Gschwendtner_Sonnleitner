@@ -18,7 +18,7 @@
 ## 4. Frontend
 
 - [x] 4.1 Return dialog with quantities and a damage field, English and German; component tests for "Dialog suggests the loaned quantities", a full return, a missing battery and a defect (#151)
-- [ ] 4.2 Defective badge, status filter and overview count, report and repair actions on the drone page; missing parts in the history; component tests including "Overview counts defective drones" (#152)
+- [x] 4.2 Defective badge, status filter and overview count, report and repair actions on the drone page; missing parts in the history; component tests including "Overview counts defective drones" (#152)
 
 ## 5. Documentation
 

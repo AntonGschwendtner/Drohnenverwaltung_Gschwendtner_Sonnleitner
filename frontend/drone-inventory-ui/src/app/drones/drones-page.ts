@@ -2,12 +2,14 @@ import { DOCUMENT } from '@angular/common';
 import { afterNextRender, Component, computed, effect, inject, Injector, OnInit, signal, untracked } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { Observable } from 'rxjs';
 import { ApiService, Drone, DroneStatus, readErrorMessage } from '../api.service';
 import { I18nService } from '../i18n.service';
 import { ConfirmDialog } from '../shared/confirm-dialog';
 import { EmptyState } from '../shared/empty-state';
 import { PageHead } from '../shared/page-head';
 import { SortHeader } from '../shared/sort-header';
+import { statusKey } from '../shared/status';
 import { SortState, sortItems, SortValue } from '../shared/sort';
 import { matchesSearch, SearchField } from '../shared/search-field';
 import { StripSkeleton } from '../shared/strip-skeleton';
@@ -37,6 +39,10 @@ import { StripSkeleton } from '../shared/strip-skeleton';
           <div class="overview-tile overview-loaned">
             <dt>{{ i18n.t('status.loaned') }}</dt>
             <dd>{{ overview().loaned }}</dd>
+          </div>
+          <div class="overview-tile overview-defective">
+            <dt>{{ i18n.t('status.defective') }}</dt>
+            <dd>{{ overview().defective }}</dd>
           </div>
         </dl>
       </section>
@@ -105,7 +111,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
                   <input [id]="'edit-name-' + drone.id" formControlName="name" name="editName" autocomplete="off" />
                 </td>
                 <td [class]="'status-' + drone.status.toLowerCase()">
-                  {{ i18n.t(drone.status === 'Loaned' ? 'status.loaned' : 'status.available') }}
+                  {{ i18n.t(statusKey(drone.status)) }}
                 </td>
                 <td [attr.data-label]="i18n.t('field.description')">
                   <label class="visually-hidden" [for]="'edit-description-' + drone.id">{{ i18n.t('field.description') }}</label>
@@ -122,10 +128,24 @@ import { StripSkeleton } from '../shared/strip-skeleton';
               <tr [attr.data-drone]="drone.id">
                 <td><a [routerLink]="['/drones', drone.id]">{{ drone.name }}</a></td>
                 <td [class]="'status-' + drone.status.toLowerCase()">
-                  {{ i18n.t(drone.status === 'Loaned' ? 'status.loaned' : 'status.available') }}
+                  {{ i18n.t(statusKey(drone.status)) }}
                 </td>
-                <td [attr.data-label]="i18n.t('field.description')">{{ drone.description }}</td>
+                <td [attr.data-label]="i18n.t('field.description')">
+                  {{ drone.description }}
+                  @if (drone.defectNote) {
+                    <span class="strip-note defect-note">{{ i18n.t('drones.defectLabel', { defect: drone.defectNote }) }}</span>
+                  }
+                </td>
                 <td class="row-actions">
+                  @if (drone.status === 'Available') {
+                    <button type="button" class="quiet report" (click)="askToReportDefect(drone, $event)" [disabled]="busyId() !== null">
+                      {{ i18n.t('drones.reportDefect') }}<span class="visually-hidden"> {{ drone.name }}</span>
+                    </button>
+                  } @else if (drone.status === 'Defective') {
+                    <button type="button" class="quiet repair" (click)="askToRepair(drone, $event)" [disabled]="busyId() !== null">
+                      {{ i18n.t('drones.repair') }}<span class="visually-hidden"> {{ drone.name }}</span>
+                    </button>
+                  }
                   <button type="button" class="quiet edit" (click)="startEdit(drone)" [disabled]="busyId() !== null">
                     {{ i18n.t('action.edit') }}<span class="visually-hidden"> {{ drone.name }}</span>
                   </button>
@@ -139,6 +159,35 @@ import { StripSkeleton } from '../shared/strip-skeleton';
         </tbody>
       </table>
       }
+    }
+
+    @if (pendingDefect(); as drone) {
+      <app-confirm-dialog
+        [heading]="i18n.t('drones.reportTitle', { drone: drone.name })"
+        [text]="i18n.t('drones.reportText', { drone: drone.name })"
+        [confirmLabel]="i18n.t('drones.reportDefect')"
+        [cancelLabel]="i18n.t('dialog.cancel')"
+        (confirmed)="confirmDefect()"
+        (cancelled)="closeDroneDialog()"
+      >
+        <div class="dialog-fields">
+          <label class="wide">
+            {{ i18n.t('loans.defect') }}
+            <textarea name="defectDescription" rows="2" maxlength="500" [value]="defectDescription()" (input)="defectDescription.set($any($event.target).value)"></textarea>
+          </label>
+        </div>
+      </app-confirm-dialog>
+    }
+
+    @if (pendingRepair(); as drone) {
+      <app-confirm-dialog
+        [heading]="i18n.t('drones.repairTitle', { drone: drone.name })"
+        [text]="i18n.t('drones.repairText', { drone: drone.name })"
+        [confirmLabel]="i18n.t('drones.repair')"
+        [cancelLabel]="i18n.t('dialog.cancel')"
+        (confirmed)="confirmRepair()"
+        (cancelled)="closeDroneDialog()"
+      />
     }
 
     @if (pendingDelete(); as drone) {
@@ -174,6 +223,12 @@ export class DronesPage implements OnInit {
   protected readonly editingId = signal<number | null>(null);
   protected readonly busyId = signal<number | null>(null);
   protected readonly pendingDelete = signal<Drone | null>(null);
+  /** Report a defect and mark a drone as repaired (REQ-024). */
+  protected readonly pendingDefect = signal<Drone | null>(null);
+  protected readonly pendingRepair = signal<Drone | null>(null);
+  protected readonly defectDescription = signal('');
+  protected readonly statusKey = statusKey;
+  private dialogTrigger: HTMLElement | null = null;
   protected readonly listErrorMessage = signal<string | null>(null);
   private deleteTrigger: HTMLElement | null = null;
   protected readonly loadErrorMessage = signal<string | null>(null);
@@ -188,6 +243,7 @@ export class DronesPage implements OnInit {
     { value: 'All', label: 'filter.all' },
     { value: 'Available', label: 'status.available' },
     { value: 'Loaned', label: 'status.loaned' },
+    { value: 'Defective', label: 'status.defective' },
   ] as const;
   /** Counts all drones, independent of search and filter (REQ-014). */
   protected readonly overview = computed(() => {
@@ -196,6 +252,7 @@ export class DronesPage implements OnInit {
       total: drones.length,
       available: drones.filter((drone) => drone.status === 'Available').length,
       loaned: drones.filter((drone) => drone.status === 'Loaned').length,
+      defective: drones.filter((drone) => drone.status === 'Defective').length,
     };
   });
   /** Sorting by a column header (REQ-020); without a choice the list keeps the order from the backend. */
@@ -331,6 +388,58 @@ export class DronesPage implements OnInit {
     this.listErrorMessage.set(null);
 
     this.api.deleteDrone(drone.id).subscribe({
+      next: () => {
+        this.busyId.set(null);
+        this.loadDrones();
+      },
+      error: (error: unknown) => {
+        this.busyId.set(null);
+        this.listErrorMessage.set(readErrorMessage(error, this.i18n.t('error.fallback')));
+      },
+    });
+  }
+
+  protected askToReportDefect(drone: Drone, event: Event): void {
+    this.dialogTrigger = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+    this.defectDescription.set('');
+    this.pendingDefect.set(drone);
+  }
+
+  protected askToRepair(drone: Drone, event: Event): void {
+    this.dialogTrigger = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+    this.pendingRepair.set(drone);
+  }
+
+  protected closeDroneDialog(): void {
+    this.pendingDefect.set(null);
+    this.pendingRepair.set(null);
+    this.dialogTrigger?.focus();
+    this.dialogTrigger = null;
+  }
+
+  // The backend checks the description and that the drone is not loaned; the page shows its answer.
+  protected confirmDefect(): void {
+    const drone = this.pendingDefect();
+    this.pendingDefect.set(null);
+    this.dialogTrigger = null;
+    if (drone) {
+      this.runOnDrone(drone, this.api.reportDefect(drone.id, this.defectDescription()));
+    }
+  }
+
+  protected confirmRepair(): void {
+    const drone = this.pendingRepair();
+    this.pendingRepair.set(null);
+    this.dialogTrigger = null;
+    if (drone) {
+      this.runOnDrone(drone, this.api.repairDrone(drone.id));
+    }
+  }
+
+  private runOnDrone(drone: Drone, request: Observable<Drone>): void {
+    this.busyId.set(drone.id);
+    this.listErrorMessage.set(null);
+    request.subscribe({
       next: () => {
         this.busyId.set(null);
         this.loadDrones();

@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-export type DroneStatus = 'Available' | 'Loaned';
+export type DroneStatus = 'Available' | 'Loaned' | 'Defective';
 export type LoanStatus = 'Active' | 'Returned';
 export type LoanItemType = 'Battery' | 'Propeller';
 
@@ -11,6 +11,8 @@ export interface Drone {
   name: string;
   status: DroneStatus;
   description: string;
+  /** The reported defect while the drone is Defective (REQ-024). */
+  defectNote?: string | null;
 }
 
 export interface CreateDroneRequest {
@@ -105,6 +107,14 @@ export class ApiService {
 
   updateDrone(id: number, request: CreateDroneRequest): Observable<Drone> {
     return this.http.put<Drone>(`/api/drones/${id}`, request);
+  }
+
+  reportDefect(id: number, description: string): Observable<Drone> {
+    return this.http.post<Drone>(`/api/drones/${id}/defect`, { description });
+  }
+
+  repairDrone(id: number): Observable<Drone> {
+    return this.http.post<Drone>(`/api/drones/${id}/repair`, null);
   }
 
   deleteDrone(id: number): Observable<void> {

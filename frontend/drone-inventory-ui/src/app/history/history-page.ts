@@ -51,8 +51,18 @@ import { StripSkeleton } from '../shared/strip-skeleton';
             <tr>
               <td><a [routerLink]="['/student-groups', loan.studentGroupId]">{{ loan.studentGroupName }}</a></td>
               <td [attr.data-label]="i18n.t('field.drone')"><a [routerLink]="['/drones', loan.droneId]">{{ loan.droneName }}</a>@if (loan.note) {<span class="strip-note">{{ loan.note }}</span>}</td>
-              <td [attr.data-label]="i18n.t('field.batteries')">{{ loan.batteries }}</td>
-              <td [attr.data-label]="i18n.t('field.propellers')">{{ loan.propellers }}</td>
+              <td [attr.data-label]="i18n.t('field.batteries')">
+                {{ loan.batteries }}
+                @if (loan.missingBatteries) {
+                  <span class="missing">{{ i18n.t('history.missing', { count: '' + loan.missingBatteries }) }}</span>
+                }
+              </td>
+              <td [attr.data-label]="i18n.t('field.propellers')">
+                {{ loan.propellers }}
+                @if (loan.missingPropellers) {
+                  <span class="missing">{{ i18n.t('history.missing', { count: '' + loan.missingPropellers }) }}</span>
+                }
+              </td>
               <td [attr.data-label]="i18n.t('field.loanDate')">{{ loan.loanDate | date: 'dd.MM.yyyy' }}</td>
               <td [attr.data-label]="i18n.t('field.returnDate')">
                 {{ loan.returnDate | date: 'dd.MM.yyyy' }}
