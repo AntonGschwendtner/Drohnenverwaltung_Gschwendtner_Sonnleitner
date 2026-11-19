@@ -67,6 +67,10 @@ const english = {
   'drones.repairTitle': 'Is {drone} repaired?',
   'drones.repairText': 'The defect is removed and {drone} can be loaned again.',
   'drones.defectLabel': 'Damage: {defect}',
+  'drones.qrTitle': 'QR label',
+  'drones.qrLabel': 'QR code that opens the loan of {drone}',
+  'drones.qrHint': 'Scan it with a phone to open the loan of this drone.',
+  'drones.printLabel': 'Print label',
   'drones.deleteText': '{drone} is removed from the fleet. This is only possible while it has never been loaned.',
 
   'groups.kicker': 'Bay 02 · Crews',
@@ -188,6 +192,10 @@ const german: Record<TextKey, string> = {
   'drones.repairTitle': 'Ist {drone} repariert?',
   'drones.repairText': 'Der Schaden wird entfernt, und {drone} kann wieder ausgeliehen werden.',
   'drones.defectLabel': 'Schaden: {defect}',
+  'drones.qrTitle': 'QR-Etikett',
+  'drones.qrLabel': 'QR-Code, der die Ausleihe von {drone} öffnet',
+  'drones.qrHint': 'Mit dem Handy scannen, um die Ausleihe dieser Drohne zu öffnen.',
+  'drones.printLabel': 'Etikett drucken',
   'drones.deleteText': '{drone} wird aus der Flotte entfernt. Das geht nur, solange sie nie ausgeliehen war.',
 
   'groups.kicker': 'Platz 02 · Crews',

@@ -1651,6 +1651,72 @@ td button.busy::after {
   }
 }
 
+/* ───────────── QR label on the drone detail page (REQ-026) ───────────── */
+
+.qr-label {
+  margin-bottom: 2.75rem;
+}
+
+.qr-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem 1.75rem;
+  padding: 1.25rem;
+  background: var(--panel);
+  border: 2px solid var(--edge);
+  box-shadow: 6px 6px 0 var(--hard);
+}
+
+.qr {
+  width: 9rem;
+  height: 9rem;
+  flex: none;
+}
+
+.qr-text {
+  display: grid;
+  gap: 0.6rem;
+  justify-items: start;
+}
+
+.qr-name {
+  font-size: 1.6rem;
+  letter-spacing: 0.04em;
+}
+
+.qr-hint {
+  max-width: 22rem;
+  color: var(--muted);
+}
+
+.label-button::before {
+  content: '\2399';
+  color: var(--accent);
+}
+
+@media print {
+  /* Printing a label keeps only the QR code and the drone name. */
+  body.printing-label main > * > *:not(.qr-label) {
+    display: none !important;
+  }
+
+  body.printing-label .qr-label h2,
+  body.printing-label .qr-hint {
+    display: none !important;
+  }
+
+  body.printing-label .qr-card {
+    display: inline-flex;
+    border: 1px dashed #000000;
+  }
+
+  body.printing-label .qr {
+    width: 4cm;
+    height: 4cm;
+  }
+}
+
 /* ───────────── Print: only the title, the date and the table, in black on white (REQ-025) ───────────── */
 
 .print-only {

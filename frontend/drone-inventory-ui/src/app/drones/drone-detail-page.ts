@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, DOCUMENT } from '@angular/common';
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -7,6 +7,7 @@ import { ApiService, Drone, Loan, readErrorMessage } from '../api.service';
 import { I18nService } from '../i18n.service';
 import { EmptyState } from '../shared/empty-state';
 import { PageHead } from '../shared/page-head';
+import { QrCode } from '../shared/qr-code';
 import { statusKey } from '../shared/status';
 import { StripSkeleton } from '../shared/strip-skeleton';
 
@@ -15,7 +16,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
  */
 @Component({
   selector: 'app-drone-detail-page',
-  imports: [DatePipe, EmptyState, PageHead, RouterLink, StripSkeleton],
+  imports: [DatePipe, EmptyState, PageHead, QrCode, RouterLink, StripSkeleton],
   template: `
     <a class="back-link" routerLink="/drones">{{ i18n.t('drones.back') }}</a>
 
@@ -40,6 +41,18 @@ import { StripSkeleton } from '../shared/strip-skeleton';
           <span class="strip-note defect-note">{{ i18n.t('drones.defectLabel', { defect: drone.defectNote }) }}</span>
         }
       </p>
+
+      <section class="qr-label" aria-labelledby="drone-qr">
+        <h2 id="drone-qr">{{ i18n.t('drones.qrTitle') }}</h2>
+        <div class="qr-card">
+          <app-qr-code [value]="loanUrl()" [label]="i18n.t('drones.qrLabel', { drone: drone.name })" />
+          <div class="qr-text">
+            <strong class="qr-name">{{ drone.name }}</strong>
+            <span class="qr-hint">{{ i18n.t('drones.qrHint') }}</span>
+            <button type="button" class="tool-link label-button" (click)="printLabel()">{{ i18n.t('drones.printLabel') }}</button>
+          </div>
+        </div>
+      </section>
 
       <section aria-labelledby="drone-active-loan">
         <h2 id="drone-active-loan">{{ i18n.t('details.activeLoan') }}</h2>
@@ -115,6 +128,22 @@ export class DroneDetailPage implements OnInit {
   protected readonly returnedLoans = computed(() => this.loans().filter((loan) => loan.status === 'Returned'));
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly document = inject(DOCUMENT);
+
+  /** The QR code opens the loan page with this drone chosen (REQ-026). It contains the address of the app. */
+  protected readonly loanUrl = computed(() => {
+    const origin = this.document.defaultView?.location.origin ?? '';
+    return `${origin}/loans?drone=${this.drone()?.id ?? ''}`;
+  });
+
+  /** Prints only the label: QR code and name. The class tells the print stylesheet what to keep. */
+  protected printLabel(): void {
+    const body = this.document.body;
+    const view = this.document.defaultView;
+    body.classList.add('printing-label');
+    view?.addEventListener('afterprint', () => body.classList.remove('printing-label'), { once: true });
+    view?.print();
+  }
 
   ngOnInit(): void {
     // switchMap drops the answer for an older id, so a fast change of the address never shows the wrong record.
