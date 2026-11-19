@@ -12,7 +12,7 @@
 ## 3. QR code (REQ-026)
 
 - [x] 3.1 Add the pinned QR package, QR code and label print on the drone detail page; component tests for "Show the QR code" and "Print a label" (#168)
-- [ ] 3.2 Loan page reads `?drone=`; component tests for "Available drone from a QR code" and "Loaned drone from a QR code" (#169)
+- [x] 3.2 Loan page reads `?drone=`; component tests for "Available drone from a QR code" and "Loaned drone from a QR code" (#169)
 
 ## 4. Documentation
 
