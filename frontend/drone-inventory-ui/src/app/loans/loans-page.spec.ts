@@ -95,6 +95,8 @@ describe('LoansPage loan form', () => {
         { type: 'Battery', quantity: 4 },
         { type: 'Propeller', quantity: 8 },
       ],
+      note: null,
+      dueDate: null,
     });
     request.flush({
       id: 1,
@@ -115,6 +117,30 @@ describe('LoansPage loan form', () => {
 
     expect(element().querySelector('[role="status"]')?.textContent).toContain('TELLO-07 is loaned to Group 3.');
     expect((element().querySelector('input[name="batteries"]') as HTMLInputElement).value).toBe('0');
+  });
+
+  it('sends the note and the planned return date (REQ-021, REQ-022)', async () => {
+    choose('droneId', 'TELLO-07');
+    choose('studentGroupId', 'Group 3');
+    enter('dueDate', '2026-08-26');
+    enter('note', 'Projekt Vermessung');
+
+    await submit();
+
+    const request = http.expectOne({ method: 'POST', url: '/api/loans' });
+    expect(request.request.body.note).toBe('Projekt Vermessung');
+    expect(request.request.body.dueDate).toBe('2026-08-26');
+    request.flush({ detail: 'x' }, { status: 400, statusText: 'Bad Request' });
+    await settle();
+  });
+
+  it('offers no date before today', () => {
+    const field = element().querySelector('input[name="dueDate"]') as HTMLInputElement;
+    const today = new Date();
+    const expected = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    expect(field.type).toBe('date');
+    expect(field.min).toBe(expected);
   });
 
   it('shows the message when the drone is already loaned', async () => {

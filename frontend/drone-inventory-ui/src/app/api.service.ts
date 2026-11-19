@@ -40,8 +40,13 @@ export interface Loan {
   status: LoanStatus;
   /** Full days since the loan date, only for an active loan (REQ-012). */
   daysActive?: number | null;
-  /** True when an active loan runs longer than 7 days (REQ-012). */
+  /** True when an active loan without a planned return date runs longer than 7 days (REQ-012). */
   isLongRunning?: boolean;
+  note?: string | null;
+  /** Planned return date as yyyy-MM-dd (REQ-022). */
+  dueDate?: string | null;
+  /** True when an active loan is past its planned return date (REQ-022). */
+  isOverdue?: boolean;
 }
 
 export interface CreateLoanItemRequest {
@@ -56,6 +61,10 @@ export interface CreateLoanRequest {
   droneId: number | null;
   studentGroupId: number | null;
   items: CreateLoanItemRequest[];
+  /** Optional note, at most 500 characters (REQ-021). */
+  note?: string | null;
+  /** Optional planned return date as yyyy-MM-dd (REQ-022). */
+  dueDate?: string | null;
 }
 
 /**

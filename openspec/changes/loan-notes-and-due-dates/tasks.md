@@ -11,7 +11,7 @@
 
 ## 3. Frontend (REQ-021, REQ-022)
 
-- [ ] 3.1 Note and planned return date in the loan form, English and German; component test that both are sent (#134)
+- [x] 3.1 Note and planned return date in the loan form, English and German; component test that both are sent (#134)
 - [ ] 3.2 Show note, planned return date and the overdue mark in the active loans and the history; component tests for an overdue and a normal loan (#135)
 
 ## 4. Documentation
