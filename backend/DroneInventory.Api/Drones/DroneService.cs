@@ -31,10 +31,13 @@ public class DroneService(DroneInventoryDbContext dbContext)
         drone => new DroneResponse(
             drone.Id,
             drone.Name,
-            dbContext.Loans.Any(loan => loan.DroneId == drone.Id && loan.Status == LoanStatus.Active)
-                ? DroneStatus.Loaned
-                : DroneStatus.Available,
-            drone.Description);
+            drone.DefectNote != null
+                ? DroneStatus.Defective
+                : dbContext.Loans.Any(loan => loan.DroneId == drone.Id && loan.Status == LoanStatus.Active)
+                    ? DroneStatus.Loaned
+                    : DroneStatus.Available,
+            drone.Description,
+            drone.DefectNote);
 
     public async Task<ServiceResult<DroneResponse>> CreateAsync(CreateDroneRequest request, CancellationToken cancellationToken)
     {
@@ -90,15 +93,8 @@ public class DroneService(DroneInventoryDbContext dbContext)
             return NameAlreadyExists(name);
         }
 
-        var isLoaned = await dbContext.Loans.AnyAsync(
-            loan => loan.DroneId == id && loan.Status == LoanStatus.Active,
-            cancellationToken);
-
-        return ServiceResult<DroneResponse>.Success(new DroneResponse(
-            drone.Id,
-            drone.Name,
-            isLoaned ? DroneStatus.Loaned : DroneStatus.Available,
-            drone.Description));
+        // Read back with the same projection as the list, so the status follows the same rules.
+        return await GetAsync(id, cancellationToken);
     }
 
     /// <summary>

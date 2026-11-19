@@ -1,10 +1,12 @@
 namespace DroneInventory.Api.Domain;
 
 /// <summary>
-/// Follows from the active loan and is never stored or entered.
+/// Defective while a defect is reported (REQ-024); otherwise follows from the active loan.
+/// The status itself is never stored.
 /// </summary>
 public enum DroneStatus
 {
     Available,
     Loaned,
+    Defective,
 }
