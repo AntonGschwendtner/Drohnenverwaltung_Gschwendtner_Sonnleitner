@@ -9,6 +9,11 @@ namespace DroneInventory.Api.StudentGroups;
 
 public class StudentGroupService(DroneInventoryDbContext dbContext, TimeProvider timeProvider)
 {
+    /// <summary>The choices for the history when a group is deleted for good (REQ-033).</summary>
+    public const string KeepHistory = "keep";
+
+    public const string DeleteHistory = "delete";
+
     /// <summary>
     /// The shape of a group in every answer: members alphabetical (NOCASE column), the leader's name or null (REQ-031).
     /// </summary>
@@ -401,10 +406,6 @@ public class StudentGroupService(DroneInventoryDbContext dbContext, TimeProvider
             ? (name, NameAlreadyExists(name))
             : (name, ServiceResult<StudentGroupResponse>.Conflict(Messages.StudentGroupNameInTrash(name)));
     }
-
-    public const string KeepHistory = "keep";
-
-    public const string DeleteHistory = "delete";
 
     private DateOnly Today() => DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime);
 

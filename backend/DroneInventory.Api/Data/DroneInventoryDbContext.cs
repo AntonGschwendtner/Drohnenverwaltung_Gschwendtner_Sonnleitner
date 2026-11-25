@@ -47,7 +47,7 @@ public class DroneInventoryDbContext(DbContextOptions<DroneInventoryDbContext> o
                 .HasDatabaseName("IX_StudentGroupMembers_Leader");
         });
 
-        // Members belong to their group and go with it. A group with loans cannot be deleted anyway.
+        // Members belong to their group and go with it when the group is deleted for good from the trash (REQ-033).
         modelBuilder.Entity<StudentGroup>()
             .HasMany(studentGroup => studentGroup.Members)
             .WithOne()
