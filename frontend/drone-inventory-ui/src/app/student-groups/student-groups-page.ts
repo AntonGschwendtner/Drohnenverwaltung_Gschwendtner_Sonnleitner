@@ -74,7 +74,9 @@ import { MembersDialog } from './members-dialog';
                   <label class="visually-hidden" [for]="'edit-group-' + studentGroup.id">{{ i18n.t('field.name') }}</label>
                   <input [id]="'edit-group-' + studentGroup.id" formControlName="name" name="editName" autocomplete="off" />
                 </td>
-                <td [attr.data-label]="i18n.t('members.leader')">{{ studentGroup.leaderName ?? i18n.t('groups.noLeader') }}</td>
+                <td class="leader-cell" [attr.data-label]="i18n.t('members.leader')" [class.none]="!studentGroup.leaderName">
+                  {{ studentGroup.leaderName ?? i18n.t('groups.noLeader') }}
+                </td>
                 <td class="row-actions">
                   <button type="button" class="save" (click)="saveEdit(studentGroup)" [disabled]="busyId() !== null" [class.busy]="busyId() === studentGroup.id">
                     {{ i18n.t('action.save') }}

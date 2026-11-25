@@ -11,7 +11,11 @@ describe('StudentGroupsPage leader and member search', () => {
   let http: HttpTestingController;
   let element: HTMLElement;
 
+  // Groups without a leader come first, so sorting by leader has to move them.
   const groups: StudentGroup[] = [
+    { id: 4, name: 'Robotics Club', members: [{ id: 21, name: 'Clara Berger', isLeader: false }], leaderName: null },
+    { id: 5, name: 'Group 5', members: [], leaderName: null },
+    { id: 6, name: 'Drone Team', members: [{ id: 31, name: 'Ben Wagner', isLeader: true }], leaderName: 'Ben Wagner' },
     {
       id: 3,
       name: 'Group 3',
@@ -21,8 +25,6 @@ describe('StudentGroupsPage leader and member search', () => {
       ],
       leaderName: 'Anna Huber',
     },
-    { id: 4, name: 'Robotics Club', members: [{ id: 21, name: 'Clara Berger', isLeader: false }], leaderName: null },
-    { id: 5, name: 'Group 5', members: [], leaderName: null },
   ];
 
   beforeEach(async () => {
@@ -86,13 +88,18 @@ describe('StudentGroupsPage leader and member search', () => {
   it('still searches by the group name', async () => {
     await searchFor('group');
 
-    expect(names()).toEqual(['Group 3', 'Group 5']);
+    expect(names()).toEqual(['Group 5', 'Group 3']);
   });
 
-  it('sorts by group leader with groups without a leader last', async () => {
-    (element.querySelectorAll('thead th button')[1] as HTMLButtonElement).click();
-    await settle();
+  it('sorts by group leader in both directions with groups without a leader last', async () => {
+    const leaderHeader = element.querySelector('th[appSortHeader="leader"] button') as HTMLButtonElement;
 
-    expect(names()[0]).toBe('Group 3');
+    leaderHeader.click();
+    await settle();
+    expect(names()).toEqual(['Group 3', 'Drone Team', 'Robotics Club', 'Group 5']);
+
+    leaderHeader.click();
+    await settle();
+    expect(names()).toEqual(['Drone Team', 'Group 3', 'Robotics Club', 'Group 5']);
   });
 });
