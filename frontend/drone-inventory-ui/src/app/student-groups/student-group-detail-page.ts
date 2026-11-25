@@ -30,6 +30,18 @@ import { StripSkeleton } from '../shared/strip-skeleton';
         [lede]="i18n.t('groups.detailLede', { count: '' + activeLoans().length })"
       />
 
+      @if (studentGroup.deletedAt) {
+        <div class="trash-notice" role="status">
+          <span>{{ i18n.t('groups.inTrash', { date: (studentGroup.deletedAt | date: 'dd.MM.yyyy') ?? '' }) }}</span>
+          <button type="button" class="tool-link restore" (click)="restore(studentGroup)" [disabled]="restoring()" [class.busy]="restoring()">
+            {{ i18n.t('trash.restore') }}
+          </button>
+        </div>
+      }
+      @if (restoreError(); as message) {
+        <p class="error" role="alert">{{ message }}</p>
+      }
+
       <section aria-labelledby="group-members">
         <h2 id="group-members">{{ i18n.t('details.members') }}</h2>
         @if (studentGroup.members.length === 0) {
@@ -114,6 +126,28 @@ export class StudentGroupDetailPage implements OnInit {
   protected readonly i18n = inject(I18nService);
 
   protected readonly studentGroup = signal<StudentGroup | null>(null);
+  protected readonly restoring = signal(false);
+  protected readonly restoreError = signal<string | null>(null);
+
+  /** A group in the trash comes back from its own page, for example when it was opened from the history (REQ-033). */
+  protected restore(studentGroup: StudentGroup): void {
+    if (this.restoring()) {
+      return;
+    }
+
+    this.restoring.set(true);
+    this.restoreError.set(null);
+    this.api.restoreStudentGroup(studentGroup.id).subscribe({
+      next: (restored) => {
+        this.restoring.set(false);
+        this.studentGroup.set(restored);
+      },
+      error: (error: unknown) => {
+        this.restoring.set(false);
+        this.restoreError.set(readErrorMessage(error, this.i18n.t('error.fallback')));
+      },
+    });
+  }
   protected readonly loans = signal<Loan[]>([]);
   protected readonly loading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);

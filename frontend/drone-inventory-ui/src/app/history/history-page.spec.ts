@@ -41,6 +41,23 @@ describe('HistoryPage', () => {
     fixture.detectChanges();
   }
 
+  it('shows a group deleted for good as text without a link (scenario "Group deleted, history kept")', async () => {
+    await respondWith([{ ...returnedLoan, studentGroupId: null }]);
+
+    const element = fixture.nativeElement as HTMLElement;
+    const cell = element.querySelector('tbody tr td:first-child') as HTMLElement;
+    expect(cell.textContent?.trim()).toBe('Group 3');
+    expect(cell.querySelector('a')).toBeNull();
+    expect(cell.querySelector('.former-group')).not.toBeNull();
+  });
+
+  it('links a group that still exists', async () => {
+    await respondWith([returnedLoan]);
+
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('tbody tr td:first-child a')?.getAttribute('href')).toBe('/student-groups/3');
+  });
+
   function rows(): string[][] {
     const element = fixture.nativeElement as HTMLElement;
     return Array.from(element.querySelectorAll('tbody tr')).map((row) =>
