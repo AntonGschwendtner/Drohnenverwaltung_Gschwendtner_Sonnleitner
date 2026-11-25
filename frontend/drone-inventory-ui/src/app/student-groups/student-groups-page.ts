@@ -11,10 +11,11 @@ import { SortHeader } from '../shared/sort-header';
 import { SortState, sortItems, SortValue } from '../shared/sort';
 import { matchesSearch, SearchField } from '../shared/search-field';
 import { StripSkeleton } from '../shared/strip-skeleton';
+import { MembersDialog } from './members-dialog';
 
 @Component({
   selector: 'app-student-groups-page',
-  imports: [ConfirmDialog, EmptyState, PageHead, ReactiveFormsModule, RouterLink, SearchField, SortHeader, StripSkeleton],
+  imports: [ConfirmDialog, EmptyState, MembersDialog, PageHead, ReactiveFormsModule, RouterLink, SearchField, SortHeader, StripSkeleton],
   template: `
     <app-page-head
       bay="02"
@@ -83,6 +84,9 @@ import { StripSkeleton } from '../shared/strip-skeleton';
               <tr [attr.data-group]="studentGroup.id">
                 <td><a [routerLink]="['/student-groups', studentGroup.id]">{{ studentGroup.name }}</a></td>
                 <td class="row-actions">
+                  <button type="button" class="quiet members" (click)="openMembers(studentGroup, $event)" [disabled]="busyId() !== null">
+                    {{ i18n.t('groups.members', { count: '' + studentGroup.members.length }) }}<span class="visually-hidden"> {{ studentGroup.name }}</span>
+                  </button>
                   <button type="button" class="quiet edit" (click)="startEdit(studentGroup)" [disabled]="busyId() !== null">
                     {{ i18n.t('action.edit') }}<span class="visually-hidden"> {{ studentGroup.name }}</span>
                   </button>
@@ -96,6 +100,10 @@ import { StripSkeleton } from '../shared/strip-skeleton';
         </tbody>
       </table>
       }
+    }
+
+    @if (membersGroup(); as studentGroup) {
+      <app-members-dialog [group]="studentGroup" (changed)="membersChanged($event)" (closed)="closeMembers()" />
     }
 
     @if (pendingDelete(); as studentGroup) {
@@ -125,6 +133,9 @@ export class StudentGroupsPage implements OnInit {
   protected readonly editingId = signal<number | null>(null);
   protected readonly busyId = signal<number | null>(null);
   protected readonly pendingDelete = signal<StudentGroup | null>(null);
+  /** The group whose members are open in the dialog (REQ-031). */
+  protected readonly membersGroup = signal<StudentGroup | null>(null);
+  private membersTrigger: HTMLElement | null = null;
   protected readonly listErrorMessage = signal<string | null>(null);
   private deleteTrigger: HTMLElement | null = null;
   protected readonly loadErrorMessage = signal<string | null>(null);
@@ -232,6 +243,25 @@ export class StudentGroupsPage implements OnInit {
         this.listErrorMessage.set(readErrorMessage(error, this.i18n.t('error.fallback')));
       },
     });
+  }
+
+  protected openMembers(studentGroup: StudentGroup, event: Event): void {
+    this.membersTrigger = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+    this.listErrorMessage.set(null);
+    this.membersGroup.set(studentGroup);
+  }
+
+  /** The dialog changed the group; the row shows the new count at once, without loading the whole list. */
+  protected membersChanged(changed: StudentGroup): void {
+    this.studentGroups.update((groups) => groups.map((group) => (group.id === changed.id ? changed : group)));
+    this.membersGroup.set(changed);
+  }
+
+  protected closeMembers(): void {
+    const id = this.membersGroup()?.id;
+    this.membersGroup.set(null);
+    this.membersTrigger = null;
+    this.focusAfterRender(`[data-group="${id}"] button.members`);
   }
 
   protected askToDelete(studentGroup: StudentGroup, event: Event): void {

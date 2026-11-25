@@ -50,7 +50,7 @@ describe('StudentGroupDetailPage', () => {
   }
 
   it('Group with active and returned loans', async () => {
-    const element = await openWith({ id: 3, name: 'Group 3' }, [active, returned]);
+    const element = await openWith({ id: 3, name: 'Group 3', members: [], leaderName: null }, [active, returned]);
 
     expect(element.querySelector('h1')?.textContent?.trim()).toBe('Group 3');
     expect(section(element, 'group-active-loans').querySelector('tbody td')?.textContent?.trim()).toBe('TELLO-07');
@@ -62,7 +62,7 @@ describe('StudentGroupDetailPage', () => {
   });
 
   it('says when the group has nothing right now', async () => {
-    const element = await openWith({ id: 3, name: 'Group 3' }, []);
+    const element = await openWith({ id: 3, name: 'Group 3', members: [], leaderName: null }, []);
 
     expect(section(element, 'group-active-loans').textContent).toContain('This group has no drone right now.');
     expect(section(element, 'group-history').textContent).toContain('No returned loans yet.');

@@ -43,7 +43,7 @@ describe('LoansPage opened for one drone', () => {
   async function open(url: string): Promise<HTMLElement> {
     await harness.navigateByUrl(url, LoansPage);
     http.expectOne('/api/drones').flush(drones);
-    http.expectOne('/api/student-groups').flush([{ id: 3, name: 'Group 3' }]);
+    http.expectOne('/api/student-groups').flush([{ id: 3, name: 'Group 3', members: [], leaderName: null }]);
     http.expectOne('/api/loans?status=Active').flush([activeLoan]);
     await harness.fixture.whenStable();
     harness.detectChanges();
@@ -94,7 +94,7 @@ describe('LoansPage opened for one drone', () => {
       .expectOne({ method: 'POST', url: '/api/loans' })
       .flush({ ...activeLoan, id: 2, droneId: 7, droneName: 'TELLO-07' });
     http.expectOne('/api/drones').flush([{ ...drones[0], status: 'Loaned' }, drones[1], drones[2]]);
-    http.expectOne('/api/student-groups').flush([{ id: 3, name: 'Group 3' }]);
+    http.expectOne('/api/student-groups').flush([{ id: 3, name: 'Group 3', members: [], leaderName: null }]);
     http.expectOne('/api/loans?status=Active').flush([activeLoan, { ...activeLoan, id: 2, droneId: 7, droneName: 'TELLO-07' }]);
     await harness.fixture.whenStable();
     harness.detectChanges();

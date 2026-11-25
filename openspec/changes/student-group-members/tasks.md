@@ -12,7 +12,7 @@
 
 ## 3. Frontend (REQ-031)
 
-- [ ] 3.1 "Members" button and members dialog in the student group list (add, remove with confirmation, make leader, no leader), English and German; component tests for "Open the members", "Group without members", "Add a member in the members view", removing and choosing the leader (#181)
+- [x] 3.1 "Members" button and members dialog in the student group list (add, remove with confirmation, make leader, no leader), English and German; component tests for "Open the members", "Group without members", "Add a member in the members view", removing and choosing the leader (#181)
 - [ ] 3.2 Group leader column and member search in the list, members with leader on the detail page; component tests for "Members and leader in the list", "Search by a member" and "Group with members" (#182)
 
 ## 4. Documentation

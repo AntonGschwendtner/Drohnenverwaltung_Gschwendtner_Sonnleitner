@@ -12,8 +12,8 @@ describe('StudentGroupsPage edit and delete', () => {
   let element: HTMLElement;
 
   const groups: StudentGroup[] = [
-    { id: 3, name: 'Grup 3' },
-    { id: 4, name: 'Group 4' },
+    { id: 3, name: 'Grup 3', members: [], leaderName: null },
+    { id: 4, name: 'Group 4', members: [], leaderName: null },
   ];
 
   beforeEach(async () => {
@@ -56,9 +56,9 @@ describe('StudentGroupsPage edit and delete', () => {
 
     const request = http.expectOne({ method: 'PUT', url: '/api/student-groups/3' });
     expect(request.request.body).toEqual({ name: 'Group 3' });
-    request.flush({ id: 3, name: 'Group 3' });
+    request.flush({ id: 3, name: 'Group 3', members: [], leaderName: null });
     await settle();
-    http.expectOne('/api/student-groups').flush([{ id: 3, name: 'Group 3' }, groups[1]]);
+    http.expectOne('/api/student-groups').flush([{ id: 3, name: 'Group 3', members: [], leaderName: null }, groups[1]]);
     await settle();
 
     expect(names()).toEqual(['Group 3', 'Group 4']);

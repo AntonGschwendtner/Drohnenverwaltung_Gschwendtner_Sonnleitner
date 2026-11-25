@@ -44,8 +44,8 @@ describe('StudentGroupsPage', () => {
 
   it('shows the student groups', async () => {
     http.expectOne('/api/student-groups').flush([
-      { id: 1, name: 'Group 3' },
-      { id: 2, name: 'Group 4' },
+      { id: 1, name: 'Group 3', members: [], leaderName: null },
+      { id: 2, name: 'Group 4', members: [], leaderName: null },
     ]);
     await settle();
 
@@ -67,10 +67,10 @@ describe('StudentGroupsPage', () => {
 
     const request = http.expectOne({ method: 'POST', url: '/api/student-groups' });
     expect(request.request.body).toEqual({ name: 'Group 3' });
-    request.flush({ id: 1, name: 'Group 3' });
+    request.flush({ id: 1, name: 'Group 3', members: [], leaderName: null });
     await settle();
 
-    http.expectOne({ method: 'GET', url: '/api/student-groups' }).flush([{ id: 1, name: 'Group 3' }]);
+    http.expectOne({ method: 'GET', url: '/api/student-groups' }).flush([{ id: 1, name: 'Group 3', members: [], leaderName: null }]);
     await settle();
 
     expect(names()).toEqual(['Group 3']);
@@ -78,7 +78,7 @@ describe('StudentGroupsPage', () => {
   });
 
   it('shows the rejection message from the backend', async () => {
-    http.expectOne('/api/student-groups').flush([{ id: 1, name: 'Group 3' }]);
+    http.expectOne('/api/student-groups').flush([{ id: 1, name: 'Group 3', members: [], leaderName: null }]);
     await settle();
 
     await submitName('Group 3');
