@@ -241,6 +241,7 @@ Diese Anforderungen sind als OpenSpec-Changes beschlossen (Freigabe am 2026-11-1
 | REQ-038 | Generalreset | Ankreuzen: alle Drohnen zurückgeben, alle Drohnen löschen, alle Schülergruppen löschen, ganze Historie löschen | `settings-and-data` |
 | REQ-039 | Backup und Wiederherstellen | Ganze Datenbank als Datei herunterladen und wieder einspielen | `settings-and-data` |
 | REQ-040 | Historie löschen | Knopf auf der Historienseite, löscht alle zurückgegebenen Ausleihen | `settings-and-data` |
+| REQ-041 | Auf einem Server betreiben | Port und Image per `.env`, fertiges Image für amd64 und arm64 aus GitHub, Health-Check `/api/health` | `docker-server` |
 
 ## Out of Scope
 

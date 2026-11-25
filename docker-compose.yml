@@ -1,13 +1,14 @@
-# Startet die Drohnenverwaltung als einen Container (REQ-032): docker compose up --build
+# Baut und startet die Drohnenverwaltung aus dem Quellcode (REQ-032): docker compose up --build -d
+# Port und Image-Name lassen sich in einer Datei .env setzen, siehe .env.example (REQ-041).
 name: drohnenverwaltung
 
 services:
   drohnenverwaltung:
     build: .
-    image: drohnenverwaltung
+    image: ${DROHNENVERWALTUNG_IMAGE:-drohnenverwaltung}
     container_name: drohnenverwaltung
     ports:
-      - "8080:8080"
+      - "${DROHNENVERWALTUNG_PORT:-8080}:8080"
     volumes:
       - drohnenverwaltung-data:/data
     restart: unless-stopped

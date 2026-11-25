@@ -2,3 +2,6 @@
 HANDOFF.md
 .claude/max-run-state.json
 .claude/settings.local.json
+
+# Local settings for Docker Compose (REQ-041); .env.example documents them.
+.env

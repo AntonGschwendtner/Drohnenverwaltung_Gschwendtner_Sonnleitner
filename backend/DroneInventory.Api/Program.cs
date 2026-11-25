@@ -63,6 +63,12 @@ app.MapStudentGroupEndpoints();
 app.MapLoanEndpoints();
 app.MapAdminEndpoints();
 
+// For monitoring or a reverse proxy in front of the container (REQ-041): healthy when the database opens.
+app.MapGet("/api/health", async (DroneInventoryDbContext dbContext, CancellationToken cancellationToken) =>
+    await dbContext.Database.CanConnectAsync(cancellationToken)
+        ? Results.Ok(new { Status = "healthy" })
+        : Results.Problem(statusCode: StatusCodes.Status503ServiceUnavailable, detail: Messages.Unhealthy));
+
 if (serveApp)
 {
     // Addresses of the app such as /drones/7 or /loans?drone=7 (QR codes, bookmarks) open the app, which then routes.

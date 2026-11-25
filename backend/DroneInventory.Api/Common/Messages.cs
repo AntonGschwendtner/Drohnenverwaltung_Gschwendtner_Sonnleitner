@@ -184,6 +184,10 @@ public static class Messages
         "This backup was made by a newer version of the app and cannot be restored here.",
         "Dieses Backup stammt von einer neueren Version der App und lässt sich hier nicht einspielen.");
 
+    public static string Unhealthy => Pick(
+        "The database of the app cannot be opened.",
+        "Die Datenbank der App lässt sich nicht öffnen.");
+
     public static string[] CsvHeader => IsGerman
         ? ["Schülergruppe", "Drohne", "Akkus", "Propeller", "Ausleihdatum", "Rückgabedatum"]
         : ["Student group", "Drone", "Batteries", "Propellers", "Loan date", "Return date"];
