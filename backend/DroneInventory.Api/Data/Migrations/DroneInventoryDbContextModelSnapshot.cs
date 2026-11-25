@@ -127,6 +127,37 @@ namespace DroneInventory.Api.Data.Migrations
                     b.ToTable("StudentGroups");
                 });
 
+            modelBuilder.Entity("DroneInventory.Api.Domain.StudentGroupMember", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsLeader")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE");
+
+                    b.Property<int>("StudentGroupId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentGroupId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_StudentGroupMembers_Leader")
+                        .HasFilter("\"IsLeader\" = 1");
+
+                    b.HasIndex("StudentGroupId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("StudentGroupMembers", (string)null);
+                });
+
             modelBuilder.Entity("DroneInventory.Api.Domain.Loan", b =>
                 {
                     b.HasOne("DroneInventory.Api.Domain.Drone", "Drone")
@@ -155,9 +186,23 @@ namespace DroneInventory.Api.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("DroneInventory.Api.Domain.StudentGroupMember", b =>
+                {
+                    b.HasOne("DroneInventory.Api.Domain.StudentGroup", null)
+                        .WithMany("Members")
+                        .HasForeignKey("StudentGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("DroneInventory.Api.Domain.Loan", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("DroneInventory.Api.Domain.StudentGroup", b =>
+                {
+                    b.Navigation("Members");
                 });
 #pragma warning restore 612, 618
         }
