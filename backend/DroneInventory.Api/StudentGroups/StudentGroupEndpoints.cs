@@ -11,6 +11,16 @@ public static class StudentGroupEndpoints
         studentGroups.MapGet("/", async (StudentGroupService service, CancellationToken cancellationToken) =>
             await service.ListAsync(cancellationToken));
 
+        studentGroups.MapGet("/trash", async (StudentGroupService service, CancellationToken cancellationToken) =>
+            await service.ListTrashAsync(cancellationToken));
+
+        studentGroups.MapPost("/{id:int}/restore", async (int id, StudentGroupService service, CancellationToken cancellationToken) =>
+        {
+            var result = await service.RestoreAsync(id, cancellationToken);
+
+            return result.Error is { } error ? error.ToProblem() : Results.Ok(result.Value);
+        });
+
         studentGroups.MapGet("/{id:int}", async (int id, StudentGroupService service, CancellationToken cancellationToken) =>
         {
             var result = await service.GetAsync(id, cancellationToken);

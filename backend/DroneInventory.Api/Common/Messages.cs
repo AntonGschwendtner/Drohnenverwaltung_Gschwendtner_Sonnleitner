@@ -152,6 +152,10 @@ public static class Messages
         $"\"{group}\" still has \"{drone}\". Return the drone first.",
         $"„{group}“ hat noch „{drone}“. Gib die Drohne zuerst zurück.");
 
+    public static string StudentGroupNotInTrash(string name) => Pick(
+        $"\"{name}\" is not in the trash.",
+        $"„{name}“ liegt nicht im Papierkorb.");
+
     public static string[] CsvHeader => IsGerman
         ? ["Schülergruppe", "Drohne", "Akkus", "Propeller", "Ausleihdatum", "Rückgabedatum"]
         : ["Student group", "Drone", "Batteries", "Propellers", "Loan date", "Return date"];
