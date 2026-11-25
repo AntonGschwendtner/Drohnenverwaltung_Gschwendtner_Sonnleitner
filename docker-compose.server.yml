@@ -1,0 +1,21 @@
+# Startet die Drohnenverwaltung auf einem Server ohne Quellcode, mit dem fertigen Image (REQ-041):
+#   docker compose -f docker-compose.server.yml up -d
+# Update auf die neueste Version:
+#   docker compose -f docker-compose.server.yml pull && docker compose -f docker-compose.server.yml up -d
+# Port und Image lassen sich in einer Datei .env daneben setzen, siehe .env.example.
+name: drohnenverwaltung
+
+services:
+  drohnenverwaltung:
+    image: ${DROHNENVERWALTUNG_IMAGE:-ghcr.io/antongschwendtner/drohnenverwaltung:latest}
+    pull_policy: always
+    container_name: drohnenverwaltung
+    ports:
+      - "${DROHNENVERWALTUNG_PORT:-8080}:8080"
+    volumes:
+      - drohnenverwaltung-data:/data
+    restart: unless-stopped
+
+volumes:
+  drohnenverwaltung-data:
+    name: drohnenverwaltung-data
