@@ -24,9 +24,14 @@
         <span>{{ time() }}</span>
       </span>
 
-      <button class="settings-button" type="button" (click)="openSettings($event)" [attr.aria-label]="i18n.t('settings.title')">
+      <button
+        class="settings-button"
+        type="button"
+        (click)="openSettings($event)"
+        [attr.aria-label]="i18n.t('settings.title')"
+        [title]="i18n.t('settings.title')"
+      >
         <span aria-hidden="true">⚙</span>
-        <span class="settings-label">{{ i18n.t('settings.title') }}</span>
       </button>
     </div>
   </div>
