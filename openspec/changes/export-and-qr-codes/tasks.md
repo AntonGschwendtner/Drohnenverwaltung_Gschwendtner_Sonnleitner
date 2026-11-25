@@ -16,4 +16,4 @@
 
 ## 4. Documentation
 
-- [ ] 4.1 README (export, print, labels), Out of Scope in `docs/requirements.md` (#170)
+- [x] 4.1 README (export, print, labels), Out of Scope in `docs/requirements.md` (#170)

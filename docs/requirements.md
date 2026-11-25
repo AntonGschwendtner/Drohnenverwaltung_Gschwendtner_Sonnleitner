@@ -250,6 +250,9 @@ Diese Anforderungen sind als OpenSpec-Changes beschlossen (Freigabe am 2026-11-1
 - Weitere Daten zu Mitgliedern als den Namen (Klasse, E-Mail), Konten für Mitglieder und Gruppenleiter
 - Festhalten, welches Mitglied eine Drohne genommen hat; eine Ausleihe gehört der ganzen Gruppe
 - Automatisches Leeren der Papierkörbe, einzelne Ausleihen aus der Historie löschen
+- Export anderer Listen (Drohnen, Gruppen) und Excel-Dateien (`.xlsx`); exportiert wird nur die Historie als CSV
+- Ein PDF, das der Server erzeugt; PDF entsteht über den Druckdialog des Browsers
+- QR-Codes in der App scannen; das übernimmt die Kamera des Handys, der Code ist ein normaler Link
 - HTTPS im Container, Veröffentlichen des Images in einer Registry, automatische Builds in CI und Backups des Volumes
 
 Diese Punkte kommen bei Bedarf später als eigener Change Request.
