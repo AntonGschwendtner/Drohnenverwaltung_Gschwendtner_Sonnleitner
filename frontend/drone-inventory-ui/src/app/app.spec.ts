@@ -25,6 +25,8 @@ describe('App', () => {
       '/student-groups',
       '/loans',
       '/history',
+      '/reservations',
+      '/statistics',
     ]);
   });
 

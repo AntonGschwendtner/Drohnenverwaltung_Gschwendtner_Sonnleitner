@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ApiService, Drone, Loan, readErrorMessage, ReturnLoanRequest, StudentGroup } from '../api.service';
@@ -51,6 +52,9 @@ import { StripSkeleton } from '../shared/strip-skeleton';
             }
           </select>
         </label>
+        @if (reservationHint(); as hint) {
+          <p class="strip-note reservation-note" role="status">{{ hint }}</p>
+        }
         <label>
           {{ i18n.t('field.studentGroup') }}
           <select formControlName="studentGroupId" name="studentGroupId">
@@ -193,6 +197,17 @@ export class LoansPage implements OnInit {
     propellers: 0 as number | null,
     dueDate: '',
     note: '',
+  });
+
+  /** The next reservation of the chosen drone, so nobody loans it into a reserved day by surprise (REQ-029). */
+  private readonly chosenDroneId = toSignal(this.form.controls.droneId.valueChanges, { initialValue: null });
+  protected readonly reservationHint = computed(() => {
+    const drone = this.drones().find((candidate) => candidate.id === this.chosenDroneId());
+    if (!drone?.nextReservationDate) {
+      return null;
+    }
+    const [year, month, day] = drone.nextReservationDate.split('-');
+    return this.i18n.t('reservations.loanHint', { drone: drone.name, date: `${day}.${month}.${year}`, group: drone.nextReservationGroup ?? '' });
   });
 
   /** Today as yyyy-MM-dd for the date field; the backend checks the date again (REQ-022). */

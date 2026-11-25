@@ -1,4 +1,4 @@
-import { DOCUMENT } from '@angular/common';
+import { DatePipe, DOCUMENT } from '@angular/common';
 import { afterNextRender, Component, computed, effect, inject, Injector, OnInit, signal, untracked, viewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -17,7 +17,7 @@ import { DroneTrashSection } from './drone-trash-section';
 
 @Component({
   selector: 'app-drones-page',
-  imports: [ConfirmDialog, DroneTrashSection, EmptyState, PageHead, ReactiveFormsModule, RouterLink, SearchField, SortHeader, StripSkeleton],
+  imports: [ConfirmDialog, DatePipe, DroneTrashSection, EmptyState, PageHead, ReactiveFormsModule, RouterLink, SearchField, SortHeader, StripSkeleton],
   template: `
     <app-page-head
       bay="01"
@@ -135,6 +135,11 @@ import { DroneTrashSection } from './drone-trash-section';
                   {{ drone.description }}
                   @if (drone.defectNote) {
                     <span class="strip-note defect-note">{{ i18n.t('drones.defectLabel', { defect: drone.defectNote }) }}</span>
+                  }
+                  @if (drone.nextReservationDate) {
+                    <span class="strip-note reservation-note">
+                      {{ i18n.t('reservations.hint', { date: (drone.nextReservationDate | date: 'dd.MM.yyyy') ?? '', group: drone.nextReservationGroup ?? '' }) }}
+                    </span>
                   }
                 </td>
                 <td class="row-actions">

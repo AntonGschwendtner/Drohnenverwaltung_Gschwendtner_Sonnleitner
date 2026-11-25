@@ -6,7 +6,7 @@
 
 ## 2. Frontend (REQ-030)
 
-- [ ] 2.1 Statistics page (Bay 06) with period switch, totals and bars per drone and per student group, English and German; component tests for loading, switching the period and that bars and numbers match the response (#236)
+- [x] 2.1 Statistics page (Bay 06) with period switch, totals and bars per drone and per student group, English and German; component tests for loading, switching the period and that bars and numbers match the response (#236)
 
 ## 3. Documentation
 

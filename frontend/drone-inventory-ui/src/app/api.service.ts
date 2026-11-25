@@ -15,6 +15,9 @@ export interface Drone {
   defectNote?: string | null;
   /** The day the drone went into the trash, or null (REQ-034). */
   deletedAt?: string | null;
+  /** The next reservation of today or later, for the hints (REQ-029). */
+  nextReservationDate?: string | null;
+  nextReservationGroup?: string | null;
 }
 
 export interface CreateDroneRequest {
@@ -39,6 +42,42 @@ export interface StudentGroup {
 }
 
 /** A group in the trash with what a permanent delete would take with it (REQ-033). */
+/** A drone kept for a student group on one day (REQ-027, REQ-028). */
+export interface Reservation {
+  id: number;
+  droneId: number;
+  droneName: string;
+  studentGroupId: number;
+  studentGroupName: string;
+  date: string;
+  isToday: boolean;
+  droneIsLoaned: boolean;
+}
+
+export interface CreateReservationRequest {
+  droneId: number | null;
+  studentGroupId: number | null;
+  date: string | null;
+}
+
+/** Loans and loan days of one drone or student group in the period (REQ-030). */
+export interface Usage {
+  id: number;
+  name: string;
+  loanCount: number;
+  loanDays: number;
+}
+
+export interface Statistics {
+  from: string;
+  to: string;
+  loanCount: number;
+  activeCount: number;
+  averageDays: number | null;
+  drones: Usage[];
+  studentGroups: Usage[];
+}
+
 /** The parts of the general reset; only what is true happens (REQ-038). */
 export interface ResetRequest {
   returnAllDrones: boolean;
@@ -183,6 +222,23 @@ export class ApiService {
 
   deleteStudentGroup(id: number): Observable<void> {
     return this.http.delete<void>(`/api/student-groups/${id}`);
+  }
+
+  listReservations(): Observable<Reservation[]> {
+    return this.http.get<Reservation[]>('/api/reservations');
+  }
+
+  createReservation(request: CreateReservationRequest): Observable<Reservation> {
+    return this.http.post<Reservation>('/api/reservations', request);
+  }
+
+  cancelReservation(id: number): Observable<void> {
+    return this.http.delete<void>(`/api/reservations/${id}`);
+  }
+
+  /** Without a period the backend takes this school year (REQ-030). */
+  getStatistics(period: { from?: string; to?: string }): Observable<Statistics> {
+    return this.http.get<Statistics>('/api/statistics', { params: { ...period } });
   }
 
   reset(request: ResetRequest): Observable<unknown> {

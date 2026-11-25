@@ -6,7 +6,7 @@
 
 ## 2. Frontend (REQ-027 to REQ-029)
 
-- [ ] 2.1 Reservations page (Bay 05) with form, list and cancel, English and German; reservation hints in the drone list and the loan form; reserved today on the page "Today"; component tests for creating, listing, cancelling, "Loan before the reserved day" and "Reserved today" (#233)
+- [x] 2.1 Reservations page (Bay 05) with form, list and cancel, English and German; reservation hints in the drone list and the loan form; reserved today on the page "Today"; component tests for creating, listing, cancelling, "Loan before the reserved day" and "Reserved today" (#233)
 
 ## 3. Documentation
 
