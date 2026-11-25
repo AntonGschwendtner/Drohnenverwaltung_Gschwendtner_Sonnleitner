@@ -8,6 +8,8 @@ Diese Begriffe gelten überall: in Anforderung, Spec, Code, Datenbank und im Ges
 |---|---|
 | Drone | Ein Fluggerät, das ausgeliehen werden kann |
 | StudentGroup | Eine Schülergruppe, die ausleiht und verantwortlich ist |
+| Member | Eine Person in einer StudentGroup, nur mit Namen |
+| Group leader | Das Mitglied, das für die StudentGroup verantwortlich ist; höchstens eines pro Gruppe |
 | Loan | Ein Ausleihvorgang mit Gruppe, Drohne, Datum und Status |
 | LoanItem | Eine Zubehörposition einer Ausleihe: Typ und Menge |
 | Active / Returned | Zustand eines Loan |
@@ -20,6 +22,7 @@ Diese Begriffe gelten überall: in Anforderung, Spec, Code, Datenbank und im Ges
 erDiagram
     Drone ||--o{ Loan : "wird ausgeliehen in"
     StudentGroup ||--o{ Loan : "leiht aus in"
+    StudentGroup ||--o{ StudentGroupMember : "besteht aus"
     Loan ||--o{ LoanItem : "enthält"
 
     Drone {
@@ -31,6 +34,12 @@ erDiagram
     StudentGroup {
         int Id
         string Name
+    }
+    StudentGroupMember {
+        int Id
+        int StudentGroupId
+        string Name "hoechstens 100 Zeichen, in der Gruppe eindeutig"
+        bool IsLeader "hoechstens ein Leiter pro Gruppe"
     }
     Loan {
         int Id
@@ -56,6 +65,7 @@ erDiagram
 - **Drone und StudentGroup sind Entities.** Sie haben eine eigene Identität und bleiben dieselbe Drohne oder Gruppe, auch wenn sich ihre Daten ändern. Deshalb lässt sich die Geschichte einer Drohne über mehrere Ausleihen verfolgen.
 - **Loan ist die zentrale Entity und Wurzel eines Aggregates.** Sie verbindet Drohne, Gruppe, Zeit und Zubehör. Änderungen an einer Ausleihe laufen immer über den Loan.
 - **LoanItem gehört zum Aggregate Loan.** Es existiert nur innerhalb einer Ausleihe und hat außerhalb keine Bedeutung. Die Id im Modell dient nur der Speicherung, fachlich verhält es sich wie ein Value Object: Es zählen nur Typ und Menge.
+- **Mitglieder gehören zur StudentGroup.** Sie werden nur über ihre Gruppe angelegt und entfernt und mit ihr gelöscht. Ausleihen hängen an der Gruppe, nicht an einem Mitglied.
 - **Akkus und Propeller sind keine Entities.** Sie werden nur als Menge geführt. Das ändert sich erst, wenn ein Change Request einzelne Akkus verlangt.
 
 ## Domain Rules
@@ -68,6 +78,7 @@ erDiagram
 6. Akkus und Propeller werden nur als Menge geführt.
 7. Die Verfügbarkeit ergibt sich aus dem gemeldeten Schaden und der aktiven Ausleihe. Eine defekte Drohne wird erst nach der Reparatur wieder ausgeliehen.
 8. Bei der Rückgabe werden die zurückgegebenen Mengen erfasst. Fehlteile bleiben in der Historie sichtbar.
+9. Ein Mitgliedsname kommt in einer Gruppe nur einmal vor, ohne Unterschied zwischen Groß- und Kleinschreibung. Eine Gruppe hat höchstens einen Gruppenleiter, und er ist Mitglied dieser Gruppe.
 
 Alle Regeln erzwingt das Backend. Das Frontend darf sie zusätzlich anzeigen, aber nicht als einzige Absicherung enthalten.
 

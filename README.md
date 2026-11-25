@@ -8,6 +8,7 @@ Schulprojekt im Fach SYP, 4. INF, 2026/27, von Gschwendtner und Sonnleitner. Bet
 
 - Drohnen anlegen und mit ihrem Status anzeigen. Der Status „Available“ oder „Loaned“ ergibt sich aus der aktiven Ausleihe und wird nie eingegeben.
 - Schülergruppen anlegen und anzeigen.
+- Die Personen einer Gruppe festhalten: Der Knopf „Mitglieder“ in der Gruppenliste zeigt die Namen, dort werden Mitglieder hinzugefügt und entfernt und ein Gruppenleiter bestimmt. Die Liste zeigt den Gruppenleiter, die Suche findet Gruppen auch über Mitglieder, die Detailseite listet alle Mitglieder. Gespeichert wird nur der Name.
 - Drohnen und Schülergruppen direkt in der Liste bearbeiten. Löschen geht nur, solange sie nie ausgeliehen waren, damit die Historie vollständig bleibt.
 - Eine verfügbare Drohne an eine Gruppe ausleihen, mit Akkus und Propellern als Mengenangabe.
 - Eine zweite aktive Ausleihe derselben Drohne und ungültige Mengen ablehnen, auch wenn zwei Anfragen gleichzeitig kommen.
@@ -25,7 +26,7 @@ Schulprojekt im Fach SYP, 4. INF, 2026/27, von Gschwendtner und Sonnleitner. Bet
 
 Nicht enthalten sind Login und Rollen sowie einzeln erfasste Akkus. Sie können später als eigener Change Request folgen.
 
-Die Changes `initial-drone-lending-system`, `improve-lending-overview`, `manage-drones-and-groups`, `drone-and-group-details`, `loan-notes-and-due-dates` und `return-check-and-damage` sind abgeschlossen und archiviert. Die geltenden Anforderungen stehen in [openspec/specs](openspec/specs), die erledigten Aufgaben im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
+Die Changes `initial-drone-lending-system`, `improve-lending-overview`, `manage-drones-and-groups`, `drone-and-group-details`, `loan-notes-and-due-dates`, `return-check-and-damage` und `student-group-members` sind abgeschlossen und archiviert. Die geltenden Anforderungen stehen in [openspec/specs](openspec/specs), die erledigten Aufgaben im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
 
 ## Technik
 
@@ -110,7 +111,10 @@ dotnet tool restore
 | `GET /api/student-groups/{id}` | Eine Schülergruppe |
 | `POST /api/student-groups` | Schülergruppe anlegen |
 | `PUT /api/student-groups/{id}` | Namen ändern |
-| `DELETE /api/student-groups/{id}` | Schülergruppe ohne Ausleihen löschen |
+| `DELETE /api/student-groups/{id}` | Schülergruppe ohne Ausleihen löschen, mit ihren Mitgliedern |
+| `POST /api/student-groups/{id}/members` | Mitglied hinzufügen |
+| `DELETE /api/student-groups/{id}/members/{memberId}` | Mitglied entfernen |
+| `PUT /api/student-groups/{id}/leader` | Gruppenleiter bestimmen (`memberId`) oder entfernen (`null`) |
 | `POST /api/loans` | Drohne mit Zubehör ausleihen |
 | `GET /api/loans?status=Active` | Aktive Ausleihen |
 | `POST /api/loans/{id}/return` | Ausleihe zurückgeben, optional mit `{ items: [{ type, returnedQuantity }], defect }` |

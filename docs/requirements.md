@@ -231,11 +231,14 @@ Diese Anforderungen sind als OpenSpec-Changes beschlossen (Freigabe am 2026-11-1
 | REQ-028 | Reservierungen anzeigen und stornieren | Heute und später, früheste zuerst | `reservations` |
 | REQ-029 | Reservierung beim Ausleihen beachten | Am reservierten Tag nur für die reservierende Gruppe | `reservations` |
 | REQ-030 | Statistiken | Summen, pro Drohne und pro Gruppe, für einen Zeitraum | `lending-statistics` |
+| REQ-031 | Mitglieder und Gruppenleiter | Namen der Personen einer Gruppe, ein Gruppenleiter, Knopf „Mitglieder“ in der Gruppenliste | `student-group-members` |
 
 ## Out of Scope
 
 - Login, Benutzerkonten und Rollen
 - Einzelinventarisierung von Akkus (BAT-001 ...)
+- Weitere Daten zu Mitgliedern als den Namen (Klasse, E-Mail), Konten für Mitglieder und Gruppenleiter
+- Festhalten, welches Mitglied eine Drohne genommen hat; eine Ausleihe gehört der ganzen Gruppe
 
 Diese Punkte kommen bei Bedarf später als eigener Change Request.
 
