@@ -17,4 +17,4 @@
 
 ## 4. Documentation
 
-- [ ] 4.1 REQ-031 in `docs/requirements.md`, domain model and README (#183)
+- [x] 4.1 REQ-031 in `docs/requirements.md`, domain model and README (#183)

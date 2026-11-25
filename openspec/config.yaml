@@ -21,7 +21,8 @@ context: |
   - Frontend code is located in /frontend/drone-inventory-ui.
   - OpenSpec is the source of truth for requirements.
 
-  Domain concepts: Drone, StudentGroup, Loan, LoanItem.
+  Domain concepts: Drone, StudentGroup, Loan, LoanItem. A StudentGroup has members
+  (StudentGroupMember, name only); one member can be its group leader.
   Use these terms everywhere. Do not introduce synonyms.
 
   Domain rules:
@@ -34,6 +35,8 @@ context: |
   - A drone with a reported defect is Defective and cannot be loaned until it is repaired.
   - Otherwise drone availability follows from the active loan and is never entered by a user.
   - A return records the returned quantities; missing parts stay visible in the history.
+  - A member name is unique within its group, ignoring case; a group has at most one leader,
+    who is one of its own members. Loans belong to the group, not to a member.
 
   Out of scope: login, user accounts and roles; individual batteries with their own
   identity. Damage management, return differences, reservations, statistics and the
