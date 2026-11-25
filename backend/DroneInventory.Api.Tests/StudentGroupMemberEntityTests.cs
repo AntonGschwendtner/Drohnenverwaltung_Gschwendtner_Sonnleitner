@@ -90,6 +90,7 @@ public sealed class StudentGroupMemberEntityTests : IDisposable
         var response = await client.DeleteAsync($"/api/student-groups/{groupId}");
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync($"/api/student-groups/{groupId}")).StatusCode);
         Assert.Equal(0, await CountMembersAsync());
     }
 
