@@ -53,7 +53,8 @@ export interface Loan {
   id: number;
   droneId: number;
   droneName: string;
-  studentGroupId: number;
+  /** Null once the group was deleted for good with its history kept; the name stays (REQ-033). */
+  studentGroupId: number | null;
   studentGroupName: string;
   batteries: number;
   propellers: number;
@@ -167,6 +168,11 @@ export class ApiService {
 
   restoreStudentGroup(id: number): Observable<StudentGroup> {
     return this.http.post<StudentGroup>(`/api/student-groups/${id}/restore`, null);
+  }
+
+  /** Deletes a group from the trash for good; its loans stay in the history ("keep") or go with it ("delete"). */
+  deleteStudentGroupPermanently(id: number, history: 'keep' | 'delete'): Observable<void> {
+    return this.http.delete<void>(`/api/student-groups/${id}/permanent`, { params: { history } });
   }
 
   addMember(studentGroupId: number, name: string): Observable<StudentGroupMember> {

@@ -1,7 +1,9 @@
 import { DatePipe } from '@angular/common';
 import { Component, inject, output, signal } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { ApiService, readErrorMessage, StudentGroup, TrashedStudentGroup } from '../api.service';
 import { I18nService } from '../i18n.service';
+import { ConfirmDialog } from '../shared/confirm-dialog';
 import { EmptyState } from '../shared/empty-state';
 
 /**
@@ -10,7 +12,7 @@ import { EmptyState } from '../shared/empty-state';
  */
 @Component({
   selector: 'app-trash-section',
-  imports: [DatePipe, EmptyState],
+  imports: [ConfirmDialog, DatePipe, EmptyState],
   template: `
     <section class="trash" aria-labelledby="group-trash">
       <h2 id="group-trash">
@@ -57,6 +59,9 @@ import { EmptyState } from '../shared/empty-state';
                       <button type="button" class="quiet restore" (click)="restore(group)" [disabled]="busyId() !== null" [class.busy]="busyId() === group.id">
                         {{ i18n.t('trash.restore') }}<span class="visually-hidden"> {{ group.name }}</span>
                       </button>
+                      <button type="button" class="quiet delete-permanently" (click)="askPermanent(group, $event)" [disabled]="busyId() !== null">
+                        {{ i18n.t('trash.deletePermanently') }}<span class="visually-hidden"> {{ group.name }}</span>
+                      </button>
                     </td>
                   </tr>
                 }
@@ -66,6 +71,29 @@ import { EmptyState } from '../shared/empty-state';
         </div>
       }
     </section>
+
+    @if (pendingPermanent(); as group) {
+      <app-confirm-dialog
+        [heading]="i18n.t('trash.permanentTitle', { group: group.name })"
+        [text]="i18n.t('trash.permanentText', { group: group.name })"
+        [confirmLabel]="history() === 'keep' ? i18n.t('trash.confirmKeep') : i18n.t('trash.confirmAll')"
+        [cancelLabel]="i18n.t('dialog.cancel')"
+        (confirmed)="confirmPermanent()"
+        (cancelled)="cancelPermanent()"
+      >
+        <fieldset class="history-choice">
+          <legend>{{ i18n.t('trash.historyLegend') }}</legend>
+          <label>
+            <input type="radio" name="history" value="keep" [checked]="history() === 'keep'" (change)="history.set('keep')" />
+            {{ i18n.t('trash.keepHistory', { group: group.name }) }}
+          </label>
+          <label>
+            <input type="radio" name="history" value="delete" [checked]="history() === 'delete'" (change)="history.set('delete')" />
+            {{ i18n.t('trash.deleteHistory', { count: '' + group.loanCount }) }}
+          </label>
+        </fieldset>
+      </app-confirm-dialog>
+    }
   `,
 })
 export class TrashSection {
@@ -81,6 +109,12 @@ export class TrashSection {
   protected readonly busyId = signal<number | null>(null);
   protected readonly errorMessage = signal<string | null>(null);
 
+  /** The group waiting for the answer of the permanent dialog and the chosen fate of its history. */
+  protected readonly pendingPermanent = signal<TrashedStudentGroup | null>(null);
+  protected readonly history = signal<'keep' | 'delete'>('keep');
+  private permanentTrigger: HTMLElement | null = null;
+  private loadRequest: Subscription | null = null;
+
   protected toggle(): void {
     this.open.update((open) => !open);
     if (this.open()) {
@@ -88,22 +122,62 @@ export class TrashSection {
     }
   }
 
-  /** Loads the trash again when it is open, for example after a group was moved into it. */
-  reload(): void {
+  /**
+   * Loads the trash again when it is open, for example after a group was moved into it. A message stays visible
+   * after the load, such as the reason why a restore failed.
+   */
+  reload(message: string | null = null): void {
     if (!this.open()) {
       return;
     }
 
+    // A newer load replaces an older one that is still on its way.
+    this.loadRequest?.unsubscribe();
     this.loading.set(true);
-    this.api.listTrash().subscribe({
+    this.loadRequest = this.api.listTrash().subscribe({
       next: (groups) => {
         this.groups.set(groups);
-        this.errorMessage.set(null);
+        this.errorMessage.set(message);
         this.loading.set(false);
       },
       error: (error: unknown) => {
         this.errorMessage.set(readErrorMessage(error, this.i18n.t('error.fallback')));
         this.loading.set(false);
+      },
+    });
+  }
+
+  protected askPermanent(group: TrashedStudentGroup, event: Event): void {
+    this.permanentTrigger = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+    // Keeping the history is the safe default; deleting it has to be chosen on purpose.
+    this.history.set('keep');
+    this.pendingPermanent.set(group);
+  }
+
+  protected cancelPermanent(): void {
+    this.pendingPermanent.set(null);
+    this.permanentTrigger?.focus();
+    this.permanentTrigger = null;
+  }
+
+  protected confirmPermanent(): void {
+    const group = this.pendingPermanent();
+    this.pendingPermanent.set(null);
+    this.permanentTrigger = null;
+    if (!group) {
+      return;
+    }
+
+    this.busyId.set(group.id);
+    this.errorMessage.set(null);
+    this.api.deleteStudentGroupPermanently(group.id, this.history()).subscribe({
+      next: () => {
+        this.busyId.set(null);
+        this.groups.update((groups) => groups.filter((candidate) => candidate.id !== group.id));
+      },
+      error: (error: unknown) => {
+        this.busyId.set(null);
+        this.reloadAfterError(error);
       },
     });
   }
@@ -123,8 +197,15 @@ export class TrashSection {
       },
       error: (error: unknown) => {
         this.busyId.set(null);
-        this.errorMessage.set(readErrorMessage(error, this.i18n.t('error.fallback')));
+        this.reloadAfterError(error);
       },
     });
+  }
+
+  /** Shows the message and loads the trash again, because the group may have been changed somewhere else. */
+  private reloadAfterError(error: unknown): void {
+    const message = readErrorMessage(error, this.i18n.t('error.fallback'));
+    this.errorMessage.set(message);
+    this.reload(message);
   }
 }

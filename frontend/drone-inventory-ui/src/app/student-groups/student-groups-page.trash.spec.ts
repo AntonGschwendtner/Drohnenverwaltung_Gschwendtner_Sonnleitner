@@ -102,8 +102,12 @@ describe('StudentGroupsPage trash', () => {
       .flush({ detail: '"Group 5" is not in the trash.' }, { status: 404, statusText: 'Not Found' });
     await settle();
 
+    // The group may have been restored somewhere else, so the trash loads again and keeps the message.
+    http.expectOne('/api/student-groups/trash').flush([]);
+    await settle();
+
     expect(element.querySelector('.trash [role="alert"]')?.textContent).toContain('is not in the trash');
-    expect(element.querySelector('[data-trashed="5"]')).not.toBeNull();
+    expect(element.querySelector('[data-trashed="5"]')).toBeNull();
   });
 
   it('moves a deleted group into the open trash', async () => {
