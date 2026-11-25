@@ -1,0 +1,13 @@
+# Nur Quellcode kommt in den Build, keine lokalen Builds, Abhaengigkeiten oder Datenbanken.
+.git
+.claude
+HANDOFF.md
+**/node_modules
+**/dist
+**/.angular
+**/bin
+**/obj
+**/*.db
+**/*.db-shm
+**/*.db-wal
+backend/DroneInventory.Api.Tests
