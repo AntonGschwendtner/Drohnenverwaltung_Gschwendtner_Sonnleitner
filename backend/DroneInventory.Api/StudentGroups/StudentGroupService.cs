@@ -249,7 +249,7 @@ public class StudentGroupService(DroneInventoryDbContext dbContext)
 
             await transaction.CommitAsync(cancellationToken);
         }
-        catch (SqliteException exception) when (exception.SqliteErrorCode == 19)
+        catch (SqliteException exception) when (exception is { SqliteErrorCode: 19, SqliteExtendedErrorCode: 2067 })
         {
             // Another request chose a leader for this group at the same moment.
             return ServiceResult<StudentGroupResponse>.Conflict(Messages.LeaderChangedAtTheSameTime);
