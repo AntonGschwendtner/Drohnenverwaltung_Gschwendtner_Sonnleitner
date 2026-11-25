@@ -66,9 +66,11 @@ public class DroneInventoryDbContext(DbContextOptions<DroneInventoryDbContext> o
                 .HasForeignKey(l => l.DroneId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Optional only for loans whose group was deleted for good with "keep the history" (REQ-033).
             loan.HasOne(l => l.StudentGroup)
                 .WithMany()
                 .HasForeignKey(l => l.StudentGroupId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
             loan.HasMany(l => l.Items)

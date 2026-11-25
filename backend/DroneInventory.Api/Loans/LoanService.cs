@@ -20,7 +20,8 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
         loan.DroneId,
         loan.Drone!.Name,
         loan.StudentGroupId,
-        loan.StudentGroup!.Name,
+        // The current name of the group; the kept name once the group was deleted for good (REQ-033).
+        loan.StudentGroup != null ? loan.StudentGroup.Name : loan.FormerStudentGroupName ?? string.Empty,
         loan.Items.Where(item => item.Type == LoanItemType.Battery).Sum(item => item.Quantity),
         loan.Items.Where(item => item.Type == LoanItemType.Propeller).Sum(item => item.Quantity),
         loan.LoanDate,
