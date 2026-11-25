@@ -21,6 +21,13 @@ public static class StudentGroupEndpoints
             return result.Error is { } error ? error.ToProblem() : Results.Ok(result.Value);
         });
 
+        studentGroups.MapDelete("/{id:int}/permanent", async (int id, string? history, StudentGroupService service, CancellationToken cancellationToken) =>
+        {
+            var result = await service.DeletePermanentlyAsync(id, history, cancellationToken);
+
+            return result.Error is { } error ? error.ToProblem() : Results.NoContent();
+        });
+
         studentGroups.MapGet("/{id:int}", async (int id, StudentGroupService service, CancellationToken cancellationToken) =>
         {
             var result = await service.GetAsync(id, cancellationToken);

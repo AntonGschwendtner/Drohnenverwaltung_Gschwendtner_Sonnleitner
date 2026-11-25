@@ -156,6 +156,10 @@ public static class Messages
         $"\"{name}\" is not in the trash.",
         $"„{name}“ liegt nicht im Papierkorb.");
 
+    public static string HistoryChoiceMissing => Pick(
+        "Say what happens to the history of the group: history=keep or history=delete.",
+        "Gib an, was mit der Historie der Gruppe passiert: history=keep oder history=delete.");
+
     public static string[] CsvHeader => IsGerman
         ? ["Schülergruppe", "Drohne", "Akkus", "Propeller", "Ausleihdatum", "Rückgabedatum"]
         : ["Student group", "Drone", "Batteries", "Propellers", "Loan date", "Return date"];
