@@ -9,7 +9,7 @@ Diese Begriffe gelten überall: in Anforderung, Spec, Code, Datenbank und im Ges
 | Drone | Ein Fluggerät, das ausgeliehen werden kann |
 | StudentGroup | Eine Schülergruppe, die ausleiht und verantwortlich ist |
 | Member | Eine Person in einer StudentGroup, nur mit Namen |
-| Trash | Papierkorb: Eine gelöschte StudentGroup liegt dort mit Mitgliedern und Ausleihen, bis sie wiederhergestellt oder endgültig gelöscht wird |
+| Trash | Papierkorb: Eine gelöschte StudentGroup oder Drone liegt dort mit ihren Ausleihen, bis sie wiederhergestellt oder endgültig gelöscht wird |
 | Group leader | Das Mitglied, das für die StudentGroup verantwortlich ist; höchstens eines pro Gruppe |
 | Loan | Ein Ausleihvorgang mit Gruppe, Drohne, Datum und Status |
 | LoanItem | Eine Zubehörposition einer Ausleihe: Typ und Menge |
@@ -31,6 +31,7 @@ erDiagram
         string Name
         string Description
         string DefectNote "optional, gemeldeter Schaden"
+        date DeletedAt "optional, Tag im Papierkorb"
     }
     StudentGroup {
         int Id
@@ -45,7 +46,8 @@ erDiagram
     }
     Loan {
         int Id
-        int DroneId
+        int DroneId "leer nach endgueltigem Loeschen mit behaltener Historie"
+        string FormerDroneName "optional, Name der endgueltig geloeschten Drohne"
         int StudentGroupId "leer nach endgueltigem Loeschen mit behaltener Historie"
         string FormerStudentGroupName "optional, Name der endgueltig geloeschten Gruppe"
         date LoanDate
@@ -77,12 +79,12 @@ erDiagram
 2. Nur verfügbare Drohnen dürfen ausgeliehen werden.
 3. Eine Rückgabe macht die Drohne wieder verfügbar, außer es wird dabei ein Schaden gemeldet.
 4. Zubehörmengen sind nie negativ.
-5. Zurückgegebene Ausleihen bleiben gespeichert. Einzige Ausnahme: Eine StudentGroup wird aus dem Papierkorb endgültig mit ihrer Historie gelöscht.
+5. Zurückgegebene Ausleihen bleiben gespeichert. Einzige Ausnahme: Eine StudentGroup oder Drone wird aus dem Papierkorb endgültig mit ihrer Historie gelöscht.
 6. Akkus und Propeller werden nur als Menge geführt.
 7. Die Verfügbarkeit ergibt sich aus dem gemeldeten Schaden und der aktiven Ausleihe. Eine defekte Drohne wird erst nach der Reparatur wieder ausgeliehen.
 8. Bei der Rückgabe werden die zurückgegebenen Mengen erfasst. Fehlteile bleiben in der Historie sichtbar.
 9. Ein Mitgliedsname kommt in einer Gruppe nur einmal vor, ohne Unterschied zwischen Groß- und Kleinschreibung. Eine Gruppe hat höchstens einen Gruppenleiter, und er ist Mitglied dieser Gruppe.
-10. Löschen verschiebt eine StudentGroup in den Papierkorb. Eine Gruppe mit aktiver Ausleihe kommt nicht in den Papierkorb und wird nicht endgültig gelöscht. Eine Gruppe im Papierkorb leiht nicht aus und wird nicht geändert, ihr Name bleibt vergeben.
+10. Löschen verschiebt eine StudentGroup oder Drone in den Papierkorb. Mit aktiver Ausleihe kommt sie nicht in den Papierkorb und wird nicht endgültig gelöscht. Im Papierkorb wird sie nicht ausgeliehen und nicht geändert, ihr Name bleibt vergeben.
 
 Alle Regeln erzwingt das Backend. Das Frontend darf sie zusätzlich anzeigen, aber nicht als einzige Absicherung enthalten.
 

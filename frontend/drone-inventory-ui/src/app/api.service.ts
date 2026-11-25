@@ -13,6 +13,8 @@ export interface Drone {
   description: string;
   /** The reported defect while the drone is Defective (REQ-024). */
   defectNote?: string | null;
+  /** The day the drone went into the trash, or null (REQ-034). */
+  deletedAt?: string | null;
 }
 
 export interface CreateDroneRequest {
@@ -37,6 +39,14 @@ export interface StudentGroup {
 }
 
 /** A group in the trash with what a permanent delete would take with it (REQ-033). */
+/** A drone in the trash with the number of loans a permanent delete would take with it (REQ-034). */
+export interface TrashedDrone {
+  id: number;
+  name: string;
+  deletedAt: string;
+  loanCount: number;
+}
+
 export interface TrashedStudentGroup {
   id: number;
   name: string;
@@ -51,7 +61,8 @@ export interface CreateStudentGroupRequest {
 
 export interface Loan {
   id: number;
-  droneId: number;
+  /** Null once the drone was deleted for good with its history kept; the name stays (REQ-034). */
+  droneId: number | null;
   droneName: string;
   /** Null once the group was deleted for good with its history kept; the name stays (REQ-033). */
   studentGroupId: number | null;
@@ -160,6 +171,19 @@ export class ApiService {
 
   deleteStudentGroup(id: number): Observable<void> {
     return this.http.delete<void>(`/api/student-groups/${id}`);
+  }
+
+  listDroneTrash(): Observable<TrashedDrone[]> {
+    return this.http.get<TrashedDrone[]>('/api/drones/trash');
+  }
+
+  restoreDrone(id: number): Observable<Drone> {
+    return this.http.post<Drone>(`/api/drones/${id}/restore`, null);
+  }
+
+  /** Deletes a drone from the trash for good; its loans stay in the history ("keep") or go with it ("delete"). */
+  deleteDronePermanently(id: number, history: 'keep' | 'delete'): Observable<void> {
+    return this.http.delete<void>(`/api/drones/${id}/permanent`, { params: { history } });
   }
 
   listTrash(): Observable<TrashedStudentGroup[]> {

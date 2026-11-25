@@ -116,7 +116,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
                     <span class="former-group">{{ loan.studentGroupName }}</span>
                   }
                 </td>
-                <td [attr.data-label]="i18n.t('field.drone')"><a [routerLink]="['/drones', loan.droneId]">{{ loan.droneName }}</a>@if (loan.note) {<span class="strip-note">{{ loan.note }}</span>}</td>
+                <td [attr.data-label]="i18n.t('field.drone')">@if (loan.droneId !== null) {<a [routerLink]="['/drones', loan.droneId]">{{ loan.droneName }}</a>} @else {<span class="former-group">{{ loan.droneName }}</span>}@if (loan.note) {<span class="strip-note">{{ loan.note }}</span>}</td>
                 <td [attr.data-label]="i18n.t('field.batteries')">{{ loan.batteries }}</td>
                 <td [attr.data-label]="i18n.t('field.propellers')">{{ loan.propellers }}</td>
                 <td [attr.data-label]="i18n.t('field.loanDate')">{{ loan.loanDate | date: 'dd.MM.yyyy' }}</td>

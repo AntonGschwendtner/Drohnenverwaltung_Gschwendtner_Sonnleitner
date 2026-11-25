@@ -160,7 +160,7 @@ The system SHALL store the return date of a loan. The return date SHALL be set b
 
 ## REQ-010 Ausleihhistorie anzeigen
 
-Returned loans SHALL stay stored and SHALL NOT be deleted, except when a student group is deleted for good together with its history (REQ-033). The system SHALL list past loans with student group, drone, accessory quantities, loan date and return date.
+Returned loans SHALL stay stored and SHALL NOT be deleted, except when a student group (REQ-033) or a drone (REQ-034) is deleted for good together with its history. The system SHALL list past loans with student group, drone, accessory quantities, loan date and return date.
 
 **Scenario: Returned loan stays in the history**
 - GIVEN "TELLO-07" was loaned to "Group 3" with 4 batteries and 8 propellers
@@ -216,7 +216,7 @@ Diese Anforderungen sind als OpenSpec-Changes beschlossen (Freigabe am 2026-11-1
 | REQ | Titel | Kurz | Change |
 |---|---|---|---|
 | REQ-015 | Drohne bearbeiten | Name und Beschreibung ändern, Name bleibt eindeutig | `manage-drones-and-groups` |
-| REQ-016 | Drohne löschen | Nur wenn sie nie ausgeliehen war | `manage-drones-and-groups` |
+| REQ-016 | Drohne löschen | Verschiebt seit REQ-034 in den Papierkorb | `manage-drones-and-groups` |
 | REQ-017 | Schülergruppe bearbeiten und löschen | Löschen verschiebt seit REQ-033 in den Papierkorb | `manage-drones-and-groups` |
 | REQ-018 | Drohnendetails | Aktive Ausleihe und alle früheren Ausleihen einer Drohne | `drone-and-group-details` |
 | REQ-019 | Gruppendetails | Aktive und frühere Ausleihen einer Gruppe | `drone-and-group-details` |
@@ -234,6 +234,7 @@ Diese Anforderungen sind als OpenSpec-Changes beschlossen (Freigabe am 2026-11-1
 | REQ-031 | Mitglieder und Gruppenleiter | Namen der Personen einer Gruppe, ein Gruppenleiter, Knopf „Mitglieder“ in der Gruppenliste | `student-group-members` |
 | REQ-032 | Docker-Container | Frontend und Backend in einem Container `drohnenverwaltung`, Daten im Volume | `docker-container` |
 | REQ-033 | Papierkorb für Schülergruppen | Löschen verschiebt in den Papierkorb; wiederherstellen oder endgültig löschen, mit oder ohne Historie | `student-group-trash` |
+| REQ-034 | Papierkorb für Drohnen | Wie REQ-033: Papierkorb, wiederherstellen, endgültig löschen mit oder ohne Historie | `drone-trash` |
 
 ## Out of Scope
 
@@ -241,7 +242,7 @@ Diese Anforderungen sind als OpenSpec-Changes beschlossen (Freigabe am 2026-11-1
 - Einzelinventarisierung von Akkus (BAT-001 ...)
 - Weitere Daten zu Mitgliedern als den Namen (Klasse, E-Mail), Konten für Mitglieder und Gruppenleiter
 - Festhalten, welches Mitglied eine Drohne genommen hat; eine Ausleihe gehört der ganzen Gruppe
-- Ein Papierkorb für Drohnen, automatisches Leeren des Papierkorbs, einzelne Ausleihen aus der Historie löschen
+- Automatisches Leeren der Papierkörbe, einzelne Ausleihen aus der Historie löschen
 - HTTPS im Container, Veröffentlichen des Images in einer Registry, automatische Builds in CI und Backups des Volumes
 
 Diese Punkte kommen bei Bedarf später als eigener Change Request.

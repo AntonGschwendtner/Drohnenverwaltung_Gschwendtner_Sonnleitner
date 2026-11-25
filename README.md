@@ -9,8 +9,8 @@ Schulprojekt im Fach SYP, 4. INF, 2026/27, von Gschwendtner und Sonnleitner. Bet
 - Drohnen anlegen und mit ihrem Status anzeigen. Der Status „Available“ oder „Loaned“ ergibt sich aus der aktiven Ausleihe und wird nie eingegeben.
 - Schülergruppen anlegen und anzeigen.
 - Die Personen einer Gruppe festhalten: Der Knopf „Mitglieder“ in der Gruppenliste zeigt die Namen, dort werden Mitglieder hinzugefügt und entfernt und ein Gruppenleiter bestimmt. Die Liste zeigt den Gruppenleiter, die Suche findet Gruppen auch über Mitglieder, die Detailseite listet alle Mitglieder. Gespeichert wird nur der Name.
-- Drohnen und Schülergruppen direkt in der Liste bearbeiten. Eine Drohne lässt sich nur löschen, solange sie nie ausgeliehen war.
-- Schülergruppen löschen, auch mit Ausleihen: „Löschen“ verschiebt die Gruppe in den **Papierkorb** unter der Gruppenliste. Dort lässt sie sich wiederherstellen oder endgültig löschen, wahlweise mit „Historie behalten“ (die Ausleihen bleiben unter dem Gruppennamen) oder „Auch die Historie löschen“. Eine Gruppe, die gerade eine Drohne hat, muss sie zuerst zurückgeben.
+- Drohnen und Schülergruppen direkt in der Liste bearbeiten.
+- Drohnen und Schülergruppen löschen, auch mit Ausleihen: „Löschen“ verschiebt sie in den **Papierkorb** unter der jeweiligen Liste. Dort lassen sie sich wiederherstellen oder endgültig löschen, wahlweise mit „Historie behalten“ (die Ausleihen bleiben unter dem Namen) oder „Auch die Historie löschen“. Eine ausgeliehene Drohne muss vorher zurückgegeben werden.
 - Eine verfügbare Drohne an eine Gruppe ausleihen, mit Akkus und Propellern als Mengenangabe.
 - Eine zweite aktive Ausleihe derselben Drohne und ungültige Mengen ablehnen, auch wenn zwei Anfragen gleichzeitig kommen.
 - Aktive Ausleihen anzeigen und zurückgeben. Ausleih- und Rückgabedatum setzt das System.
@@ -28,7 +28,7 @@ Schulprojekt im Fach SYP, 4. INF, 2026/27, von Gschwendtner und Sonnleitner. Bet
 
 Nicht enthalten sind Login und Rollen sowie einzeln erfasste Akkus. Sie können später als eigener Change Request folgen.
 
-Die Changes `initial-drone-lending-system`, `improve-lending-overview`, `manage-drones-and-groups`, `drone-and-group-details`, `loan-notes-and-due-dates`, `return-check-and-damage`, `student-group-members`, `docker-container` und `student-group-trash` sind abgeschlossen und archiviert. Die geltenden Anforderungen stehen in [openspec/specs](openspec/specs), die erledigten Aufgaben im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
+Die Changes `initial-drone-lending-system`, `improve-lending-overview`, `manage-drones-and-groups`, `drone-and-group-details`, `loan-notes-and-due-dates`, `return-check-and-damage`, `student-group-members`, `docker-container`, `student-group-trash` und `drone-trash` sind abgeschlossen und archiviert. Die geltenden Anforderungen stehen in [openspec/specs](openspec/specs), die erledigten Aufgaben im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
 
 ## Technik
 
@@ -123,7 +123,10 @@ dotnet tool restore
 | `GET /api/drones/{id}` | Eine Drohne mit Status |
 | `POST /api/drones` | Drohne anlegen |
 | `PUT /api/drones/{id}` | Name und Beschreibung ändern |
-| `DELETE /api/drones/{id}` | Drohne ohne Ausleihen löschen |
+| `DELETE /api/drones/{id}` | Drohne in den Papierkorb verschieben (nicht wenn ausgeliehen) |
+| `GET /api/drones/trash` | Drohnen im Papierkorb mit Löschdatum und Ausleihen |
+| `POST /api/drones/{id}/restore` | Drohne aus dem Papierkorb wiederherstellen |
+| `DELETE /api/drones/{id}/permanent?history=keep\|delete` | Drohne aus dem Papierkorb endgültig löschen, Historie behalten oder mitlöschen |
 | `POST /api/drones/{id}/defect` | Schaden melden (`{ description }`), nicht bei verliehener Drohne |
 | `POST /api/drones/{id}/repair` | Defekte Drohne als repariert markieren |
 | `GET /api/student-groups` | Schülergruppen |
@@ -145,7 +148,7 @@ dotnet tool restore
 
 Jede Ausleihe enthält `daysActive` (volle Tage seit dem Ausleihdatum, nur bei aktiven Ausleihen, sonst `null`), `isLongRunning` (mehr als 7 Tage, nur ohne geplantes Rückgabedatum), `note`, `dueDate` und `isOverdue` (aktiv und das geplante Datum ist vorbei). Die Markierungen berechnet das Backend beim Lesen. Beim Anlegen sind `note` (höchstens 500 Zeichen) und `dueDate` (nicht vor heute) optional. Nach der Rückgabe zeigen `missingBatteries` und `missingPropellers` die Fehlteile. Drohnen haben den Status `Available`, `Loaned` oder `Defective` und bei einem Schaden `defectNote`.
 
-Ablehnungen kommen als ProblemDetails mit lesbarer Meldung: 400 bei ungültiger Eingabe (auch ohne `history` beim endgültigen Löschen), 404 bei unbekannter Drohne, Gruppe oder Ausleihe, 409 bei doppeltem Namen (auch wenn die Gruppe mit dem Namen im Papierkorb liegt), bereits ausgeliehener Drohne, bereits zurückgegebener Ausleihe, beim Löschen einer Drohne mit Ausleihen, beim Löschen einer Gruppe mit aktiver Ausleihe oder bei Änderungen an einer Gruppe im Papierkorb. Nach dem Umbenennen zeigt auch die Historie den neuen Namen.
+Ablehnungen kommen als ProblemDetails mit lesbarer Meldung: 400 bei ungültiger Eingabe (auch ohne `history` beim endgültigen Löschen), 404 bei unbekannter Drohne, Gruppe oder Ausleihe, 409 bei doppeltem Namen (auch wenn die Gruppe mit dem Namen im Papierkorb liegt), bereits ausgeliehener Drohne, bereits zurückgegebener Ausleihe, beim Löschen einer ausgeliehenen Drohne oder einer Gruppe mit aktiver Ausleihe oder bei Änderungen an einer Drohne oder Gruppe im Papierkorb. Nach dem Umbenennen zeigt auch die Historie den neuen Namen.
 
 ## Dokumentation
 
