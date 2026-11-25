@@ -148,6 +148,12 @@ public sealed class DroneTrashApiTests : IDisposable
         Assert.Equal("Group 3", loan.GetProperty("studentGroupName").GetString());
         Assert.Contains("TELLO-07", await _client.GetStringAsync("/api/loans/export"));
 
+        // Returning the old loan again says it is returned, not that it is unknown.
+        var loanId = loan.GetProperty("id").GetInt32();
+        await ApiResponseAssert.IsProblemAsync(
+            await _client.PostAsync($"/api/loans/{loanId}/return", null),
+            HttpStatusCode.Conflict);
+
         // The name is free again.
         Assert.Equal(HttpStatusCode.Created, (await _client.PostAsJsonAsync("/api/drones", new { name = "TELLO-07" })).StatusCode);
     }

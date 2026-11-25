@@ -199,14 +199,17 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
     {
         DateOnly? returnDate = Today();
 
-        var droneId = await dbContext.Loans
+        // The drone is empty only for a returned loan of a drone deleted for good (REQ-034), so "unknown" is the row.
+        var loanToReturn = await dbContext.Loans
             .Where(loan => loan.Id == id)
-            .Select(loan => (int?)loan.DroneId)
+            .Select(loan => new { loan.DroneId })
             .SingleOrDefaultAsync(cancellationToken);
-        if (droneId is null)
+        if (loanToReturn is null)
         {
             return ServiceResult<LoanResponse>.NotFound(Messages.UnknownLoan(id));
         }
+
+        var droneId = loanToReturn.DroneId;
 
         var items = await dbContext.Set<LoanItem>().Where(item => item.LoanId == id).ToListAsync(cancellationToken);
         var (returned, itemError) = ReadReturnedQuantities(request?.Items, items);
