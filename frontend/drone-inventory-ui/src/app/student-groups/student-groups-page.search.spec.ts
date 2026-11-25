@@ -21,8 +21,8 @@ describe('StudentGroupsPage search', () => {
     TestBed.inject(HttpTestingController)
       .expectOne('/api/student-groups')
       .flush([
-        { id: 3, name: 'Group 3' },
-        { id: 7, name: 'Robotics Club' },
+        { id: 3, name: 'Group 3', members: [], leaderName: null },
+        { id: 7, name: 'Robotics Club', members: [], leaderName: null },
       ]);
     await fixture.whenStable();
     fixture.detectChanges();

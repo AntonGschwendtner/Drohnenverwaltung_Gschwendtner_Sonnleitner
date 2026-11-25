@@ -1464,6 +1464,80 @@ td button.busy::after {
   color: var(--ink);
 }
 
+/* ───────────── Members of a student group (REQ-031) ───────────── */
+
+.members-dialog {
+  width: min(36rem, calc(100vw - 2rem));
+}
+
+.members-dialog .members-empty {
+  margin: 0 0 1.25rem;
+}
+
+.member-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.member-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0.55rem 0.75rem;
+  background: var(--strip);
+  border: 2px solid var(--edge);
+}
+
+.member-list li.leader {
+  border-left: 0.6rem solid var(--signal);
+}
+
+.member-name {
+  font-weight: 700;
+}
+
+.leader-badge {
+  padding: 0.1rem 0.5rem;
+  background: var(--signal);
+  color: var(--on-signal);
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.member-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.member-question {
+  font-weight: 700;
+}
+
+.members-dialog .no-leader {
+  margin: 0 0 1.25rem;
+}
+
+.member-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin: 0 0 1.5rem;
+}
+
+.member-form label {
+  flex: 1 1 14rem;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;

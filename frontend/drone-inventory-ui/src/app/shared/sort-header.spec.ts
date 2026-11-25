@@ -117,8 +117,8 @@ describe('Sortable lists', () => {
     TestBed.inject(HttpTestingController)
       .expectOne('/api/student-groups')
       .flush([
-        { id: 10, name: 'Group 10' },
-        { id: 9, name: 'Group 9' },
+        { id: 10, name: 'Group 10', members: [], leaderName: null },
+        { id: 9, name: 'Group 9', members: [], leaderName: null },
       ]);
     await fixture.whenStable();
     fixture.detectChanges();

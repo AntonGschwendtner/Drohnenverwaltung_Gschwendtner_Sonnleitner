@@ -20,9 +20,18 @@ export interface CreateDroneRequest {
   description: string;
 }
 
+export interface StudentGroupMember {
+  id: number;
+  name: string;
+  isLeader: boolean;
+}
+
+/** A student group with its members in alphabetical order and the name of its leader (REQ-031). */
 export interface StudentGroup {
   id: number;
   name: string;
+  members: StudentGroupMember[];
+  leaderName: string | null;
 }
 
 export interface CreateStudentGroupRequest {
@@ -139,6 +148,19 @@ export class ApiService {
 
   deleteStudentGroup(id: number): Observable<void> {
     return this.http.delete<void>(`/api/student-groups/${id}`);
+  }
+
+  addMember(studentGroupId: number, name: string): Observable<StudentGroupMember> {
+    return this.http.post<StudentGroupMember>(`/api/student-groups/${studentGroupId}/members`, { name });
+  }
+
+  removeMember(studentGroupId: number, memberId: number): Observable<void> {
+    return this.http.delete<void>(`/api/student-groups/${studentGroupId}/members/${memberId}`);
+  }
+
+  /** Makes a member the group leader, or leaves the group without a leader with null (REQ-031). */
+  setLeader(studentGroupId: number, memberId: number | null): Observable<StudentGroup> {
+    return this.http.put<StudentGroup>(`/api/student-groups/${studentGroupId}/leader`, { memberId });
   }
 
   listLoans(status: LoanStatus): Observable<Loan[]> {

@@ -12,7 +12,7 @@ describe('LoansPage loan form', () => {
     { id: 7, name: 'TELLO-07', status: 'Available', description: '' },
     { id: 8, name: 'TELLO-08', status: 'Loaned', description: '' },
   ];
-  const studentGroups = [{ id: 3, name: 'Group 3' }];
+  const studentGroups = [{ id: 3, name: 'Group 3', members: [], leaderName: null }];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
