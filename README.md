@@ -145,7 +145,7 @@ dotnet tool restore
 
 Jede Ausleihe enthält `daysActive` (volle Tage seit dem Ausleihdatum, nur bei aktiven Ausleihen, sonst `null`), `isLongRunning` (mehr als 7 Tage, nur ohne geplantes Rückgabedatum), `note`, `dueDate` und `isOverdue` (aktiv und das geplante Datum ist vorbei). Die Markierungen berechnet das Backend beim Lesen. Beim Anlegen sind `note` (höchstens 500 Zeichen) und `dueDate` (nicht vor heute) optional. Nach der Rückgabe zeigen `missingBatteries` und `missingPropellers` die Fehlteile. Drohnen haben den Status `Available`, `Loaned` oder `Defective` und bei einem Schaden `defectNote`.
 
-Ablehnungen kommen als ProblemDetails mit lesbarer Meldung: 400 bei ungültiger Eingabe, 404 bei unbekannter Drohne, Gruppe oder Ausleihe, 409 bei doppeltem Namen, bereits ausgeliehener Drohne, bereits zurückgegebener Ausleihe oder beim Löschen mit vorhandenen Ausleihen. Nach dem Umbenennen zeigt auch die Historie den neuen Namen.
+Ablehnungen kommen als ProblemDetails mit lesbarer Meldung: 400 bei ungültiger Eingabe (auch ohne `history` beim endgültigen Löschen), 404 bei unbekannter Drohne, Gruppe oder Ausleihe, 409 bei doppeltem Namen (auch wenn die Gruppe mit dem Namen im Papierkorb liegt), bereits ausgeliehener Drohne, bereits zurückgegebener Ausleihe, beim Löschen einer Drohne mit Ausleihen, beim Löschen einer Gruppe mit aktiver Ausleihe oder bei Änderungen an einer Gruppe im Papierkorb. Nach dem Umbenennen zeigt auch die Historie den neuen Namen.
 
 ## Dokumentation
 

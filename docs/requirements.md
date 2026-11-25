@@ -160,7 +160,7 @@ The system SHALL store the return date of a loan. The return date SHALL be set b
 
 ## REQ-010 Ausleihhistorie anzeigen
 
-Returned loans SHALL stay stored and SHALL NOT be deleted. The system SHALL list past loans with student group, drone, accessory quantities, loan date and return date.
+Returned loans SHALL stay stored and SHALL NOT be deleted, except when a student group is deleted for good together with its history (REQ-033). The system SHALL list past loans with student group, drone, accessory quantities, loan date and return date.
 
 **Scenario: Returned loan stays in the history**
 - GIVEN "TELLO-07" was loaned to "Group 3" with 4 batteries and 8 propellers
@@ -217,7 +217,7 @@ Diese Anforderungen sind als OpenSpec-Changes beschlossen (Freigabe am 2026-11-1
 |---|---|---|---|
 | REQ-015 | Drohne bearbeiten | Name und Beschreibung ändern, Name bleibt eindeutig | `manage-drones-and-groups` |
 | REQ-016 | Drohne löschen | Nur wenn sie nie ausgeliehen war | `manage-drones-and-groups` |
-| REQ-017 | Schülergruppe bearbeiten und löschen | Löschen nur ohne Ausleihen | `manage-drones-and-groups` |
+| REQ-017 | Schülergruppe bearbeiten und löschen | Löschen verschiebt seit REQ-033 in den Papierkorb | `manage-drones-and-groups` |
 | REQ-018 | Drohnendetails | Aktive Ausleihe und alle früheren Ausleihen einer Drohne | `drone-and-group-details` |
 | REQ-019 | Gruppendetails | Aktive und frühere Ausleihen einer Gruppe | `drone-and-group-details` |
 | REQ-020 | Listen sortieren | Klick auf die Spaltenüberschrift, zweiter Klick dreht um | `drone-and-group-details` |
