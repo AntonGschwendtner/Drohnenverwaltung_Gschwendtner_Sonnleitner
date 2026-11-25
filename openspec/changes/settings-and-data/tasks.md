@@ -10,4 +10,4 @@
 
 ## 3. Documentation
 
-- [ ] 3.1 REQ-037 to REQ-040 in `docs/requirements.md`, domain rule 5, README (#226)
+- [x] 3.1 REQ-037 to REQ-040 in `docs/requirements.md`, domain rule 5, README (#226)

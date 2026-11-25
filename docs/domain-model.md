@@ -79,7 +79,7 @@ erDiagram
 2. Nur verfügbare Drohnen dürfen ausgeliehen werden.
 3. Eine Rückgabe macht die Drohne wieder verfügbar, außer es wird dabei ein Schaden gemeldet.
 4. Zubehörmengen sind nie negativ.
-5. Zurückgegebene Ausleihen bleiben gespeichert. Einzige Ausnahme: Eine StudentGroup oder Drone wird aus dem Papierkorb endgültig mit ihrer Historie gelöscht.
+5. Zurückgegebene Ausleihen bleiben gespeichert. Ausnahmen, immer bewusst und mit Rückfrage: Eine StudentGroup oder Drone wird aus dem Papierkorb endgültig mit ihrer Historie gelöscht, die Historie wird gelöscht, oder der Generalreset löscht sie.
 6. Akkus und Propeller werden nur als Menge geführt.
 7. Die Verfügbarkeit ergibt sich aus dem gemeldeten Schaden und der aktiven Ausleihe. Eine defekte Drohne wird erst nach der Reparatur wieder ausgeliehen.
 8. Bei der Rückgabe werden die zurückgegebenen Mengen erfasst. Fehlteile bleiben in der Historie sichtbar.
