@@ -62,11 +62,11 @@ app.MapLoanEndpoints();
 
 if (serveApp)
 {
-    // Unknown API addresses stay "not found" (ProblemDetails through the status code pages), never the app page.
-    app.MapFallback("/api/{**path}", () => Results.NotFound());
-
     // Addresses of the app such as /drones/7 or /loans?drone=7 (QR codes, bookmarks) open the app, which then routes.
-    app.MapFallbackToFile("index.html");
+    // Only for GET and HEAD and never below /api: unknown API addresses stay 404, a wrong method on an API route
+    // stays 405, and paths with a file extension stay with the static files.
+    app.MapFallbackToFile("{**path:nonfile:regex(^(?!api(/|$)).*$)}", "index.html")
+        .WithMetadata(new HttpMethodMetadata([HttpMethods.Get, HttpMethods.Head]));
 }
 
 app.Run();

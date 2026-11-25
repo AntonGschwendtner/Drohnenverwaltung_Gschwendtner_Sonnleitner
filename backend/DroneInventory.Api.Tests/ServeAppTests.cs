@@ -73,6 +73,32 @@ public sealed class ServeAppTests : IDisposable
         Assert.DoesNotContain("drone lending app", await response.Content.ReadAsStringAsync());
     }
 
+    [Theory]
+    [InlineData("DELETE", "/api/drones")]
+    [InlineData("PUT", "/api/student-groups")]
+    public async Task Wrong_method_on_an_API_address_stays_405(string method, string address)
+    {
+        var response = await _client.SendAsync(new HttpRequestMessage(new HttpMethod(method), address));
+
+        Assert.Equal(HttpStatusCode.MethodNotAllowed, response.StatusCode);
+    }
+
+    [Theory]
+    [InlineData("/API/unknown")]
+    [InlineData("/api")]
+    public async Task API_prefix_is_never_the_app(string address)
+    {
+        var response = await _client.GetAsync(address);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Address_that_only_starts_like_api_opens_the_app()
+    {
+        await AssertIsAppAsync(await _client.GetAsync("/apiary"));
+    }
+
     [Fact]
     public async Task The_REST_API_works_next_to_the_app()
     {
@@ -87,12 +113,15 @@ public sealed class ServeAppTests : IDisposable
     [Fact]
     public async Task Without_the_built_app_nothing_changes()
     {
+        // An empty web root, as in development, where ng serve delivers the app.
+        var emptyWebRoot = Directory.CreateTempSubdirectory("drone-empty-").FullName;
         using var factory = new DroneInventoryApiFactory();
-        using var client = factory.CreateClient();
+        using var client = factory.WithWebHostBuilder(builder => builder.UseWebRoot(emptyWebRoot)).CreateClient();
 
         Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync("/drones/7")).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync("/api/unknown")).StatusCode);
         Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/api/drones")).StatusCode);
+        Directory.Delete(emptyWebRoot);
     }
 
     public void Dispose()
