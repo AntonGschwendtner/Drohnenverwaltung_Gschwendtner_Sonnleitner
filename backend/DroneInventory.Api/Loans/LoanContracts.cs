@@ -36,4 +36,6 @@ public sealed record LoanResponse(
     int MissingPropellers = 0,
     int? DaysActive = null,
     bool IsLongRunning = false,
-    bool IsOverdue = false);
+    bool IsOverdue = false,
+    bool IsDueToday = false,
+    int? DaysOverdue = null);

@@ -275,14 +275,15 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
 
     /// <summary>
     /// Adds the full days an active loan has been running and its marks (REQ-012, REQ-022): a loan with a
-    /// planned return date is overdue once that date has passed; only a loan without one becomes long-running.
+    /// planned return date is due on that day and overdue once it has passed, with the days since (REQ-035); only a
+    /// loan without one becomes long-running.
     /// Computed when the loan is read, so the values never get stale.
     /// </summary>
     private static LoanResponse WithDuration(LoanResponse loan, DateOnly today)
     {
         if (loan.Status != LoanStatus.Active)
         {
-            return loan with { DaysActive = null, IsLongRunning = false, IsOverdue = false };
+            return loan with { DaysActive = null, IsLongRunning = false, IsOverdue = false, IsDueToday = false, DaysOverdue = null };
         }
 
         var days = today.DayNumber - loan.LoanDate.DayNumber;
@@ -291,6 +292,9 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             DaysActive = days,
             IsLongRunning = loan.DueDate is null && days > LongRunningAfterDays,
             IsOverdue = loan.DueDate is { } dueDate && today > dueDate,
+            // Due today and the full days since the planned return date (REQ-035).
+            IsDueToday = loan.DueDate == today,
+            DaysOverdue = loan.DueDate is { } plannedDate && today > plannedDate ? today.DayNumber - plannedDate.DayNumber : null,
         };
     }
 

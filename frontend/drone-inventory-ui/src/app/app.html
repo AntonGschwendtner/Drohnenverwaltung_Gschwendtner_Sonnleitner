@@ -1,6 +1,6 @@
 <header class="tower">
   <div class="tower-inner">
-    <a class="brand" routerLink="/drones" [attr.aria-label]="i18n.t('app.start')">
+    <a class="brand" routerLink="/today" [attr.aria-label]="i18n.t('app.start')">
       <span class="scope" aria-hidden="true"><span class="sweep"></span><span class="blip"></span></span>
       <span class="brand-text">
         <span class="brand-name">{{ i18n.t('app.brand') }}</span>
@@ -9,6 +9,7 @@
     </a>
 
     <nav [attr.aria-label]="i18n.t('nav.label')">
+      <a routerLink="/today" routerLinkActive="active"><span class="nav-code" aria-hidden="true">00</span>{{ i18n.t('nav.today') }}</a>
       <a routerLink="/drones" routerLinkActive="active"><span class="nav-code" aria-hidden="true">01</span>{{ i18n.t('nav.drones') }}</a>
       <a routerLink="/student-groups" routerLinkActive="active"><span class="nav-code" aria-hidden="true">02</span>{{ i18n.t('nav.studentGroups') }}</a>
       <a routerLink="/loans" routerLinkActive="active"><span class="nav-code" aria-hidden="true">03</span>{{ i18n.t('nav.loans') }}</a>

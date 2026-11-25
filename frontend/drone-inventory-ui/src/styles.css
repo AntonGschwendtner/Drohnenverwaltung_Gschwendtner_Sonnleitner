@@ -1211,6 +1211,33 @@ tbody tr.long-loan {
   --status: var(--error);
 }
 
+/* Due today in the signal colour, overdue in the alarm colour (REQ-035). */
+tbody tr.due-today {
+  --status: var(--signal);
+}
+
+tbody tr.overdue-loan {
+  --status: var(--error);
+}
+
+tbody tr.overdue-loan td {
+  background: var(--error-surface);
+}
+
+.long-running.overdue {
+  background: var(--error);
+  border-color: var(--error);
+  color: var(--page);
+  font-weight: 700;
+}
+
+.long-running.due-today-badge {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: var(--on-signal);
+  font-weight: 700;
+}
+
 td.duration {
   white-space: nowrap;
 }
@@ -1540,6 +1567,56 @@ td button.busy::after {
 
 .member-form label {
   flex: 1 1 14rem;
+}
+
+/* ───────────── Today page (REQ-036) ───────────── */
+
+.overview-due-today {
+  --tile: var(--signal);
+}
+
+.today-list {
+  margin-top: 2.5rem;
+}
+
+.today-list ul {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.today-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--strip);
+  border: 2px solid var(--edge);
+  border-left: 0.6rem solid var(--edge);
+}
+
+.today-item.overdue-item {
+  border-left-color: var(--error);
+  background: var(--error-surface);
+}
+
+.today-item.due-today-item {
+  border-left-color: var(--signal);
+}
+
+.today-what {
+  font-weight: 700;
+}
+
+.today-when {
+  color: var(--muted);
+}
+
+.today-go {
+  margin-left: auto;
 }
 
 /* ───────────── Trash of the student groups (REQ-033) ───────────── */

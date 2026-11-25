@@ -235,6 +235,8 @@ Diese Anforderungen sind als OpenSpec-Changes beschlossen (Freigabe am 2026-11-1
 | REQ-032 | Docker-Container | Frontend und Backend in einem Container `drohnenverwaltung`, Daten im Volume | `docker-container` |
 | REQ-033 | Papierkorb für Schülergruppen | Löschen verschiebt in den Papierkorb; wiederherstellen oder endgültig löschen, mit oder ohne Historie | `student-group-trash` |
 | REQ-034 | Papierkorb für Drohnen | Wie REQ-033: Papierkorb, wiederherstellen, endgültig löschen mit oder ohne Historie | `drone-trash` |
+| REQ-035 | Fälligkeit markieren | „Heute fällig“ und „Seit X Tagen überfällig“, farbig in der Liste der aktiven Ausleihen | `due-marks-and-today` |
+| REQ-036 | Startseite „Heute“ | Kennzahlen, überfällige, heute fällige und lange Ausleihen auf einen Blick | `due-marks-and-today` |
 
 ## Out of Scope
 

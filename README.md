@@ -22,13 +22,14 @@ Schulprojekt im Fach SYP, 4. INF, 2026/27, von Gschwendtner und Sonnleitner. Bet
 - Vor der Rückgabe in einem Dialog mit Drohne und Gruppe nachfragen.
 - Bei der Rückgabe die zurückgegebenen Akkus und Propeller erfassen. Fehlteile stehen danach in der Historie.
 - Einen Schaden melden, bei der Rückgabe oder jederzeit auf der Drohnenseite. Eine defekte Drohne hat den Status „Defective“ und lässt sich erst nach „Repaired“ wieder ausleihen.
-- Beim Ausleihen eine Notiz (zum Beispiel das Projekt) und ein geplantes Rückgabedatum angeben. Ist das Datum vorbei, wird die Ausleihe als „Overdue“ markiert. Mit geplantem Datum ersetzt das die 7-Tage-Markierung.
+- Beim Ausleihen eine Notiz (zum Beispiel das Projekt) und ein geplantes Rückgabedatum angeben. Am Tag selbst steht „Heute fällig“ (orange), danach „Seit X Tagen überfällig“ (rot). Mit geplantem Datum ersetzt das die 7-Tage-Markierung.
+- Die Startseite „Heute“ zeigt auf einen Blick aktive, heute fällige und überfällige Ausleihen, verfügbare Drohnen und listet, was zu tun ist.
 - Über der Drohnenliste zählen, wie viele Drohnen es gibt und wie viele davon verfügbar und ausgeliehen sind.
 - Die ganze Anwendung als ein Docker-Container `drohnenverwaltung` starten, mit dauerhafter Datenbank im Volume.
 
 Nicht enthalten sind Login und Rollen sowie einzeln erfasste Akkus. Sie können später als eigener Change Request folgen.
 
-Die Changes `initial-drone-lending-system`, `improve-lending-overview`, `manage-drones-and-groups`, `drone-and-group-details`, `loan-notes-and-due-dates`, `return-check-and-damage`, `student-group-members`, `docker-container`, `student-group-trash` und `drone-trash` sind abgeschlossen und archiviert. Die geltenden Anforderungen stehen in [openspec/specs](openspec/specs), die erledigten Aufgaben im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
+Die Changes `initial-drone-lending-system`, `improve-lending-overview`, `manage-drones-and-groups`, `drone-and-group-details`, `loan-notes-and-due-dates`, `return-check-and-damage`, `student-group-members`, `docker-container`, `student-group-trash`, `drone-trash` und `due-marks-and-today` sind abgeschlossen und archiviert. Die geltenden Anforderungen stehen in [openspec/specs](openspec/specs), die erledigten Aufgaben im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
 
 ## Technik
 
@@ -146,7 +147,7 @@ dotnet tool restore
 | `GET /api/loans?status=Returned` | Historie, neueste Rückgabe zuerst |
 | `GET /api/loans?droneId=7` oder `?studentGroupId=3` | Ausleihen einer Drohne oder Gruppe, aktive zuerst; mit `status` kombinierbar |
 
-Jede Ausleihe enthält `daysActive` (volle Tage seit dem Ausleihdatum, nur bei aktiven Ausleihen, sonst `null`), `isLongRunning` (mehr als 7 Tage, nur ohne geplantes Rückgabedatum), `note`, `dueDate` und `isOverdue` (aktiv und das geplante Datum ist vorbei). Die Markierungen berechnet das Backend beim Lesen. Beim Anlegen sind `note` (höchstens 500 Zeichen) und `dueDate` (nicht vor heute) optional. Nach der Rückgabe zeigen `missingBatteries` und `missingPropellers` die Fehlteile. Drohnen haben den Status `Available`, `Loaned` oder `Defective` und bei einem Schaden `defectNote`.
+Jede Ausleihe enthält `daysActive` (volle Tage seit dem Ausleihdatum, nur bei aktiven Ausleihen, sonst `null`), `isLongRunning` (mehr als 7 Tage, nur ohne geplantes Rückgabedatum), `note`, `dueDate`, `isOverdue` (aktiv und das geplante Datum ist vorbei), `isDueToday` (geplantes Datum ist heute) und `daysOverdue` (volle Tage seit dem geplanten Datum, sonst `null`). Die Markierungen berechnet das Backend beim Lesen. Beim Anlegen sind `note` (höchstens 500 Zeichen) und `dueDate` (nicht vor heute) optional. Nach der Rückgabe zeigen `missingBatteries` und `missingPropellers` die Fehlteile. Drohnen haben den Status `Available`, `Loaned` oder `Defective` und bei einem Schaden `defectNote`.
 
 Ablehnungen kommen als ProblemDetails mit lesbarer Meldung: 400 bei ungültiger Eingabe (auch ohne `history` beim endgültigen Löschen), 404 bei unbekannter Drohne, Gruppe oder Ausleihe, 409 bei doppeltem Namen (auch wenn die Gruppe mit dem Namen im Papierkorb liegt), bereits ausgeliehener Drohne, bereits zurückgegebener Ausleihe, beim Löschen einer ausgeliehenen Drohne oder einer Gruppe mit aktiver Ausleihe oder bei Änderungen an einer Drohne oder Gruppe im Papierkorb. Nach dem Umbenennen zeigt auch die Historie den neuen Namen.
 

@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { App } from './app';
@@ -7,7 +9,7 @@ describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideRouter(routes)],
+      providers: [provideRouter(routes), provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
   });
 
@@ -18,6 +20,7 @@ describe('App', () => {
     const links = Array.from<HTMLAnchorElement>(fixture.nativeElement.querySelectorAll('nav a'));
 
     expect(links.map((link) => link.getAttribute('href'))).toEqual([
+      '/today',
       '/drones',
       '/student-groups',
       '/loans',
@@ -25,12 +28,12 @@ describe('App', () => {
     ]);
   });
 
-  it('opens the drones by default', async () => {
+  it('opens the page Today by default (scenario "Open the app")', async () => {
     TestBed.createComponent(App);
 
     await TestBed.inject(Router).navigateByUrl('/');
 
-    expect(TestBed.inject(Router).url).toBe('/drones');
+    expect(TestBed.inject(Router).url).toBe('/today');
   });
 
   it('marks the open view in the navigation', async () => {
@@ -43,11 +46,11 @@ describe('App', () => {
     expect(active.textContent).toContain('Loans');
   });
 
-  it('sends unknown addresses to the drones', async () => {
+  it('sends unknown addresses to the page Today', async () => {
     TestBed.createComponent(App);
 
     await TestBed.inject(Router).navigateByUrl('/does-not-exist');
 
-    expect(TestBed.inject(Router).url).toBe('/drones');
+    expect(TestBed.inject(Router).url).toBe('/today');
   });
 });
