@@ -30,7 +30,10 @@ context: |
   - Only available drones can be loaned.
   - Returning a loan makes the drone available again.
   - Accessory quantities must not be negative.
-  - Returned loans stay stored and are never deleted.
+  - Returned loans stay stored and are never deleted, except when a user deletes a student
+    group for good from the trash together with its history.
+  - Deleting a student group moves it into the trash; a group with an active loan is not deleted.
+    A group in the trash cannot loan or be changed, and its name stays taken.
   - Batteries and propellers are tracked as quantities only.
   - A drone with a reported defect is Defective and cannot be loaned until it is repaired.
   - Otherwise drone availability follows from the active loan and is never entered by a user.

@@ -233,6 +233,7 @@ Diese Anforderungen sind als OpenSpec-Changes beschlossen (Freigabe am 2026-11-1
 | REQ-030 | Statistiken | Summen, pro Drohne und pro Gruppe, für einen Zeitraum | `lending-statistics` |
 | REQ-031 | Mitglieder und Gruppenleiter | Namen der Personen einer Gruppe, ein Gruppenleiter, Knopf „Mitglieder“ in der Gruppenliste | `student-group-members` |
 | REQ-032 | Docker-Container | Frontend und Backend in einem Container `drohnenverwaltung`, Daten im Volume | `docker-container` |
+| REQ-033 | Papierkorb für Schülergruppen | Löschen verschiebt in den Papierkorb; wiederherstellen oder endgültig löschen, mit oder ohne Historie | `student-group-trash` |
 
 ## Out of Scope
 
@@ -240,6 +241,7 @@ Diese Anforderungen sind als OpenSpec-Changes beschlossen (Freigabe am 2026-11-1
 - Einzelinventarisierung von Akkus (BAT-001 ...)
 - Weitere Daten zu Mitgliedern als den Namen (Klasse, E-Mail), Konten für Mitglieder und Gruppenleiter
 - Festhalten, welches Mitglied eine Drohne genommen hat; eine Ausleihe gehört der ganzen Gruppe
+- Ein Papierkorb für Drohnen, automatisches Leeren des Papierkorbs, einzelne Ausleihen aus der Historie löschen
 - HTTPS im Container, Veröffentlichen des Images in einer Registry, automatische Builds in CI und Backups des Volumes
 
 Diese Punkte kommen bei Bedarf später als eigener Change Request.
