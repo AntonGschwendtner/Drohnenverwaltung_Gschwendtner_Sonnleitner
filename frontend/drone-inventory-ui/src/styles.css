@@ -1542,6 +1542,40 @@ td button.busy::after {
   flex: 1 1 14rem;
 }
 
+/* ───────────── Trash of the student groups (REQ-033) ───────────── */
+
+.trash {
+  margin-top: 3rem;
+}
+
+.trash h2 {
+  margin-bottom: 1rem;
+}
+
+.trash-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 1rem;
+  background: var(--field);
+  color: var(--ink);
+  font-size: 0.85rem;
+}
+
+.trash-toggle::before {
+  content: '\25B8';
+  color: var(--accent);
+  transition: transform 0.15s var(--ease);
+}
+
+.trash-toggle[aria-expanded='true']::before {
+  transform: rotate(90deg);
+}
+
+.trash-loading {
+  color: var(--muted);
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;

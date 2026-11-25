@@ -12,7 +12,7 @@
 
 ## 3. Frontend (REQ-033)
 
-- [ ] 3.1 Delete dialog text and trash section on the student group page with restore, English and German; component tests for moving to the trash, "Show the trash", "Empty trash" and "Restore a group" (#204)
+- [x] 3.1 Delete dialog text and trash section on the student group page with restore, English and German; component tests for moving to the trash, "Show the trash", "Empty trash" and "Restore a group" (#204)
 - [ ] 3.2 Permanent delete dialog with the history choice, deleted group names without link in history, loan and drone pages, trash hint with restore on the group detail page; component tests for both choices, "Group deleted, history kept" and "Open a group in the trash" (#205)
 
 ## 4. Documentation
