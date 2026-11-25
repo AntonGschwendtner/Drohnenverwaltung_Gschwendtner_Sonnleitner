@@ -34,7 +34,7 @@ Schulprojekt im Fach SYP, 4. INF, 2026/27, von Gschwendtner und Sonnleitner. Bet
 
 Nicht enthalten sind Login und Rollen sowie einzeln erfasste Akkus. Sie können später als eigener Change Request folgen.
 
-Die Changes `initial-drone-lending-system`, `improve-lending-overview`, `manage-drones-and-groups`, `drone-and-group-details`, `loan-notes-and-due-dates`, `return-check-and-damage`, `student-group-members`, `docker-container`, `student-group-trash`, `drone-trash`, `due-marks-and-today` und `settings-and-data` sind abgeschlossen und archiviert. Die geltenden Anforderungen stehen in [openspec/specs](openspec/specs), die erledigten Aufgaben im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
+Die Changes `initial-drone-lending-system`, `improve-lending-overview`, `manage-drones-and-groups`, `drone-and-group-details`, `loan-notes-and-due-dates`, `return-check-and-damage`, `student-group-members`, `docker-container`, `student-group-trash`, `drone-trash`, `due-marks-and-today`, `settings-and-data` und `docker-server` sind abgeschlossen und archiviert. Die geltenden Anforderungen stehen in [openspec/specs](openspec/specs), die erledigten Aufgaben im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
 
 ## Technik
 
@@ -89,6 +89,31 @@ Danach http://localhost:8080 öffnen. Das Backend liefert die App und die REST-A
 - **QR-Codes mit dem Handy:** Das Handy muss im selben WLAN sein und die App über die Adresse des PCs erreichen, zum Beispiel http://192.168.0.15:8080 (die eigene Adresse zeigt `ipconfig`). Die App am PC über diese Adresse öffnen, dann enthalten die QR-Etiketten einen Link, den das Handy erreicht. Eventuell muss die Windows-Firewall Port 8080 erlauben.
 
 Die Docker-Variante nutzt eine eigene Datenbank, nicht `backend/DroneInventory.Api/droneinventory.db`.
+
+### Auf einem Server betreiben
+
+Am Code muss dafür nichts geändert werden. Port und Image kommen aus einer Datei `.env` neben der Compose-Datei (Vorlage: [.env.example](.env.example)):
+
+```dotenv
+DROHNENVERWALTUNG_PORT=8080
+```
+
+**Variante A, mit Quellcode:** Repository auf den Server klonen und wie oben `docker compose up --build -d`. Update: `git pull`, dann noch einmal `docker compose up --build -d`.
+
+**Variante B, ohne Quellcode:** Bei jedem Merge nach `main` baut GitHub Actions ein fertiges Image für `linux/amd64` und `linux/arm64` (zum Beispiel Raspberry Pi) und veröffentlicht es als `ghcr.io/antongschwendtner/drohnenverwaltung` (Tags `latest` und `sha-<commit>`). Auf dem Server genügen [docker-compose.server.yml](docker-compose.server.yml) und optional `.env`:
+
+```bash
+docker compose -f docker-compose.server.yml up -d
+# Update auf die neueste Version
+docker compose -f docker-compose.server.yml pull
+docker compose -f docker-compose.server.yml up -d
+```
+
+- Die Daten liegen im Volume `drohnenverwaltung-data` und bleiben bei Updates erhalten. Vor einem Update am besten ein Backup über die Einstellungen herunterladen.
+- Eine feste Version statt `latest`: `DROHNENVERWALTUNG_IMAGE=ghcr.io/antongschwendtner/drohnenverwaltung:sha-<commit>` in `.env`.
+- Ist das Paket auf GitHub noch privat, einmal in den Paket-Einstellungen auf „Public“ stellen oder auf dem Server `docker login ghcr.io` ausführen.
+- `GET /api/health` antwortet mit 200, solange App und Datenbank laufen, sonst mit 503. Das eignet sich für Monitoring oder einen Reverse Proxy.
+- HTTPS übernimmt ein Reverse Proxy vor dem Container (zum Beispiel Caddy oder nginx). Die App gehört ins Schulnetz, nicht offen ins Internet (siehe oben).
 
 ## Bedienung am Beispiel
 
