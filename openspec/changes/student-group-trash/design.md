@@ -24,13 +24,14 @@
    - `DELETE /api/student-groups/{id}`: to the trash, 204; 404 unknown or already in the trash; 409 active loan (message names the drone).
    - `GET /api/student-groups/trash`: `{ id, name, deletedAt, loanCount, memberCount }`, newest deletion first.
    - `POST /api/student-groups/{id}/restore`: 200 with the group; 404 when not in the trash.
-   - `DELETE /api/student-groups/{id}/permanent?history=keep|delete`: 204; 404 unknown; 409 not in the trash; 400 without a valid `history`.
+   - `DELETE /api/student-groups/{id}/permanent?history=keep|delete`: 204; 404 unknown; 409 not in the trash or still an active loan; 400 without a valid `history`. The active-loan check runs inside the transaction of decisions 4 and 5.
+   - Rename, add or remove a member and set the leader answer 409 for a group in the trash ("restore it first"); renaming to the name of a group in the trash answers 409 with the trash message.
    - `GET /api/student-groups/{id}` also answers for a group in the trash and includes `deletedAt`, so links from the history keep working.
    - Creating a loan for a group in the trash answers 409 with a message.
 7. **Frontend.** The delete dialog says the group goes to the trash and can be restored. Below the group list a "Trash (n)" section lists the groups with "Restore" and "Delete permanently". The permanent dialog has two radio options, "Keep the history" preselected and "Also delete the history (n loans)"; the confirm button names the chosen action. History, loan and drone pages show a group without `studentGroupId` as plain text. The detail page of a group in the trash shows a hint with "Restore".
 
 ## Risks / Trade-offs
 
-- [A loan created while the group moves to the trash] → The trash move and the loan check run in transactions; the loan check reads `DeletedAt`. A rare race leaves an active loan on a group in the trash; the loan can still be returned from the loan page, which lists active loans independent of the group list.
+- [A loan created while the group moves to the trash] → The trash move and the loan check run in transactions; the loan check reads `DeletedAt`. A rare race leaves an active loan on a group in the trash; the loan can still be returned from the loan page, which lists active loans independent of the group list, and the permanent delete refuses the group until then.
 - [Deleting with the history cannot be undone] → Only from the trash, with an explicit choice and the number of loans in the dialog.
 - [Domain rule 5 changes] → Documented in the domain model and `openspec/config.yaml`.

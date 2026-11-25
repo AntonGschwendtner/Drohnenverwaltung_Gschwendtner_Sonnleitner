@@ -61,6 +61,27 @@ The system SHALL delete a student group from the trash for good, together with i
 - **THEN** the deletion is rejected
 - **AND** "Group 3" stays in the trash
 
+#### Scenario: Group in the trash still has a drone
+- **GIVEN** "Group 3" is in the trash and still has an active loan of "TELLO-07"
+- **WHEN** "Group 3" is deleted permanently
+- **THEN** the deletion is rejected with a message that "TELLO-07" has to be returned first
+- **AND** "Group 3" and the active loan stay unchanged
+
+### Requirement: No changes in the trash
+The system SHALL reject renaming a student group in the trash, adding or removing its members and choosing or clearing its group leader (REQ-033). The group has to be restored first.
+
+#### Scenario: Rename a group in the trash
+- **GIVEN** "Group 3" is in the trash
+- **WHEN** "Group 3" is renamed to "Group 33"
+- **THEN** the change is rejected with a message that "Group 3" is in the trash
+- **AND** "Group 3" keeps its name
+
+#### Scenario: Change the members of a group in the trash
+- **GIVEN** "Group 3" with the member "Anna Huber" is in the trash
+- **WHEN** a member is added to "Group 3", "Anna Huber" is removed or chosen as group leader
+- **THEN** each change is rejected
+- **AND** the members of "Group 3" stay unchanged
+
 ## MODIFIED Requirements
 
 ### Requirement: Create student group
@@ -85,6 +106,29 @@ The system SHALL allow a student group to be created with a unique name (REQ-003
 - **GIVEN** "Group 3" is in the trash
 - **WHEN** a student group is created with the name "Group 3"
 - **THEN** the creation is rejected with a message that "Group 3" is in the trash
+
+### Requirement: Edit student group
+The system SHALL allow the name of an existing student group to be changed (REQ-017). The name is required and unique; the name of a group in the trash stays taken (REQ-033).
+
+#### Scenario: Correct a name
+- **GIVEN** the student group "Grup 3" exists
+- **WHEN** its name is changed to "Group 3"
+- **THEN** the student group is listed as "Group 3"
+
+#### Scenario: Name already used
+- **GIVEN** the student groups "Group 3" and "Group 4" exist
+- **WHEN** the name of "Group 4" is changed to "Group 3"
+- **THEN** the change is rejected
+
+#### Scenario: Unknown student group
+- **GIVEN** no student group with the given identity exists
+- **WHEN** the student group is edited
+- **THEN** the change is rejected as not found
+
+#### Scenario: Name of a group in the trash when renaming
+- **GIVEN** "Group 3" is in the trash and "Group 4" is not
+- **WHEN** the name of "Group 4" is changed to "Group 3"
+- **THEN** the change is rejected with a message that "Group 3" is in the trash
 
 ### Requirement: List student groups
 The system SHALL list all student groups that are not in the trash with their names, so that a group can be chosen for a loan (REQ-003, REQ-033). Each group SHALL show how many members it has and who its group leader is (REQ-031).
@@ -134,3 +178,9 @@ The system SHALL move a deleted student group into the trash with its members an
 - **WHEN** "Group 3" is deleted
 - **THEN** the deletion is rejected with a message that "TELLO-07" has to be returned first
 - **AND** "Group 3" stays listed
+
+#### Scenario: Group is already in the trash
+- **GIVEN** "Group 3" is in the trash
+- **WHEN** "Group 3" is deleted again
+- **THEN** the request is answered as not found
+- **AND** "Group 3" stays in the trash with its deletion date
