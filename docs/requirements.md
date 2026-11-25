@@ -209,9 +209,9 @@ The drone page SHALL show the number of all drones, of available drones and of l
 - WHEN the drone page is shown
 - THEN the overview shows 3 drones, 2 available and 1 loaned
 
-## Weitere Anforderungen (REQ-015 bis REQ-030)
+## Weitere Anforderungen (REQ-015 bis REQ-041)
 
-Diese Anforderungen sind als OpenSpec-Changes beschlossen (Freigabe am 2026-11-12) und werden der Reihe nach umgesetzt. Die vollständigen Szenarien stehen in den Delta-Specs des jeweiligen Change unter `openspec/changes/<change>/specs/`.
+Diese Anforderungen sind als OpenSpec-Changes beschlossen und alle umgesetzt (Stand 2026-11-25). Die vollständigen Szenarien stehen in den Delta-Specs des jeweiligen Change unter `openspec/changes/<change>/specs/`.
 
 | REQ | Titel | Kurz | Change |
 |---|---|---|---|
@@ -227,7 +227,7 @@ Diese Anforderungen sind als OpenSpec-Changes beschlossen (Freigabe am 2026-11-1
 | REQ-024 | Schaden melden | Status Defective, nicht ausleihbar, reparieren macht verfügbar | `return-check-and-damage` |
 | REQ-025 | Historie exportieren und drucken | CSV für Excel, Druckansicht für PDF | `export-and-qr-codes` |
 | REQ-026 | QR-Code pro Drohne | Öffnet die Ausleihe mit dieser Drohne | `export-and-qr-codes` |
-| REQ-027 | Reservierung anlegen | Eine Drohne für eine Gruppe an einem Tag, höchstens eine pro Tag | `reservations` |
+| REQ-027 | Reservierung anlegen | Eine Drohne für eine Gruppe an einem Tag, höchstens eine pro Tag; nicht für defekte Drohnen oder im Papierkorb; reservierte Drohnen und Gruppen kommen nicht in den Papierkorb | `reservations` |
 | REQ-028 | Reservierungen anzeigen und stornieren | Heute und später, früheste zuerst | `reservations` |
 | REQ-029 | Reservierung beim Ausleihen beachten | Am reservierten Tag nur für die reservierende Gruppe | `reservations` |
 | REQ-030 | Statistiken | Summen, pro Drohne und pro Gruppe, für einen Zeitraum | `lending-statistics` |

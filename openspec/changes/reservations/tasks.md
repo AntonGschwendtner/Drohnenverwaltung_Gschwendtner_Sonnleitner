@@ -10,4 +10,4 @@
 
 ## 3. Documentation
 
-- [ ] 3.1 Ubiquitous language, domain model, domain rules in `openspec/config.yaml`, `docs/requirements.md`, README (#234)
+- [x] 3.1 Ubiquitous language, domain model, domain rules in `openspec/config.yaml`, `docs/requirements.md`, README (#234)

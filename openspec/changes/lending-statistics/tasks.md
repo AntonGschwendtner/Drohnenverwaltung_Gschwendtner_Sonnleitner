@@ -10,4 +10,4 @@
 
 ## 3. Documentation
 
-- [ ] 3.1 README, `docs/requirements.md` (#237)
+- [x] 3.1 README, `docs/requirements.md` (#237)

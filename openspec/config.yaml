@@ -21,7 +21,7 @@ context: |
   - Frontend code is located in /frontend/drone-inventory-ui.
   - OpenSpec is the source of truth for requirements.
 
-  Domain concepts: Drone, StudentGroup, Loan, LoanItem. A StudentGroup has members
+  Domain concepts: Drone, StudentGroup, Loan, LoanItem, Reservation. A StudentGroup has members
   (StudentGroupMember, name only); one member can be its group leader.
   Use these terms everywhere. Do not introduce synonyms.
 
@@ -33,6 +33,9 @@ context: |
   - Returned loans stay stored and are never deleted, except on purpose: a student group or a
     drone is deleted for good from the trash together with its history, the history is deleted,
     or the general reset deletes it.
+  - A drone has at most one reservation per day; on that day only the reserving group can loan
+    it. Defective drones and entries in the trash cannot be reserved; a drone or group with a
+    reservation from today on cannot be moved into the trash.
   - Deleting a student group or a drone moves it into the trash; with an active loan it is not
     deleted. In the trash it cannot loan or be loaned or changed, and its name stays taken.
   - Batteries and propellers are tracked as quantities only.
