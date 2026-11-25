@@ -6,7 +6,7 @@
 
 ## 2. Container (REQ-032)
 
-- [ ] 2.1 `Dockerfile` (multi-stage, pinned images), `.dockerignore` and `docker-compose.yml` with the volume `drohnenverwaltung-data`; build and run the image and check "Open the app", "Open a page directly", "Unknown API address", "First start" and "Restart the container" with HTTP requests (#185)
+- [x] 2.1 `Dockerfile` (multi-stage, pinned images), `.dockerignore` and `docker-compose.yml` with the volume `drohnenverwaltung-data`; build and run the image and check "Open the app", "Open a page directly", "Unknown API address", "First start" and "Restart the container" with HTTP requests (#185)
 
 ## 3. Documentation
 
