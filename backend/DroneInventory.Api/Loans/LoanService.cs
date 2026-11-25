@@ -124,6 +124,11 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             return ServiceResult<LoanResponse>.Invalid(Messages.UnknownStudentGroup(studentGroupId));
         }
 
+        if (studentGroup.DeletedAt is not null)
+        {
+            return ServiceResult<LoanResponse>.Conflict(Messages.StudentGroupInTrash(studentGroup.Name));
+        }
+
         // A defective drone is not available and cannot be loaned until it is repaired (REQ-024).
         if (drone.DefectNote is not null)
         {

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DroneInventory.Api.StudentGroups;
 
-public class StudentGroupService(DroneInventoryDbContext dbContext)
+public class StudentGroupService(DroneInventoryDbContext dbContext, TimeProvider timeProvider)
 {
     /// <summary>
     /// The shape of a group in every answer: members alphabetical (NOCASE column), the leader's name or null (REQ-031).
@@ -28,6 +28,7 @@ public class StudentGroupService(DroneInventoryDbContext dbContext)
 
     public async Task<IReadOnlyList<StudentGroupResponse>> ListAsync(CancellationToken cancellationToken) =>
         await dbContext.StudentGroups
+            .Where(studentGroup => studentGroup.DeletedAt == null)
             .OrderBy(studentGroup => studentGroup.Name)
             .Select(ToResponse)
             .ToListAsync(cancellationToken);
@@ -83,6 +84,11 @@ public class StudentGroupService(DroneInventoryDbContext dbContext)
             return ServiceResult<StudentGroupResponse>.NotFound(Messages.UnknownStudentGroup(id));
         }
 
+        if (studentGroup.DeletedAt is not null)
+        {
+            return ServiceResult<StudentGroupResponse>.Conflict(Messages.StudentGroupInTrash(studentGroup.Name));
+        }
+
         var (name, error) = await CheckNameAsync(request.Name, exceptId: id, cancellationToken);
         if (error is not null)
         {
@@ -105,32 +111,32 @@ public class StudentGroupService(DroneInventoryDbContext dbContext)
     }
 
     /// <summary>
-    /// Deletes a student group that never had a loan (REQ-017). A group with any loan stays, so the history stays complete.
+    /// Moves a student group into the trash (REQ-033). It keeps its members and loans and can be restored. A group that
+    /// has a drone right now stays, so the drone can still be returned through the loan page.
     /// </summary>
     public async Task<ServiceResult<bool>> DeleteAsync(int id, CancellationToken cancellationToken)
     {
+        // The transaction takes the write lock first, so the check and the move see the same loans.
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
         var studentGroup = await dbContext.StudentGroups.FindAsync([id], cancellationToken);
-        if (studentGroup is null)
+        if (studentGroup is null || studentGroup.DeletedAt is not null)
         {
             return ServiceResult<bool>.NotFound(Messages.UnknownStudentGroup(id));
         }
 
-        if (await dbContext.Loans.AnyAsync(loan => loan.StudentGroupId == id, cancellationToken))
+        var loanedDrone = await dbContext.Loans
+            .Where(loan => loan.StudentGroupId == id && loan.Status == LoanStatus.Active)
+            .Select(loan => loan.Drone!.Name)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (loanedDrone is not null)
         {
-            return ServiceResult<bool>.Conflict(Messages.StudentGroupHasLoans(studentGroup.Name));
+            return ServiceResult<bool>.Conflict(Messages.StudentGroupHasActiveLoan(studentGroup.Name, loanedDrone));
         }
 
-        dbContext.StudentGroups.Remove(studentGroup);
-
-        try
-        {
-            await dbContext.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateException exception) when (exception.IsForeignKeyViolation())
-        {
-            // A loan was created after the check above; the database refuses the delete.
-            return ServiceResult<bool>.Conflict(Messages.StudentGroupHasLoans(studentGroup.Name));
-        }
+        studentGroup.DeletedAt = Today();
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         return ServiceResult<bool>.Success(true);
     }
@@ -148,6 +154,11 @@ public class StudentGroupService(DroneInventoryDbContext dbContext)
         if (studentGroup is null)
         {
             return ServiceResult<StudentGroupMemberResponse>.NotFound(Messages.UnknownStudentGroup(studentGroupId));
+        }
+
+        if (studentGroup.DeletedAt is not null)
+        {
+            return ServiceResult<StudentGroupMemberResponse>.Conflict(Messages.StudentGroupInTrash(studentGroup.Name));
         }
 
         var name = request.Name?.Trim();
@@ -191,9 +202,15 @@ public class StudentGroupService(DroneInventoryDbContext dbContext)
     /// </summary>
     public async Task<ServiceResult<bool>> RemoveMemberAsync(int studentGroupId, int memberId, CancellationToken cancellationToken)
     {
-        if (!await dbContext.StudentGroups.AnyAsync(studentGroup => studentGroup.Id == studentGroupId, cancellationToken))
+        var studentGroup = await dbContext.StudentGroups.FindAsync([studentGroupId], cancellationToken);
+        if (studentGroup is null)
         {
             return ServiceResult<bool>.NotFound(Messages.UnknownStudentGroup(studentGroupId));
+        }
+
+        if (studentGroup.DeletedAt is not null)
+        {
+            return ServiceResult<bool>.Conflict(Messages.StudentGroupInTrash(studentGroup.Name));
         }
 
         var member = await dbContext.StudentGroupMembers.SingleOrDefaultAsync(
@@ -220,9 +237,15 @@ public class StudentGroupService(DroneInventoryDbContext dbContext)
         SetLeaderRequest request,
         CancellationToken cancellationToken)
     {
-        if (!await dbContext.StudentGroups.AnyAsync(studentGroup => studentGroup.Id == studentGroupId, cancellationToken))
+        var studentGroup = await dbContext.StudentGroups.FindAsync([studentGroupId], cancellationToken);
+        if (studentGroup is null)
         {
             return ServiceResult<StudentGroupResponse>.NotFound(Messages.UnknownStudentGroup(studentGroupId));
+        }
+
+        if (studentGroup.DeletedAt is not null)
+        {
+            return ServiceResult<StudentGroupResponse>.Conflict(Messages.StudentGroupInTrash(studentGroup.Name));
         }
 
         var memberId = request.MemberId;
@@ -270,12 +293,23 @@ public class StudentGroupService(DroneInventoryDbContext dbContext)
             return (string.Empty, ServiceResult<StudentGroupResponse>.Invalid(Messages.StudentGroupNeedsName));
         }
 
-        var nameIsTaken = await dbContext.StudentGroups.AnyAsync(
-            studentGroup => studentGroup.Name == name && studentGroup.Id != exceptId,
-            cancellationToken);
+        // The name of a group in the trash stays taken, so a restore never collides (REQ-033).
+        var takenBy = await dbContext.StudentGroups
+            .Where(studentGroup => studentGroup.Name == name && studentGroup.Id != exceptId)
+            .Select(studentGroup => new { studentGroup.DeletedAt })
+            .FirstOrDefaultAsync(cancellationToken);
 
-        return nameIsTaken ? (name, NameAlreadyExists(name)) : (name, null);
+        if (takenBy is null)
+        {
+            return (name, null);
+        }
+
+        return takenBy.DeletedAt is null
+            ? (name, NameAlreadyExists(name))
+            : (name, ServiceResult<StudentGroupResponse>.Conflict(Messages.StudentGroupNameInTrash(name)));
     }
+
+    private DateOnly Today() => DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime);
 
     private static ServiceResult<StudentGroupResponse> NameAlreadyExists(string name) =>
         ServiceResult<StudentGroupResponse>.Conflict(Messages.StudentGroupNameExists(name));
