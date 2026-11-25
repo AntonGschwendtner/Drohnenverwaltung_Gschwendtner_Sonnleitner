@@ -25,6 +25,7 @@ describe('Note and planned return date in the lists', () => {
     note: 'Projekt Vermessung',
     dueDate: '2026-08-26',
     isOverdue: true,
+    daysOverdue: 1,
   };
 
   beforeEach(() => {
@@ -51,8 +52,8 @@ describe('Note and planned return date in the lists', () => {
     const element = await activeLoans([loan]);
     const row = element.querySelector('section[aria-labelledby="active-loans"] tbody tr') as HTMLElement;
 
-    expect(row.classList.contains('long-loan')).toBe(true);
-    expect(row.querySelector('.overdue')?.textContent?.trim()).toBe('Overdue');
+    expect(row.classList.contains('overdue-loan')).toBe(true);
+    expect(row.querySelector('.overdue')?.textContent?.trim()).toBe('Overdue for 1 day');
     expect(row.querySelector('.strip-note')?.textContent?.trim()).toBe('Projekt Vermessung');
     expect(row.querySelector('.due')?.textContent?.trim()).toBe('due 26.08.2026');
   });
@@ -61,7 +62,7 @@ describe('Note and planned return date in the lists', () => {
     const element = await activeLoans([{ ...loan, isOverdue: false, note: null }]);
     const row = element.querySelector('section[aria-labelledby="active-loans"] tbody tr') as HTMLElement;
 
-    expect(row.classList.contains('long-loan')).toBe(false);
+    expect(row.classList.contains('overdue-loan')).toBe(false);
     expect(row.querySelector('.overdue')).toBeNull();
     expect(row.querySelector('.strip-note')).toBeNull();
     expect(row.querySelector('.due')?.textContent?.trim()).toBe('due 26.08.2026');
@@ -71,7 +72,7 @@ describe('Note and planned return date in the lists', () => {
     TestBed.inject(I18nService).language.set('de');
     const element = await activeLoans([loan]);
 
-    expect(element.querySelector('.overdue')?.textContent?.trim()).toBe('Überfällig');
+    expect(element.querySelector('.overdue')?.textContent?.trim()).toBe('Seit 1 Tag überfällig');
     expect(element.querySelector('.due')?.textContent?.trim()).toBe('fällig am 26.08.2026');
   });
 

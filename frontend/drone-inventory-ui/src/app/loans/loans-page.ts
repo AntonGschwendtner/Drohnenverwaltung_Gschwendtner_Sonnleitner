@@ -108,7 +108,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
           </thead>
           <tbody>
             @for (loan of sortedActiveLoans(); track loan.id) {
-              <tr [class.long-loan]="loan.isLongRunning || loan.isOverdue">
+              <tr [class.long-loan]="loan.isLongRunning" [class.overdue-loan]="loan.isOverdue" [class.due-today]="loan.isDueToday">
                 <td>
                   @if (loan.studentGroupId !== null) {
                     <a [routerLink]="['/student-groups', loan.studentGroupId]">{{ loan.studentGroupName }}</a>
@@ -126,7 +126,12 @@ import { StripSkeleton } from '../shared/strip-skeleton';
                     <span class="long-running">{{ i18n.t('loans.longRunning') }}</span>
                   }
                   @if (loan.isOverdue) {
-                    <span class="long-running overdue">{{ i18n.t('loans.overdue') }}</span>
+                    <span class="long-running overdue">
+                      {{ loan.daysOverdue === 1 ? i18n.t('loans.overdueDay') : i18n.t('loans.overdueDays', { days: '' + (loan.daysOverdue ?? 0) }) }}
+                    </span>
+                  }
+                  @if (loan.isDueToday) {
+                    <span class="long-running due-today-badge">{{ i18n.t('loans.dueToday') }}</span>
                   }
                   @if (loan.dueDate) {
                     <span class="due">{{ i18n.t('loans.dueOn', { date: (loan.dueDate | date: 'dd.MM.yyyy') ?? '' }) }}</span>

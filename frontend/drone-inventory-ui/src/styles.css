@@ -1211,6 +1211,33 @@ tbody tr.long-loan {
   --status: var(--error);
 }
 
+/* Due today in the signal colour, overdue in the alarm colour (REQ-035). */
+tbody tr.due-today {
+  --status: var(--signal);
+}
+
+tbody tr.overdue-loan {
+  --status: var(--error);
+}
+
+tbody tr.overdue-loan td {
+  background: var(--error-surface);
+}
+
+.long-running.overdue {
+  background: var(--error);
+  border-color: var(--error);
+  color: var(--page);
+  font-weight: 700;
+}
+
+.long-running.due-today-badge {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: var(--on-signal);
+  font-weight: 700;
+}
+
 td.duration {
   white-space: nowrap;
 }

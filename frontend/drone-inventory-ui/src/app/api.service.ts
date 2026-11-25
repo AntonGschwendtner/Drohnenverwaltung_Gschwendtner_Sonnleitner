@@ -81,6 +81,10 @@ export interface Loan {
   dueDate?: string | null;
   /** True when an active loan is past its planned return date (REQ-022). */
   isOverdue?: boolean;
+  /** The planned return date is today (REQ-035). */
+  isDueToday?: boolean;
+  /** Full days since the planned return date of an overdue loan, otherwise null (REQ-035). */
+  daysOverdue?: number | null;
   /** Accessories that did not come back with the return (REQ-023). */
   missingBatteries?: number;
   missingPropellers?: number;
