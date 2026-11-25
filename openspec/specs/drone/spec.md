@@ -7,7 +7,7 @@ Manages the drones that can be loaned and shows at any time whether each drone i
 ## Requirements
 
 ### Requirement: Create drone
-The system SHALL allow a drone to be created with a unique name and a free-text description (REQ-001).
+The system SHALL allow a drone to be created with a unique name and a free-text description (REQ-001). The name of a drone in the trash stays taken (REQ-034).
 
 #### Scenario: Create a drone
 - **GIVEN** no drone named "TELLO-07" exists
@@ -25,8 +25,13 @@ The system SHALL allow a drone to be created with a unique name and a free-text 
 - **WHEN** another drone is created with the name "TELLO-07"
 - **THEN** the creation is rejected
 
+#### Scenario: Name of a drone in the trash
+- **GIVEN** "TELLO-07" is in the trash
+- **WHEN** a drone is created with the name "TELLO-07"
+- **THEN** the creation is rejected with a message that "TELLO-07" is in the trash
+
 ### Requirement: List drones
-The system SHALL list all drones with name, status and description. The status SHALL be Available, Loaned or Defective (REQ-002, REQ-024). A drone with a reported defect SHALL be Defective. Otherwise the status SHALL follow from the active loan.
+The system SHALL list all drones that are not in the trash with name, status and description (REQ-034). The status SHALL be Available, Loaned or Defective (REQ-002, REQ-024). A drone with a reported defect SHALL be Defective. Otherwise the status SHALL follow from the active loan.
 
 #### Scenario: Drone without an active loan
 - **GIVEN** the drone "TELLO-07" has no active loan
@@ -42,6 +47,11 @@ The system SHALL list all drones with name, status and description. The status S
 - **GIVEN** a defect was reported for "TELLO-07"
 - **WHEN** the drones are listed
 - **THEN** "TELLO-07" is shown as Defective with the defect description
+
+#### Scenario: Drone in the trash is not listed
+- **GIVEN** "TELLO-07" is in the trash and "TELLO-08" is not
+- **WHEN** the drones are listed
+- **THEN** the list contains "TELLO-08" and not "TELLO-07"
 
 ### Requirement: Search and filter drones
 The drone list SHALL be narrowed by a name search and by a status filter (REQ-011). The name search SHALL ignore upper and lower case and match parts of the name. Both conditions SHALL apply together. When no drone matches, the list SHALL say so.
@@ -80,7 +90,7 @@ The drone page SHALL show the number of all drones, of available drones, of loan
 - **THEN** the overview shows 3 drones, 1 available, 1 loaned and 1 defective
 
 ### Requirement: Edit drone
-The system SHALL allow the name and the description of an existing drone to be changed (REQ-015). The same rules as for creating a drone SHALL apply: the name is required and unique. Editing SHALL NOT change the status of the drone or its loans.
+The system SHALL allow the name and the description of an existing drone to be changed (REQ-015). The same rules as for creating a drone SHALL apply: the name is required and unique, and the name of a drone in the trash stays taken (REQ-034). Editing SHALL NOT change the status of the drone or its loans.
 
 #### Scenario: Correct a name
 - **GIVEN** the drone "TELO-07" exists
@@ -104,23 +114,29 @@ The system SHALL allow the name and the description of an existing drone to be c
 - **THEN** the change is rejected as not found
 
 ### Requirement: Delete drone
-The system SHALL allow a drone to be deleted only if it never had a loan (REQ-016). A drone with an active or returned loan SHALL NOT be deleted, so the loan history stays complete.
+The system SHALL move a deleted drone into the trash with its loans (REQ-016, REQ-034). A loaned drone SHALL NOT be deleted.
 
 #### Scenario: Delete a drone without loans
 - **GIVEN** the drone "TELLO-09" has never been loaned
 - **WHEN** "TELLO-09" is deleted
 - **THEN** "TELLO-09" is no longer listed
+- **AND** "TELLO-09" is in the trash
 
 #### Scenario: Drone has a returned loan
 - **GIVEN** "TELLO-07" was loaned to "Group 3" and returned
 - **WHEN** "TELLO-07" is deleted
-- **THEN** the deletion is rejected
+- **THEN** "TELLO-07" is no longer listed and is in the trash
 - **AND** the returned loan stays in the history
 
 #### Scenario: Drone is loaned
 - **GIVEN** "TELLO-07" is loaned to "Group 3"
 - **WHEN** "TELLO-07" is deleted
-- **THEN** the deletion is rejected
+- **THEN** the deletion is rejected with a message that "TELLO-07" has to be returned first
+
+#### Scenario: Drone is already in the trash
+- **GIVEN** "TELLO-07" is in the trash
+- **WHEN** "TELLO-07" is deleted again
+- **THEN** the request is answered as not found
 
 ### Requirement: Drone details
 The system SHALL show a single drone with name, description and status, its active loan if there is one, and all its returned loans with student group, accessories, loan date and return date, the newest return first (REQ-018).
@@ -172,3 +188,69 @@ A defective drone SHALL NOT be loaned (REQ-024).
 - **GIVEN** "TELLO-07" is Defective
 - **WHEN** "TELLO-07" is loaned to "Group 3"
 - **THEN** the loan is rejected
+
+### Requirement: Drone trash
+The system SHALL show the drones in the trash with their name, the date they were deleted and how many loans they have, the most recently deleted first (REQ-034). The details of a drone in the trash SHALL say that it is in the trash.
+
+#### Scenario: Show the drone trash
+- **GIVEN** "TELLO-07" with 2 returned loans was deleted on 20.08.2026
+- **WHEN** the drone trash is shown
+- **THEN** it lists "TELLO-07" with the date 20.08.2026 and 2 loans
+
+#### Scenario: Empty drone trash
+- **GIVEN** no drone is in the trash
+- **WHEN** the drone trash is shown
+- **THEN** the trash says that it is empty
+
+#### Scenario: Open a drone in the trash
+- **GIVEN** "TELLO-07" is in the trash
+- **WHEN** the details of "TELLO-07" are opened
+- **THEN** the details say that "TELLO-07" is in the trash
+- **AND** its loans are still shown
+
+### Requirement: Restore drone
+The system SHALL restore a drone from the trash with its loans and its defect (REQ-034).
+
+#### Scenario: Restore a drone
+- **GIVEN** "TELLO-07" with a returned loan is in the trash
+- **WHEN** "TELLO-07" is restored
+- **THEN** "TELLO-07" is listed again with its status
+- **AND** its returned loan is still in the history
+
+#### Scenario: Drone is not in the trash
+- **GIVEN** "TELLO-08" is not in the trash
+- **WHEN** "TELLO-08" is restored
+- **THEN** the request is answered as not found
+
+### Requirement: Delete drone permanently
+The system SHALL delete a drone from the trash for good (REQ-034). The user SHALL choose whether its loans stay in the history under the drone's name or are deleted with it. Only a drone in the trash without an active loan can be deleted permanently.
+
+#### Scenario: Keep the drone history
+- **GIVEN** "TELLO-07" with a returned loan by "Group 3" is in the trash
+- **WHEN** "TELLO-07" is deleted permanently and the history is kept
+- **THEN** "TELLO-07" is no longer stored and not in the trash
+- **AND** the history still shows the loan of "TELLO-07" by "Group 3"
+
+#### Scenario: Delete the drone with the history
+- **GIVEN** "TELLO-07" with a returned loan is in the trash and "TELLO-08" has a returned loan
+- **WHEN** "TELLO-07" is deleted permanently together with its history
+- **THEN** "TELLO-07" and its loans are no longer stored
+- **AND** the history still shows the loan of "TELLO-08"
+
+#### Scenario: Drone is not in the trash for good
+- **GIVEN** "TELLO-08" is not in the trash
+- **WHEN** "TELLO-08" is deleted permanently
+- **THEN** the deletion is rejected
+
+#### Scenario: No choice about the drone history
+- **GIVEN** "TELLO-07" is in the trash
+- **WHEN** "TELLO-07" is deleted permanently without saying what happens to its history
+- **THEN** the deletion is rejected
+
+### Requirement: No changes to a drone in the trash
+The system SHALL reject renaming a drone in the trash and reporting or repairing its defect (REQ-034). The drone has to be restored first.
+
+#### Scenario: Change a drone in the trash
+- **GIVEN** "TELLO-07" is in the trash
+- **WHEN** "TELLO-07" is renamed, a defect is reported or it is repaired
+- **THEN** each change is rejected with a message that "TELLO-07" is in the trash

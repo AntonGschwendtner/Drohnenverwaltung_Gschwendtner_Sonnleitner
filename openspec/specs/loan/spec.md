@@ -128,7 +128,7 @@ The system SHALL store the current date as return date when a loan is returned. 
 - **THEN** the loan has no return date
 
 ### Requirement: Loan history
-Returned loans SHALL stay stored and SHALL NOT be deleted, except when a user deletes a student group permanently together with its history (REQ-033). The system SHALL list returned loans with student group, drone, accessory quantities, loan date and return date (REQ-010). A loan of a permanently deleted group whose history was kept SHALL keep showing the group's name.
+Returned loans SHALL stay stored and SHALL NOT be deleted, except when a user deletes a student group (REQ-033) or a drone (REQ-034) permanently together with its history. The system SHALL list returned loans with student group, drone, accessory quantities, loan date and return date (REQ-010). A loan of a permanently deleted group or drone whose history was kept SHALL keep showing its name.
 
 #### Scenario: Returned loan stays in the history
 - **GIVEN** "TELLO-07" was loaned to "Group 3" with 4 batteries and 8 propellers
@@ -157,6 +157,12 @@ Returned loans SHALL stay stored and SHALL NOT be deleted, except when a user de
 - **GIVEN** "Group 3" returned "TELLO-07" and was deleted permanently together with its history
 - **WHEN** the loan history is listed
 - **THEN** the loan of "TELLO-07" by "Group 3" is no longer shown
+
+#### Scenario: Drone deleted, history kept
+- **GIVEN** "Group 3" returned "TELLO-07" and "TELLO-07" was deleted permanently with the history kept
+- **WHEN** the loan history is listed or exported
+- **THEN** the loan is shown with the drone "TELLO-07"
+- **AND** the drone name is not a link
 
 ### Requirement: Loan duration
 Every active loan SHALL show how many full days have passed since its loan date (REQ-012). An active loan without a planned return date running longer than 7 full days SHALL be marked as long-running. An active loan with a planned return date SHALL NOT be marked as long-running; the overdue mark replaces it (REQ-022). Returned loans SHALL NOT be marked.
@@ -322,3 +328,11 @@ The system SHALL reject a loan for a student group in the trash (REQ-033).
 - **WHEN** "TELLO-07" is loaned to "Group 3"
 - **THEN** the loan is rejected
 - **AND** "TELLO-07" stays available
+
+### Requirement: No loan of a drone in the trash
+The system SHALL reject a loan of a drone in the trash (REQ-034).
+
+#### Scenario: Loan a drone in the trash
+- **GIVEN** "TELLO-07" is in the trash
+- **WHEN** "TELLO-07" is loaned to "Group 3"
+- **THEN** the loan is rejected
