@@ -18,6 +18,18 @@ export class ThemeService {
     this.apply(this.theme());
   }
 
+  /** Sets the theme chosen in the settings (REQ-037) and remembers it. */
+  use(next: Theme): void {
+    this.theme.set(next);
+    this.apply(next);
+
+    try {
+      this.document.defaultView?.localStorage.setItem(THEME_STORAGE_KEY, next);
+    } catch {
+      // Without storage the choice only lasts until the page is reloaded.
+    }
+  }
+
   toggle(): void {
     const next: Theme = this.theme() === 'dark' ? 'light' : 'dark';
     this.theme.set(next);

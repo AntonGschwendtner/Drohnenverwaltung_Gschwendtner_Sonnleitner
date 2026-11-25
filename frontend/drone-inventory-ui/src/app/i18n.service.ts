@@ -166,6 +166,27 @@ const english = {
   'history.noMatch': 'No loan matches the search.',
   'history.planned': 'planned {date}',
   'history.export': 'Export as CSV',
+  'history.delete': 'Delete history',
+  'history.deleteTitle': 'Delete the whole history?',
+  'history.deleteText': 'All {count} returned loans are deleted for good. Active loans stay. This cannot be undone.',
+  'settings.title': 'Settings',
+  'settings.close': 'Close the settings',
+  'settings.language': 'Language',
+  'settings.mode': 'Mode',
+  'settings.reset': 'General reset',
+  'settings.returnAllDrones': 'Return all drones',
+  'settings.deleteAllDrones': 'Delete all drones',
+  'settings.deleteAllStudentGroups': 'Delete all student groups',
+  'settings.deleteHistory': 'Delete the whole history',
+  'settings.resetHint': 'Only what is ticked happens, after one more question. Deleted drones and groups keep their returned loans in the history unless the history is deleted too. Download a backup first.',
+  'settings.backup': 'Backup',
+  'settings.backupDownload': 'Download backup',
+  'settings.restore': 'Restore a backup file',
+  'settings.restoreStep': 'Replace all data with the backup {file}',
+  'settings.apply': 'Apply',
+  'settings.confirmTitle': 'This happens now:',
+  'settings.confirmText': 'This cannot be undone.',
+  'settings.confirmRun': 'Yes, do it',
   'history.print': 'Print or save as PDF',
   'history.printedOn': 'Printed on {date}',
   'history.missing': '{count} missing',
@@ -334,6 +355,27 @@ const german: Record<TextKey, string> = {
   'history.noMatch': 'Keine Ausleihe passt zur Suche.',
   'history.planned': 'geplant {date}',
   'history.export': 'Als CSV exportieren',
+  'history.delete': 'Historie löschen',
+  'history.deleteTitle': 'Die ganze Historie löschen?',
+  'history.deleteText': 'Alle {count} zurückgegebenen Ausleihen werden endgültig gelöscht. Aktive Ausleihen bleiben. Das lässt sich nicht rückgängig machen.',
+  'settings.title': 'Einstellungen',
+  'settings.close': 'Einstellungen schließen',
+  'settings.language': 'Sprache',
+  'settings.mode': 'Darstellung',
+  'settings.reset': 'Generalreset',
+  'settings.returnAllDrones': 'Alle Drohnen zurückgeben',
+  'settings.deleteAllDrones': 'Alle Drohnen löschen',
+  'settings.deleteAllStudentGroups': 'Alle Schülergruppen löschen',
+  'settings.deleteHistory': 'Die ganze Historie löschen',
+  'settings.resetHint': 'Nur Angekreuztes passiert, nach einer Rückfrage. Gelöschte Drohnen und Gruppen behalten ihre zurückgegebenen Ausleihen in der Historie, außer die Historie wird mitgelöscht. Vorher ein Backup herunterladen.',
+  'settings.backup': 'Backup',
+  'settings.backupDownload': 'Backup herunterladen',
+  'settings.restore': 'Backup-Datei einspielen',
+  'settings.restoreStep': 'Alle Daten durch das Backup {file} ersetzen',
+  'settings.apply': 'Übernehmen',
+  'settings.confirmTitle': 'Das passiert jetzt:',
+  'settings.confirmText': 'Das lässt sich nicht rückgängig machen.',
+  'settings.confirmRun': 'Ja, ausführen',
   'history.print': 'Drucken oder als PDF speichern',
   'history.printedOn': 'Gedruckt am {date}',
   'history.missing': '{count} fehlen',
@@ -358,6 +400,18 @@ export class I18nService {
   /** Reads the language signal, so templates update when the language changes. */
   t(key: TextKey, values: Record<string, string> = {}): string {
     return texts[this.language()][key].replace(/\{(\w+)\}/g, (match, name: string) => values[name] ?? match);
+  }
+
+  /** Sets the language chosen in the settings (REQ-037) and remembers it. */
+  use(next: Language): void {
+    this.language.set(next);
+    this.apply(next);
+
+    try {
+      this.document.defaultView?.localStorage.setItem(LANGUAGE_STORAGE_KEY, next);
+    } catch {
+      // Without storage the choice only lasts until the page is reloaded.
+    }
   }
 
   toggle(): void {

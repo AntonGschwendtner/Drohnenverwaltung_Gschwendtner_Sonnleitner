@@ -22,21 +22,9 @@
         <span>{{ time() }}</span>
       </span>
 
-      <button class="lang-toggle" type="button" (click)="i18n.toggle()" [attr.aria-label]="i18n.t('language.switch')">
-        <span [class.on]="i18n.language() === 'de'" aria-hidden="true">DE</span>
-        <span class="lang-divider" aria-hidden="true"></span>
-        <span [class.on]="i18n.language() === 'en'" aria-hidden="true">EN</span>
-      </button>
-
-      <button
-        class="theme-toggle"
-        type="button"
-        (click)="theme.toggle()"
-        [attr.aria-pressed]="theme.theme() === 'dark'"
-        [attr.aria-label]="i18n.t(theme.theme() === 'dark' ? 'theme.toLight' : 'theme.toDark')"
-      >
-        <span class="toggle-track" aria-hidden="true"><span class="toggle-knob"></span></span>
-        <span class="toggle-label" aria-hidden="true">{{ i18n.t(theme.theme() === 'dark' ? 'theme.night' : 'theme.day') }}</span>
+      <button class="settings-button" type="button" (click)="openSettings($event)" [attr.aria-label]="i18n.t('settings.title')">
+        <span aria-hidden="true">⚙</span>
+        <span class="settings-label">{{ i18n.t('settings.title') }}</span>
       </button>
     </div>
   </div>
@@ -71,3 +59,7 @@
     <span>Gschwendtner &amp; Sonnleitner</span>
   </p>
 </footer>
+
+@if (settingsOpen()) {
+  <app-settings-dialog (closed)="closeSettings()" />
+}

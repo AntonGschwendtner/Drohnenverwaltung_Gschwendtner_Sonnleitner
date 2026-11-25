@@ -6,7 +6,7 @@
 
 ## 2. Frontend (REQ-037 to REQ-040)
 
-- [ ] 2.1 Settings dialog with language, mode, general reset, backup and restore, header button; "Delete history" on the history page; component tests for "Open the settings", "Close without changes", "Apply language and mode", "Reset not confirmed", the reset request, backup and restore, "Delete the history", "Cancel deleting the history" (#225)
+- [x] 2.1 Settings dialog with language, mode, general reset, backup and restore, header button; "Delete history" on the history page; component tests for "Open the settings", "Close without changes", "Apply language and mode", "Reset not confirmed", the reset request, backup and restore, "Delete the history", "Cancel deleting the history" (#225)
 
 ## 3. Documentation
 

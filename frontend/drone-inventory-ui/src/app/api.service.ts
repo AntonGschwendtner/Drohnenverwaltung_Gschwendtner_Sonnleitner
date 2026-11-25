@@ -40,6 +40,14 @@ export interface StudentGroup {
 
 /** A group in the trash with what a permanent delete would take with it (REQ-033). */
 /** A drone in the trash with the number of loans a permanent delete would take with it (REQ-034). */
+/** The parts of the general reset; only what is true happens (REQ-038). */
+export interface ResetRequest {
+  returnAllDrones: boolean;
+  deleteAllDrones: boolean;
+  deleteAllStudentGroups: boolean;
+  deleteHistory: boolean;
+}
+
 export interface TrashedDrone {
   id: number;
   name: string;
@@ -175,6 +183,22 @@ export class ApiService {
 
   deleteStudentGroup(id: number): Observable<void> {
     return this.http.delete<void>(`/api/student-groups/${id}`);
+  }
+
+  reset(request: ResetRequest): Observable<unknown> {
+    return this.http.post('/api/admin/reset', request);
+  }
+
+  /** Replaces all data with a backup file (REQ-039). */
+  restoreBackup(file: File): Observable<void> {
+    const form = new FormData();
+    form.append('file', file, file.name);
+    return this.http.post<void>('/api/admin/restore', form);
+  }
+
+  /** Deletes all returned loans (REQ-040). */
+  deleteHistory(): Observable<{ deletedLoans: number }> {
+    return this.http.delete<{ deletedLoans: number }>('/api/loans/history');
   }
 
   listDroneTrash(): Observable<TrashedDrone[]> {
