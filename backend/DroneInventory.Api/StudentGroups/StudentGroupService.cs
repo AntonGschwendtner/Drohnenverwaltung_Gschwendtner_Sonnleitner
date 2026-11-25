@@ -24,7 +24,8 @@ public class StudentGroupService(DroneInventoryDbContext dbContext, TimeProvider
             studentGroup.Members
                 .Where(member => member.IsLeader)
                 .Select(member => member.Name)
-                .FirstOrDefault());
+                .FirstOrDefault(),
+            studentGroup.DeletedAt);
 
     public async Task<IReadOnlyList<StudentGroupResponse>> ListAsync(CancellationToken cancellationToken) =>
         await dbContext.StudentGroups
@@ -69,7 +70,7 @@ public class StudentGroupService(DroneInventoryDbContext dbContext, TimeProvider
         }
 
         // A new group has no members and no leader yet.
-        return ServiceResult<StudentGroupResponse>.Success(new StudentGroupResponse(studentGroup.Id, studentGroup.Name, [], null));
+        return ServiceResult<StudentGroupResponse>.Success(new StudentGroupResponse(studentGroup.Id, studentGroup.Name, [], null, null));
     }
 
     /// <summary>Changes the name with the same rules as creating (REQ-017).</summary>
@@ -139,6 +140,40 @@ public class StudentGroupService(DroneInventoryDbContext dbContext, TimeProvider
         await transaction.CommitAsync(cancellationToken);
 
         return ServiceResult<bool>.Success(true);
+    }
+
+    /// <summary>The groups in the trash, the most recently deleted first (REQ-033).</summary>
+    public async Task<IReadOnlyList<TrashedStudentGroupResponse>> ListTrashAsync(CancellationToken cancellationToken) =>
+        await dbContext.StudentGroups
+            .Where(studentGroup => studentGroup.DeletedAt != null)
+            .OrderByDescending(studentGroup => studentGroup.DeletedAt)
+            .ThenBy(studentGroup => studentGroup.Name)
+            .Select(studentGroup => new TrashedStudentGroupResponse(
+                studentGroup.Id,
+                studentGroup.Name,
+                studentGroup.DeletedAt!.Value,
+                dbContext.Loans.Count(loan => loan.StudentGroupId == studentGroup.Id),
+                studentGroup.Members.Count))
+            .ToListAsync(cancellationToken);
+
+    /// <summary>Takes a group out of the trash with its members and loans (REQ-033).</summary>
+    public async Task<ServiceResult<StudentGroupResponse>> RestoreAsync(int id, CancellationToken cancellationToken)
+    {
+        var studentGroup = await dbContext.StudentGroups.FindAsync([id], cancellationToken);
+        if (studentGroup is null)
+        {
+            return ServiceResult<StudentGroupResponse>.NotFound(Messages.UnknownStudentGroup(id));
+        }
+
+        if (studentGroup.DeletedAt is null)
+        {
+            return ServiceResult<StudentGroupResponse>.NotFound(Messages.StudentGroupNotInTrash(studentGroup.Name));
+        }
+
+        studentGroup.DeletedAt = null;
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return await GetAsync(id, cancellationToken);
     }
 
     /// <summary>
