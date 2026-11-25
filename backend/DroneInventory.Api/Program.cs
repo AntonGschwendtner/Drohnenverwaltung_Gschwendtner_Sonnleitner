@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using DroneInventory.Api.Admin;
 using DroneInventory.Api.Common;
 using DroneInventory.Api.Data;
 using DroneInventory.Api.Drones;
@@ -23,6 +24,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<DroneService>();
 builder.Services.AddScoped<StudentGroupService>();
 builder.Services.AddScoped<LoanService>();
+builder.Services.AddScoped<AdminService>();
 
 var app = builder.Build();
 
@@ -59,6 +61,7 @@ if (serveApp)
 app.MapDroneEndpoints();
 app.MapStudentGroupEndpoints();
 app.MapLoanEndpoints();
+app.MapAdminEndpoints();
 
 if (serveApp)
 {

@@ -172,6 +172,18 @@ public static class Messages
         $"The drone \"{name}\" is not in the trash.",
         $"Die Drohne „{name}“ liegt nicht im Papierkorb.");
 
+    public static string ResetNothingChosen => Pick(
+        "Choose at least one part of the reset.",
+        "Wähle mindestens einen Teil des Zurücksetzens aus.");
+
+    public static string BackupInvalid => Pick(
+        "This file is not a backup of the drone lending app.",
+        "Diese Datei ist kein Backup der Drohnenverwaltung.");
+
+    public static string BackupNewer => Pick(
+        "This backup was made by a newer version of the app and cannot be restored here.",
+        "Dieses Backup stammt von einer neueren Version der App und lässt sich hier nicht einspielen.");
+
     public static string[] CsvHeader => IsGerman
         ? ["Schülergruppe", "Drohne", "Akkus", "Propeller", "Ausleihdatum", "Rückgabedatum"]
         : ["Student group", "Drone", "Batteries", "Propellers", "Loan date", "Return date"];

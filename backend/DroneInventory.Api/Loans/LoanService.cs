@@ -188,6 +188,10 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             loan.LoanDate));
     }
 
+    /// <summary>Deletes all returned loans, their items by cascade (REQ-040). Active loans stay.</summary>
+    public Task<int> DeleteHistoryAsync(CancellationToken cancellationToken) =>
+        dbContext.Loans.Where(loan => loan.Status == LoanStatus.Returned).ExecuteDeleteAsync(cancellationToken);
+
     /// <summary>
     /// Returns a loan (REQ-008) and records what came back (REQ-023). Without returned quantities the loaned
     /// quantities count as returned. Status, return date and quantities change in one transaction.

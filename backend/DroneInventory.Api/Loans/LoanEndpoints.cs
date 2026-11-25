@@ -9,6 +9,9 @@ public static class LoanEndpoints
     {
         var loans = app.MapGroup("/api/loans");
 
+        loans.MapDelete("/history", async (LoanService service, CancellationToken cancellationToken) =>
+            Results.Ok(new { DeletedLoans = await service.DeleteHistoryAsync(cancellationToken) }));
+
         loans.MapGet("/", async (LoanStatus? status, int? droneId, int? studentGroupId, LoanService service, CancellationToken cancellationToken) =>
         {
             var result = await service.ListAsync(status, droneId, studentGroupId, cancellationToken);
