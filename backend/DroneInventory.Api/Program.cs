@@ -47,8 +47,26 @@ app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseHttpsRedirection();
 
+// The container serves the built Angular app from wwwroot next to the API (REQ-032). In development there is no
+// wwwroot; the Angular dev server serves the app and nothing below takes effect.
+var serveApp = app.Environment.WebRootFileProvider.GetFileInfo("index.html").Exists;
+if (serveApp)
+{
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
+}
+
 app.MapDroneEndpoints();
 app.MapStudentGroupEndpoints();
 app.MapLoanEndpoints();
+
+if (serveApp)
+{
+    // Addresses of the app such as /drones/7 or /loans?drone=7 (QR codes, bookmarks) open the app, which then routes.
+    // Only for GET and HEAD and never below /api: unknown API addresses stay 404, a wrong method on an API route
+    // stays 405, and paths with a file extension stay with the static files.
+    app.MapFallbackToFile("{**path:nonfile:regex(^(?!api(/|$)).*$)}", "index.html")
+        .WithMetadata(new HttpMethodMetadata([HttpMethods.Get, HttpMethods.Head]));
+}
 
 app.Run();
