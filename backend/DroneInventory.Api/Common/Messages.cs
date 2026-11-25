@@ -88,10 +88,6 @@ public static class Messages
         $"The drone \"{name}\" has loans and cannot be deleted, so the loan history stays complete.",
         $"Die Drohne „{name}“ hat Ausleihen und kann nicht gelöscht werden, damit die Historie vollständig bleibt.");
 
-    public static string StudentGroupHasLoans(string name) => Pick(
-        $"The student group \"{name}\" has loans and cannot be deleted, so the loan history stays complete.",
-        $"Die Schülergruppe „{name}“ hat Ausleihen und kann nicht gelöscht werden, damit die Historie vollständig bleibt.");
-
     public static string NoteTooLong(int maxLength) => Pick(
         $"A note can have at most {maxLength} characters.",
         $"Eine Notiz darf höchstens {maxLength} Zeichen haben.");
@@ -143,6 +139,18 @@ public static class Messages
     public static string LeaderChangedAtTheSameTime => Pick(
         "The group leader was changed at the same time. Look at the group again and choose once more.",
         "Der Gruppenleiter wurde gleichzeitig geändert. Sieh dir die Gruppe noch einmal an und wähle erneut.");
+
+    public static string StudentGroupInTrash(string name) => Pick(
+        $"\"{name}\" is in the trash. Restore it first.",
+        $"„{name}“ liegt im Papierkorb. Stell die Gruppe zuerst wieder her.");
+
+    public static string StudentGroupNameInTrash(string name) => Pick(
+        $"A student group named \"{name}\" is in the trash. Restore it or delete it for good.",
+        $"Eine Schülergruppe mit dem Namen „{name}“ liegt im Papierkorb. Stell sie wieder her oder lösche sie endgültig.");
+
+    public static string StudentGroupHasActiveLoan(string group, string drone) => Pick(
+        $"\"{group}\" still has \"{drone}\". Return the drone first.",
+        $"„{group}“ hat noch „{drone}“. Gib die Drohne zuerst zurück.");
 
     public static string[] CsvHeader => IsGerman
         ? ["Schülergruppe", "Drohne", "Akkus", "Propeller", "Ausleihdatum", "Rückgabedatum"]

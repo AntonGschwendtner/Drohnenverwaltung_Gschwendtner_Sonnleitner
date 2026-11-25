@@ -81,7 +81,7 @@ public sealed class StudentGroupMemberEntityTests : IDisposable
     }
 
     [Fact]
-    public async Task Delete_a_group_with_members()
+    public async Task Delete_a_group_with_members_keeps_them_in_the_trash()
     {
         var groupId = await SaveGroupAsync("Group 4");
         await SaveMemberAsync(groupId, "Anna Huber", isLeader: true);
@@ -90,8 +90,8 @@ public sealed class StudentGroupMemberEntityTests : IDisposable
         var response = await client.DeleteAsync($"/api/student-groups/{groupId}");
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-        Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync($"/api/student-groups/{groupId}")).StatusCode);
-        Assert.Equal(0, await CountMembersAsync());
+        Assert.Equal("[]", await client.GetStringAsync("/api/student-groups"));
+        Assert.Equal(1, await CountMembersAsync());
     }
 
     public void Dispose() => _factory.Dispose();
