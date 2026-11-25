@@ -74,7 +74,7 @@ Ohne .NET und Node.js geht es auch mit Docker. Frontend und Backend laufen dann 
 docker compose up --build -d
 ```
 
-Danach http://localhost:8080 öffnen. Das Backend liefert die App und die REST-API unter derselben Adresse aus, Links wie `/drones/7` aus den QR-Codes öffnen direkt die richtige Seite.
+Danach http://localhost:8080 öffnen. Das Backend liefert die App und die REST-API unter derselben Adresse aus, Seiten wie `/drones/7` und die Links aus den QR-Codes (`/loans?drone=7`) öffnen direkt die richtige Seite. Beim ersten Start ist die Datenbank leer.
 
 - Die Datenbank liegt im Docker-Volume `drohnenverwaltung-data`. Sie bleibt bei `docker compose down`, beim Neustart und bei einem neuen Image erhalten. Erst `docker compose down -v` löscht sie.
 - Nach Änderungen am Code baut `docker compose up --build -d` das Image neu.
