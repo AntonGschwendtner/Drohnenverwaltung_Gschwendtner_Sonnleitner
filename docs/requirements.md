@@ -232,6 +232,7 @@ Diese Anforderungen sind als OpenSpec-Changes beschlossen (Freigabe am 2026-11-1
 | REQ-029 | Reservierung beim Ausleihen beachten | Am reservierten Tag nur für die reservierende Gruppe | `reservations` |
 | REQ-030 | Statistiken | Summen, pro Drohne und pro Gruppe, für einen Zeitraum | `lending-statistics` |
 | REQ-031 | Mitglieder und Gruppenleiter | Namen der Personen einer Gruppe, ein Gruppenleiter, Knopf „Mitglieder“ in der Gruppenliste | `student-group-members` |
+| REQ-032 | Docker-Container | Frontend und Backend in einem Container `drohnenverwaltung`, Daten im Volume | `docker-container` |
 
 ## Out of Scope
 
@@ -239,6 +240,7 @@ Diese Anforderungen sind als OpenSpec-Changes beschlossen (Freigabe am 2026-11-1
 - Einzelinventarisierung von Akkus (BAT-001 ...)
 - Weitere Daten zu Mitgliedern als den Namen (Klasse, E-Mail), Konten für Mitglieder und Gruppenleiter
 - Festhalten, welches Mitglied eine Drohne genommen hat; eine Ausleihe gehört der ganzen Gruppe
+- HTTPS im Container, Veröffentlichen des Images in einer Registry, automatische Builds in CI und Backups des Volumes
 
 Diese Punkte kommen bei Bedarf später als eigener Change Request.
 

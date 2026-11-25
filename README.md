@@ -23,10 +23,11 @@ Schulprojekt im Fach SYP, 4. INF, 2026/27, von Gschwendtner und Sonnleitner. Bet
 - Einen Schaden melden, bei der Rückgabe oder jederzeit auf der Drohnenseite. Eine defekte Drohne hat den Status „Defective“ und lässt sich erst nach „Repaired“ wieder ausleihen.
 - Beim Ausleihen eine Notiz (zum Beispiel das Projekt) und ein geplantes Rückgabedatum angeben. Ist das Datum vorbei, wird die Ausleihe als „Overdue“ markiert. Mit geplantem Datum ersetzt das die 7-Tage-Markierung.
 - Über der Drohnenliste zählen, wie viele Drohnen es gibt und wie viele davon verfügbar und ausgeliehen sind.
+- Die ganze Anwendung als ein Docker-Container `drohnenverwaltung` starten, mit dauerhafter Datenbank im Volume.
 
 Nicht enthalten sind Login und Rollen sowie einzeln erfasste Akkus. Sie können später als eigener Change Request folgen.
 
-Die Changes `initial-drone-lending-system`, `improve-lending-overview`, `manage-drones-and-groups`, `drone-and-group-details`, `loan-notes-and-due-dates`, `return-check-and-damage` und `student-group-members` sind abgeschlossen und archiviert. Die geltenden Anforderungen stehen in [openspec/specs](openspec/specs), die erledigten Aufgaben im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
+Die Changes `initial-drone-lending-system`, `improve-lending-overview`, `manage-drones-and-groups`, `drone-and-group-details`, `loan-notes-and-due-dates`, `return-check-and-damage`, `student-group-members` und `docker-container` sind abgeschlossen und archiviert. Die geltenden Anforderungen stehen in [openspec/specs](openspec/specs), die erledigten Aufgaben im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
 
 ## Technik
 
@@ -64,6 +65,23 @@ npm start
 ```
 
 Das Frontend leitet alle Anfragen an `/api` an das Backend weiter (`proxy.conf.json`). Dafür muss das Backend laufen. Danach http://localhost:4200 im Browser öffnen. Oben rechts lässt sich zwischen Deutsch und Englisch sowie zwischen hellem und dunklem Modus wechseln. Die Meldungen des Backends kommen in der gewählten Sprache.
+
+### Mit Docker starten
+
+Ohne .NET und Node.js geht es auch mit Docker. Frontend und Backend laufen dann zusammen in einem Container `drohnenverwaltung`. Docker Desktop muss laufen.
+
+```powershell
+docker compose up --build -d
+```
+
+Danach http://localhost:8080 öffnen. Das Backend liefert die App und die REST-API unter derselben Adresse aus, Links wie `/drones/7` aus den QR-Codes öffnen direkt die richtige Seite.
+
+- Die Datenbank liegt im Docker-Volume `drohnenverwaltung-data`. Sie bleibt bei `docker compose down`, beim Neustart und bei einem neuen Image erhalten. Erst `docker compose down -v` löscht sie.
+- Nach Änderungen am Code baut `docker compose up --build -d` das Image neu.
+- Mit `docker compose logs -f` siehst du die Ausgabe des Backends, mit `docker compose down` hältst du den Container an.
+- **QR-Codes mit dem Handy:** Das Handy muss im selben WLAN sein und die App über die Adresse des PCs erreichen, zum Beispiel http://192.168.0.15:8080 (die eigene Adresse zeigt `ipconfig`). Die App am PC über diese Adresse öffnen, dann enthalten die QR-Etiketten einen Link, den das Handy erreicht. Eventuell muss die Windows-Firewall Port 8080 erlauben.
+
+Die Docker-Variante nutzt eine eigene Datenbank, nicht `backend/DroneInventory.Api/droneinventory.db`.
 
 ## Bedienung am Beispiel
 
