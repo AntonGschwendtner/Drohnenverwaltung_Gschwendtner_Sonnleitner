@@ -8,14 +8,15 @@ import { I18nService } from '../i18n.service';
  * The members of one student group (REQ-031): listed alphabetically with the group leader marked. Members are
  * added and removed here and the leader is chosen or cleared. Every change goes to the backend at once; the dialog
  * then shows the group as the backend has it and tells the page, so the list row stays in step.
- * Escape and a click next to the dialog close it; Tab stays inside.
+ * Escape and a click next to the dialog close it; Tab stays inside. While a change is on its way the dialog stays
+ * open, so the answer of the backend still reaches the list row.
  */
 @Component({
   selector: 'app-members-dialog',
   imports: [ReactiveFormsModule],
   host: { '(document:keydown)': 'onKeydown($event)' },
   template: `
-    <div class="dialog-backdrop" (click)="closed.emit()"></div>
+    <div class="dialog-backdrop" (click)="close()"></div>
     <div #dialog class="dialog members-dialog" role="dialog" aria-modal="true" aria-labelledby="members-dialog-title">
       <h2 id="members-dialog-title">{{ i18n.t('members.title', { group: group().name }) }}</h2>
 
@@ -73,7 +74,7 @@ import { I18nService } from '../i18n.service';
       </form>
 
       <div class="dialog-actions">
-        <button type="button" class="dialog-cancel close" (click)="closed.emit()">{{ i18n.t('members.close') }}</button>
+        <button type="button" class="dialog-cancel close" (click)="close()" [disabled]="busy()">{{ i18n.t('members.close') }}</button>
       </div>
     </div>
   `,
@@ -121,7 +122,14 @@ export class MembersDialog {
   }
 
   protected setLeader(memberId: number | null): void {
-    this.change(this.api.setLeader(this.group().id, memberId));
+    // The clicked button disappears with the change, so the focus goes to the name field.
+    this.change(this.api.setLeader(this.group().id, memberId), () => this.nameInput().nativeElement.focus());
+  }
+
+  protected close(): void {
+    if (!this.busy()) {
+      this.closed.emit();
+    }
   }
 
   /** Sends one change, then reads the group again, so members, leader and count come from the backend. */
@@ -153,7 +161,7 @@ export class MembersDialog {
       if (this.pendingRemove()) {
         this.pendingRemove.set(null);
       } else {
-        this.closed.emit();
+        this.close();
       }
       return;
     }

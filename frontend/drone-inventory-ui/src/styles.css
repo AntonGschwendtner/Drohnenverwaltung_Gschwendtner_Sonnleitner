@@ -1503,7 +1503,7 @@ td button.busy::after {
 .leader-badge {
   padding: 0.1rem 0.5rem;
   background: var(--signal);
-  color: var(--ink);
+  color: var(--on-signal);
   font-family: var(--font-display);
   font-size: 0.72rem;
   font-weight: 700;

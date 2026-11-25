@@ -209,6 +209,44 @@ describe('StudentGroupsPage members', () => {
     expect(dialog()).toBeNull();
   });
 
+  it('stays open while a change is on its way', async () => {
+    await open(3);
+    (memberRow(12).querySelector('button.make-leader') as HTMLButtonElement).click();
+    await settle();
+
+    expect((dialog()?.querySelector('button.close') as HTMLButtonElement).disabled).toBe(true);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    (element.querySelector('.dialog-backdrop') as HTMLElement).click();
+    await settle();
+    expect(dialog()).not.toBeNull();
+
+    http.expectOne({ method: 'PUT', url: '/api/student-groups/3/leader' }).flush(group3);
+    http.expectOne({ method: 'GET', url: '/api/student-groups/3' }).flush(group3);
+    await settle();
+    expect((dialog()?.querySelector('button.close') as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it('Escape first cancels an open removal question', async () => {
+    await open(3);
+    (memberRow(12).querySelector('button.remove') as HTMLButtonElement).click();
+    await settle();
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    await settle();
+
+    expect(dialog()).not.toBeNull();
+    expect(memberRow(12).querySelector('button.confirm-remove')).toBeNull();
+    http.expectNone({ method: 'DELETE' });
+  });
+
+  it('gives the focus back to the members button when closed', async () => {
+    await open(3);
+    (dialog()?.querySelector('button.close') as HTMLButtonElement).click();
+    await settle();
+
+    expect(document.activeElement).toBe(membersButton(3));
+  });
+
   it('shows the dialog in German', async () => {
     localStorage.setItem('drone-inventory-language', 'de');
     TestBed.resetTestingModule();
