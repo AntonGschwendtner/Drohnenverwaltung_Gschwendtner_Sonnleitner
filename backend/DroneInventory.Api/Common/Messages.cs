@@ -124,6 +124,18 @@ public static class Messages
         $"More {type} returned than loaned ({loaned}).",
         $"Mehr {type} zurückgegeben als ausgeliehen ({loaned}).");
 
+    public static string MemberNeedsName => Pick(
+        "A member needs a name.",
+        "Ein Mitglied braucht einen Namen.");
+
+    public static string MemberNameTooLong(int maxLength) => Pick(
+        $"The name of a member has at most {maxLength} characters.",
+        $"Der Name eines Mitglieds hat höchstens {maxLength} Zeichen.");
+
+    public static string MemberExists(string name, string group) => Pick(
+        $"\"{name}\" is already a member of \"{group}\".",
+        $"„{name}“ ist bereits Mitglied von „{group}“.");
+
     public static string[] CsvHeader => IsGerman
         ? ["Schülergruppe", "Drohne", "Akkus", "Propeller", "Ausleihdatum", "Rückgabedatum"]
         : ["Student group", "Drone", "Batteries", "Propellers", "Loan date", "Return date"];
