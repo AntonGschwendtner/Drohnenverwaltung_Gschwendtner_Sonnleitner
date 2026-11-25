@@ -136,6 +136,10 @@ public static class Messages
         $"\"{name}\" is already a member of \"{group}\".",
         $"„{name}“ ist bereits Mitglied von „{group}“.");
 
+    public static string UnknownMember(int id) => Pick(
+        $"This student group has no member with the id {id}.",
+        $"Diese Schülergruppe hat kein Mitglied mit der ID {id}.");
+
     public static string[] CsvHeader => IsGerman
         ? ["Schülergruppe", "Drohne", "Akkus", "Propeller", "Ausleihdatum", "Rückgabedatum"]
         : ["Student group", "Drone", "Batteries", "Propellers", "Loan date", "Return date"];

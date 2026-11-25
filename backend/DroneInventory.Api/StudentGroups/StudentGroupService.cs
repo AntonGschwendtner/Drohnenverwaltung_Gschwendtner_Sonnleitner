@@ -1,16 +1,34 @@
 using DroneInventory.Api.Common;
 using DroneInventory.Api.Data;
 using DroneInventory.Api.Domain;
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 
 namespace DroneInventory.Api.StudentGroups;
 
 public class StudentGroupService(DroneInventoryDbContext dbContext)
 {
+    /// <summary>
+    /// The shape of a group in every answer: members alphabetical (NOCASE column), the leader's name or null (REQ-031).
+    /// </summary>
+    private static readonly Expression<Func<StudentGroup, StudentGroupResponse>> ToResponse = studentGroup =>
+        new StudentGroupResponse(
+            studentGroup.Id,
+            studentGroup.Name,
+            studentGroup.Members
+                .OrderBy(member => member.Name)
+                .ThenBy(member => member.Id)
+                .Select(member => new StudentGroupMemberResponse(member.Id, member.Name, member.IsLeader))
+                .ToList(),
+            studentGroup.Members
+                .Where(member => member.IsLeader)
+                .Select(member => member.Name)
+                .FirstOrDefault());
+
     public async Task<IReadOnlyList<StudentGroupResponse>> ListAsync(CancellationToken cancellationToken) =>
         await dbContext.StudentGroups
             .OrderBy(studentGroup => studentGroup.Name)
-            .Select(studentGroup => new StudentGroupResponse(studentGroup.Id, studentGroup.Name))
+            .Select(ToResponse)
             .ToListAsync(cancellationToken);
 
     /// <summary>One student group in the same shape as an item of the list (REQ-019).</summary>
@@ -18,7 +36,7 @@ public class StudentGroupService(DroneInventoryDbContext dbContext)
     {
         var studentGroup = await dbContext.StudentGroups
             .Where(studentGroup => studentGroup.Id == id)
-            .Select(studentGroup => new StudentGroupResponse(studentGroup.Id, studentGroup.Name))
+            .Select(ToResponse)
             .SingleOrDefaultAsync(cancellationToken);
 
         return studentGroup is null
@@ -48,7 +66,8 @@ public class StudentGroupService(DroneInventoryDbContext dbContext)
             return NameAlreadyExists(name);
         }
 
-        return ServiceResult<StudentGroupResponse>.Success(new StudentGroupResponse(studentGroup.Id, studentGroup.Name));
+        // A new group has no members and no leader yet.
+        return ServiceResult<StudentGroupResponse>.Success(new StudentGroupResponse(studentGroup.Id, studentGroup.Name, [], null));
     }
 
     /// <summary>Changes the name with the same rules as creating (REQ-017).</summary>
@@ -80,7 +99,8 @@ public class StudentGroupService(DroneInventoryDbContext dbContext)
             return NameAlreadyExists(name);
         }
 
-        return ServiceResult<StudentGroupResponse>.Success(new StudentGroupResponse(studentGroup.Id, studentGroup.Name));
+        // Read back, so the answer carries the members as well.
+        return await GetAsync(id, cancellationToken);
     }
 
     /// <summary>
@@ -162,6 +182,31 @@ public class StudentGroupService(DroneInventoryDbContext dbContext)
 
         return ServiceResult<StudentGroupMemberResponse>.Success(
             new StudentGroupMemberResponse(member.Id, member.Name, member.IsLeader));
+    }
+
+    /// <summary>
+    /// Removes a person from a group (REQ-031). Loans of the group stay as they are; a removed leader leaves the group
+    /// without a leader. A member of another group counts as not found.
+    /// </summary>
+    public async Task<ServiceResult<bool>> RemoveMemberAsync(int studentGroupId, int memberId, CancellationToken cancellationToken)
+    {
+        if (!await dbContext.StudentGroups.AnyAsync(studentGroup => studentGroup.Id == studentGroupId, cancellationToken))
+        {
+            return ServiceResult<bool>.NotFound(Messages.UnknownStudentGroup(studentGroupId));
+        }
+
+        var member = await dbContext.StudentGroupMembers.SingleOrDefaultAsync(
+            m => m.Id == memberId && m.StudentGroupId == studentGroupId,
+            cancellationToken);
+        if (member is null)
+        {
+            return ServiceResult<bool>.NotFound(Messages.UnknownMember(memberId));
+        }
+
+        dbContext.StudentGroupMembers.Remove(member);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return ServiceResult<bool>.Success(true);
     }
 
     /// <summary>The name is required and unique. When editing, the group itself may keep its name.</summary>
