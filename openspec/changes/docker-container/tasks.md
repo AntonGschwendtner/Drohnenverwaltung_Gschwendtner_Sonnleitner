@@ -10,4 +10,4 @@
 
 ## 3. Documentation
 
-- [ ] 3.1 README section "Mit Docker starten" (including phone access in the same network), REQ-032 in `docs/requirements.md`; check "Start without Docker" by following the README (#186)
+- [x] 3.1 README section "Mit Docker starten" (including phone access in the same network), REQ-032 in `docs/requirements.md`; check "Start without Docker" by following the README (#186)
