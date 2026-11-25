@@ -15,7 +15,7 @@ Loans are created in `LoanService.CreateAsync`, which checks the drone, the grou
 
 ## Decisions
 
-1. **Entity `Reservation`.** `Id`, `DroneId`, `StudentGroupId`, `Date` (`DateOnly`). Unique index on (`DroneId`, `Date`) catches parallel reservations; the service maps the violation to 409 like the loan does. Foreign keys `Restrict`.
+1. **Entity `Reservation`.** `Id`, `DroneId`, `StudentGroupId`, `Date` (`DateOnly`). Unique index on (`DroneId`, `Date`) catches parallel reservations; the service maps the violation to 409 like the loan does. Foreign keys `Cascade`: the trash refuses drones and groups with upcoming reservations, so only past reservations can remain when a drone or group is deleted for good or by the general reset, and they go with it.
 2. **Cancel means delete.** No status column: a cancelled or past reservation has no use. Alternative: `Status` with Cancelled - rejected, see Out of Scope (no reservation history).
 3. **Loan check.** `CreateAsync` loads the reservation of (`DroneId`, today); if it exists and belongs to another group, 409 with a message naming the group. The drone list gets `reservedTodayFor` (group name or `null`).
 4. **Endpoints.** `GET /api/reservations` (today and later, ordered by date, then drone name; each item includes whether the drone is loaned now), `POST /api/reservations`, `DELETE /api/reservations/{id}` (204/404).

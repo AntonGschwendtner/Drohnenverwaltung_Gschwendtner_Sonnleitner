@@ -28,8 +28,11 @@ public class DroneService(DroneInventoryDbContext dbContext, TimeProvider timePr
     }
 
     // The status follows from the active loan and is computed in the query.
-    private System.Linq.Expressions.Expression<Func<Drone, DroneResponse>> ToResponse() =>
-        drone => new DroneResponse(
+    private System.Linq.Expressions.Expression<Func<Drone, DroneResponse>> ToResponse()
+    {
+        // The next reservation of today or later, for the hints in the drone list and the loan form (REQ-029).
+        var today = Today();
+        return drone => new DroneResponse(
             drone.Id,
             drone.Name,
             drone.DefectNote != null
@@ -39,7 +42,18 @@ public class DroneService(DroneInventoryDbContext dbContext, TimeProvider timePr
                     : DroneStatus.Available,
             drone.Description,
             drone.DefectNote,
-            drone.DeletedAt);
+            drone.DeletedAt,
+            dbContext.Reservations
+                .Where(reservation => reservation.DroneId == drone.Id && reservation.Date >= today)
+                .OrderBy(reservation => reservation.Date)
+                .Select(reservation => (DateOnly?)reservation.Date)
+                .FirstOrDefault(),
+            dbContext.Reservations
+                .Where(reservation => reservation.DroneId == drone.Id && reservation.Date >= today)
+                .OrderBy(reservation => reservation.Date)
+                .Select(reservation => reservation.StudentGroup!.Name)
+                .FirstOrDefault());
+    }
 
     public async Task<ServiceResult<DroneResponse>> CreateAsync(CreateDroneRequest request, CancellationToken cancellationToken)
     {
@@ -195,7 +209,19 @@ public class DroneService(DroneInventoryDbContext dbContext, TimeProvider timePr
             return ServiceResult<bool>.Conflict(Messages.DroneIsLoanedCannotDelete(drone.Name));
         }
 
-        drone.DeletedAt = Today();
+        // A promised drone stays until the reservation is cancelled (decision of 2026-11-12).
+        var today = Today();
+        var reservedOn = await dbContext.Reservations
+            .Where(reservation => reservation.DroneId == id && reservation.Date >= today)
+            .OrderBy(reservation => reservation.Date)
+            .Select(reservation => (DateOnly?)reservation.Date)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (reservedOn is { } reservedDate)
+        {
+            return ServiceResult<bool>.Conflict(Messages.ReservedCannotDelete(drone.Name, reservedDate));
+        }
+
+        drone.DeletedAt = today;
         await dbContext.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 

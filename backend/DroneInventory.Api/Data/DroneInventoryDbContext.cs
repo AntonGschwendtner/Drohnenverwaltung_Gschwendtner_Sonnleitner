@@ -14,6 +14,8 @@ public class DroneInventoryDbContext(DbContextOptions<DroneInventoryDbContext> o
 
     public DbSet<Loan> Loans => Set<Loan>();
 
+    public DbSet<Reservation> Reservations => Set<Reservation>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Drone>()
@@ -84,6 +86,17 @@ public class DroneInventoryDbContext(DbContextOptions<DroneInventoryDbContext> o
             loan.HasIndex(l => l.DroneId)
                 .IsUnique()
                 .HasFilter($"\"{nameof(Loan.Status)}\" = '{nameof(LoanStatus.Active)}'");
+        });
+
+        modelBuilder.Entity<Reservation>(reservation =>
+        {
+            // At most one reservation per drone and day, also for two requests at the same time (REQ-027).
+            reservation.HasIndex(r => new { r.DroneId, r.Date }).IsUnique();
+
+            // The trash refuses drones and groups with upcoming reservations, so only past reservations can be left
+            // when one is deleted for good or by the general reset; they go with it.
+            reservation.HasOne(r => r.Drone).WithMany().HasForeignKey(r => r.DroneId).OnDelete(DeleteBehavior.Cascade);
+            reservation.HasOne(r => r.StudentGroup).WithMany().HasForeignKey(r => r.StudentGroupId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<LoanItem>(item =>

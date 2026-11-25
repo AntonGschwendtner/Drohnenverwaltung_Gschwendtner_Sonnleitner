@@ -9,6 +9,7 @@ Diese Begriffe gelten überall: in Anforderung, Spec, Code, Datenbank und im Ges
 | Drone | Ein Fluggerät, das ausgeliehen werden kann |
 | StudentGroup | Eine Schülergruppe, die ausleiht und verantwortlich ist |
 | Member | Eine Person in einer StudentGroup, nur mit Namen |
+| Reservation | Eine Drone ist für eine StudentGroup an einem Tag reserviert; an dem Tag leiht nur diese Gruppe sie aus |
 | Trash | Papierkorb: Eine gelöschte StudentGroup oder Drone liegt dort mit ihren Ausleihen, bis sie wiederhergestellt oder endgültig gelöscht wird |
 | Group leader | Das Mitglied, das für die StudentGroup verantwortlich ist; höchstens eines pro Gruppe |
 | Loan | Ein Ausleihvorgang mit Gruppe, Drohne, Datum und Status |
@@ -24,6 +25,8 @@ erDiagram
     Drone ||--o{ Loan : "wird ausgeliehen in"
     StudentGroup ||--o{ Loan : "leiht aus in"
     StudentGroup ||--o{ StudentGroupMember : "besteht aus"
+    Drone ||--o{ Reservation : "reserviert in"
+    StudentGroup ||--o{ Reservation : "reserviert"
     Loan ||--o{ LoanItem : "enthält"
 
     Drone {
@@ -37,6 +40,12 @@ erDiagram
         int Id
         string Name
         date DeletedAt "optional, Tag im Papierkorb"
+    }
+    Reservation {
+        int Id
+        int DroneId
+        int StudentGroupId
+        date Date "heute oder spaeter, eine pro Drohne und Tag"
     }
     StudentGroupMember {
         int Id
@@ -85,6 +94,7 @@ erDiagram
 8. Bei der Rückgabe werden die zurückgegebenen Mengen erfasst. Fehlteile bleiben in der Historie sichtbar.
 9. Ein Mitgliedsname kommt in einer Gruppe nur einmal vor, ohne Unterschied zwischen Groß- und Kleinschreibung. Eine Gruppe hat höchstens einen Gruppenleiter, und er ist Mitglied dieser Gruppe.
 10. Löschen verschiebt eine StudentGroup oder Drone in den Papierkorb. Mit aktiver Ausleihe kommt sie nicht in den Papierkorb und wird nicht endgültig gelöscht. Im Papierkorb wird sie nicht ausgeliehen und nicht geändert, ihr Name bleibt vergeben.
+11. Eine Drohne hat höchstens eine Reservierung pro Tag. Am reservierten Tag leiht nur die reservierende Gruppe sie aus. Defekte Drohnen und Einträge im Papierkorb werden nicht reserviert; mit einer Reservierung ab heute kommt eine Drohne oder Gruppe nicht in den Papierkorb.
 
 Alle Regeln erzwingt das Backend. Das Frontend darf sie zusätzlich anzeigen, aber nicht als einzige Absicherung enthalten.
 

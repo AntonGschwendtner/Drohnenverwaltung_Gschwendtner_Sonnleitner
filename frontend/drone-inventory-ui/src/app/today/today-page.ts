@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
-import { ApiService, Drone, Loan, readErrorMessage } from '../api.service';
+import { ApiService, Drone, Loan, readErrorMessage, Reservation } from '../api.service';
 import { I18nService } from '../i18n.service';
 import { EmptyState } from '../shared/empty-state';
 import { PageHead } from '../shared/page-head';
@@ -44,7 +44,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
         </dl>
       </section>
 
-      @if (overdue().length === 0 && dueToday().length === 0 && longRunning().length === 0) {
+      @if (overdue().length === 0 && dueToday().length === 0 && longRunning().length === 0 && reservedToday().length === 0) {
         <app-empty-state>{{ i18n.t('today.nothing') }}</app-empty-state>
       }
 
@@ -81,6 +81,20 @@ import { StripSkeleton } from '../shared/strip-skeleton';
         </section>
       }
 
+      @if (reservedToday().length > 0) {
+        <section class="today-list" aria-labelledby="today-reserved">
+          <h2 id="today-reserved">{{ i18n.t('today.reserved') }}</h2>
+          <ul>
+            @for (reservation of reservedToday(); track reservation.id) {
+              <li class="today-item due-today-item" [attr.data-reservation]="reservation.id">
+                <span class="today-what">{{ reservation.droneName }} · {{ reservation.studentGroupName }}</span>
+                <a class="tool-link today-go" routerLink="/loans" [queryParams]="{ drone: reservation.droneId }">{{ i18n.t('today.toLoans') }}</a>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
       @if (longRunning().length > 0) {
         <section class="today-list" aria-labelledby="today-long">
           <h2 id="today-long">{{ i18n.t('loans.longRunning') }}</h2>
@@ -106,6 +120,8 @@ export class TodayPage implements OnInit {
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly activeLoans = signal<Loan[]>([]);
   private readonly drones = signal<Drone[]>([]);
+  /** Today's reservations (REQ-028); the backend marks them. */
+  protected readonly reservedToday = signal<Reservation[]>([]);
 
   /** The most overdue loan first; the backend counts the days (REQ-035). */
   protected readonly overdue = computed(() =>
@@ -122,10 +138,11 @@ export class TodayPage implements OnInit {
   protected readonly availableDrones = computed(() => this.drones().filter((drone) => drone.status === 'Available').length);
 
   ngOnInit(): void {
-    forkJoin({ loans: this.api.listLoans('Active'), drones: this.api.listDrones() }).subscribe({
-      next: ({ loans, drones }) => {
+    forkJoin({ loans: this.api.listLoans('Active'), drones: this.api.listDrones(), reservations: this.api.listReservations() }).subscribe({
+      next: ({ loans, drones, reservations }) => {
         this.activeLoans.set(loans);
         this.drones.set(drones);
+        this.reservedToday.set(reservations.filter((reservation) => reservation.isToday));
         this.loading.set(false);
       },
       error: (error: unknown) => {

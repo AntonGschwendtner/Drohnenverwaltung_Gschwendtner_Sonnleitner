@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
-import { Drone, Loan } from '../api.service';
+import { Drone, Loan, Reservation } from '../api.service';
 import { routes } from '../app.routes';
 import { TodayPage } from './today-page';
 
@@ -41,10 +41,11 @@ describe('TodayPage', () => {
 
   afterEach(() => http.verify());
 
-  async function open(loans: Loan[]): Promise<HTMLElement> {
+  async function open(loans: Loan[], reservations: Reservation[] = []): Promise<HTMLElement> {
     await harness.navigateByUrl('/today', TodayPage);
     http.expectOne('/api/loans?status=Active').flush(loans);
     http.expectOne('/api/drones').flush(drones);
+    http.expectOne('/api/reservations').flush(reservations);
     await harness.fixture.whenStable();
     harness.detectChanges();
     return harness.routeNativeElement as HTMLElement;
@@ -89,6 +90,20 @@ describe('TodayPage', () => {
     expect(element.querySelector('section[aria-labelledby="today-long"] .today-when')?.textContent?.trim()).toBe('12 days');
   });
 
+  it('Reserved today', async () => {
+    const element = await open(
+      [],
+      [
+        { id: 5, droneId: 7, droneName: 'TELLO-07', studentGroupId: 3, studentGroupName: 'Group 3', date: '2026-08-19', isToday: true, droneIsLoaned: false },
+        { id: 6, droneId: 8, droneName: 'TELLO-08', studentGroupId: 3, studentGroupName: 'Group 3', date: '2026-08-21', isToday: false, droneIsLoaned: false },
+      ],
+    );
+
+    expect(names(element, 'today-reserved')).toEqual(['TELLO-07 · Group 3']);
+    expect(element.querySelector('section[aria-labelledby="today-reserved"] a.today-go')?.getAttribute('href')).toBe('/loans?drone=7');
+    expect(element.querySelector('app-empty-state')).toBeNull();
+  });
+
   it('Nothing is due', async () => {
     const element = await open([{ ...base }]);
 
@@ -109,11 +124,13 @@ describe('TodayPage', () => {
   it('shows the message when the loans cannot be loaded', async () => {
     await harness.navigateByUrl('/today', TodayPage);
     const drones = http.expectOne('/api/drones');
+    const reservations = http.expectOne('/api/reservations');
     http.expectOne('/api/loans?status=Active').flush({ detail: 'Down.' }, { status: 500, statusText: 'Error' });
     await harness.fixture.whenStable();
     harness.detectChanges();
 
     expect((harness.routeNativeElement as HTMLElement).querySelector('[role="alert"]')?.textContent).toContain('Down.');
     expect(drones.cancelled).toBe(true);
+    expect(reservations.cancelled).toBe(true);
   });
 });

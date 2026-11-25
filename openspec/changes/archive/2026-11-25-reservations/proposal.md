@@ -21,6 +21,7 @@ Groups that need a drone for a lesson or a project day cannot rely on it being t
 ### Modified Capabilities
 
 - `loan`: loans respect the reservation of the day.
+- `today`: the page lists today's reservations.
 
 ## Impact
 
@@ -35,12 +36,13 @@ Groups that need a drone for a lesson or a project day cannot rely on it being t
 - Notifications when a reservation cannot be served.
 - Keeping cancelled or past reservations as history.
 
-## Decisions (2026-11-12)
+## Decisions (2026-11-12, updated 2026-11-25)
 
-The user approved the change with the suggestions below.
+The user approved the change with the suggestions below on 2026-11-12 and asked on 2026-11-25 to finish it ("mach jetzt alles fix fertig").
 
-
-- `docs/requirements.md` lists "Reservierungen im Voraus" as out of scope. This change moves it into scope.
-- Should a group be allowed to reserve a drone that is loaned right now (this proposal: yes, with a warning)?
-- Should a defective drone (from `return-check-and-damage`) be reservable (this proposal: no, if that change is implemented)?
-- Deleting a drone or student group (from `manage-drones-and-groups`) that still has upcoming reservations: reject the deletion (this proposal) or delete the reservations with it?
+- Reservations move into scope (they were out of scope in `docs/requirements.md`).
+- A drone that is loaned right now can be reserved; the list shows that it is loaned.
+- A defective drone cannot be reserved.
+- A drone or student group with an upcoming reservation cannot be deleted. Since REQ-033/REQ-034 deleting means moving into the trash, so the move into the trash is refused until the reservation is cancelled. Drones and groups in the trash cannot be reserved.
+- Deleting for good and the general reset (REQ-038) remove the reservations with the drone or group.
+- The page "Today" (REQ-036) also lists today's reservations.

@@ -36,8 +36,8 @@ _None._
 
 ## Decisions (2026-11-12)
 
-The user approved the change with the suggestions below.
+The user approved the change with the suggestions below on 2026-11-12 and asked on 2026-11-25 to finish it ("mach jetzt alles fix fertig").
 
-
-- `docs/requirements.md` lists "Auswertungen, Statistiken" as out of scope. This change moves it into scope.
-- The school year starts on 1 September in this proposal. Is that right for your school?
+- Statistics move into scope (they were out of scope in `docs/requirements.md`).
+- The school year starts on 1 September.
+- Since the trash (REQ-033, REQ-034): drones and groups in the trash are not listed per drone or group; loans of drones or groups deleted for good still count in the totals.

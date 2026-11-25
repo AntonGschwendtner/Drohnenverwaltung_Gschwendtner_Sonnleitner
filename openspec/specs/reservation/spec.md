@@ -1,11 +1,12 @@
-## Purpose
+# reservation Specification
 
+## Purpose
 Lets a student group reserve a drone for one day in advance, so the drone is kept for that group on that day, and lets reservations be listed and cancelled.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Create reservation
-The system SHALL allow a drone to be reserved for a student group on one day (REQ-027). The day SHALL be today or later. A drone SHALL have at most one reservation per day. Drone and student group SHALL exist.
+The system SHALL allow a drone to be reserved for a student group on one day (REQ-027). The day SHALL be today or later. A drone SHALL have at most one reservation per day. Drone and student group SHALL exist and SHALL NOT be in the trash; a defective drone SHALL NOT be reserved. A loaned drone MAY be reserved.
 
 #### Scenario: Reserve a drone
 - **GIVEN** today is 19.08.2026 and "TELLO-07" has no reservation on 21.08.2026
@@ -30,6 +31,16 @@ The system SHALL allow a drone to be reserved for a student group on one day (RE
 #### Scenario: Unknown drone or student group
 - **GIVEN** the system is running
 - **WHEN** a reservation is created for a drone or student group that does not exist
+- **THEN** the reservation is rejected
+
+#### Scenario: Defective drone
+- **GIVEN** a defect was reported for "TELLO-07"
+- **WHEN** "TELLO-07" is reserved for "Group 3" on 21.08.2026
+- **THEN** the reservation is rejected
+
+#### Scenario: Drone or group in the trash
+- **GIVEN** "TELLO-07" or "Group 3" is in the trash
+- **WHEN** "TELLO-07" is reserved for "Group 3" on 21.08.2026
 - **THEN** the reservation is rejected
 
 #### Scenario: Two reservations at the same time
@@ -57,3 +68,22 @@ The system SHALL list the reservations of today and later days with drone, stude
 - **AND** "TELLO-07" is reserved for "Group 3" on 21.08.2026
 - **WHEN** the reservations are listed
 - **THEN** the reservation shows that "TELLO-07" is currently loaned
+
+### Requirement: Reservations and deleting
+A drone or student group with a reservation for today or a later day SHALL NOT be moved into the trash; the reservation has to be cancelled first (REQ-027). When a drone or student group is deleted for good or by the general reset, its reservations SHALL be deleted with it.
+
+#### Scenario: Delete a reserved drone
+- **GIVEN** "TELLO-07" is reserved for "Group 3" on 21.08.2026
+- **WHEN** "TELLO-07" is deleted
+- **THEN** the deletion is rejected with a message naming the reservation on 21.08.2026
+- **AND** "TELLO-07" stays listed
+
+#### Scenario: Delete a group with a reservation
+- **GIVEN** "TELLO-07" is reserved for "Group 3" on 21.08.2026
+- **WHEN** "Group 3" is deleted
+- **THEN** the deletion is rejected with a message naming the reservation
+
+#### Scenario: Reservations go with the general reset
+- **GIVEN** "TELLO-07" is reserved for "Group 3" on 21.08.2026
+- **WHEN** the general reset deletes all drones
+- **THEN** no reservation is listed
