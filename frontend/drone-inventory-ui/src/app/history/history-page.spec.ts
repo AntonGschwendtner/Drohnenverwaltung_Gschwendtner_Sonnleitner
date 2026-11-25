@@ -51,6 +51,15 @@ describe('HistoryPage', () => {
     expect(cell.querySelector('.former-group')).not.toBeNull();
   });
 
+  it('shows a drone deleted for good as text without a link (scenario "Drone deleted, history kept")', async () => {
+    await respondWith([{ ...returnedLoan, droneId: null }]);
+
+    const element = fixture.nativeElement as HTMLElement;
+    const cell = element.querySelector('tbody tr td[data-label="Drone"]') as HTMLElement;
+    expect(cell.textContent).toContain('TELLO-07');
+    expect(cell.querySelector('a')).toBeNull();
+  });
+
   it('links a group that still exists', async () => {
     await respondWith([returnedLoan]);
 

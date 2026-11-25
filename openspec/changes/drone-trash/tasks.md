@@ -6,7 +6,7 @@
 
 ## 2. Frontend (REQ-034)
 
-- [ ] 2.1 Delete dialog text, drone trash section with restore and permanent delete, trash hint on the drone detail page, drone names without link; component tests for "Show the drone trash", "Empty drone trash", "Restore a drone", both permanent choices, "Open a drone in the trash", "Drone deleted, history kept" (#217)
+- [x] 2.1 Delete dialog text, drone trash section with restore and permanent delete, trash hint on the drone detail page, drone names without link; component tests for "Show the drone trash", "Empty drone trash", "Restore a drone", both permanent choices, "Open a drone in the trash", "Drone deleted, history kept" (#217)
 
 ## 3. Documentation
 

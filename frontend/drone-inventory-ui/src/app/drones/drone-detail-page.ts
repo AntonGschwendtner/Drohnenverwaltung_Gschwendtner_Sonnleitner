@@ -42,6 +42,19 @@ import { StripSkeleton } from '../shared/strip-skeleton';
         }
       </p>
 
+      @if (drone.deletedAt) {
+        <div class="trash-notice" role="status">
+          <span>{{ i18n.t('drones.inTrash', { date: (drone.deletedAt | date: 'dd.MM.yyyy') ?? '' }) }}</span>
+          <button type="button" class="tool-link restore" (click)="restore(drone)" [disabled]="restoring()" [class.busy]="restoring()">
+            {{ i18n.t('trash.restore') }}
+          </button>
+        </div>
+      }
+      @if (restoreError(); as message) {
+        <p class="error" role="alert">{{ message }}</p>
+      }
+
+      @if (!drone.deletedAt) {
       <section class="qr-label" aria-labelledby="drone-qr">
         <h2 id="drone-qr">{{ i18n.t('drones.qrTitle') }}</h2>
         <div class="qr-card">
@@ -53,6 +66,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
           </div>
         </div>
       </section>
+      }
 
       <section aria-labelledby="drone-active-loan">
         <h2 id="drone-active-loan">{{ i18n.t('details.activeLoan') }}</h2>
@@ -131,6 +145,28 @@ export class DroneDetailPage implements OnInit {
   protected readonly statusKey = statusKey;
 
   protected readonly drone = signal<Drone | null>(null);
+  protected readonly restoring = signal(false);
+  protected readonly restoreError = signal<string | null>(null);
+
+  /** A drone in the trash comes back from its own page, for example when it was opened from the history (REQ-034). */
+  protected restore(drone: Drone): void {
+    if (this.restoring()) {
+      return;
+    }
+
+    this.restoring.set(true);
+    this.restoreError.set(null);
+    this.api.restoreDrone(drone.id).subscribe({
+      next: (restored) => {
+        this.restoring.set(false);
+        this.drone.set(restored);
+      },
+      error: (error: unknown) => {
+        this.restoring.set(false);
+        this.restoreError.set(readErrorMessage(error, this.i18n.t('error.fallback')));
+      },
+    });
+  }
   protected readonly loans = signal<Loan[]>([]);
   protected readonly loading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);

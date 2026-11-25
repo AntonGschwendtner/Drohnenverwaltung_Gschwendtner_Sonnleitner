@@ -122,10 +122,10 @@ describe('DronesPage edit and delete', () => {
     expect(element.querySelector('tr.editing')).toBeNull();
   });
 
-  it('deletes a drone after the confirmation (scenario "Delete a drone without loans")', async () => {
+  it('moves a drone into the trash after the confirmation (scenario "Delete a drone without loans")', async () => {
     button('button.delete', 1).click();
     await settle();
-    expect(element.querySelector('[role="alertdialog"]')?.textContent).toContain('Delete TELLO-09?');
+    expect(element.querySelector('[role="alertdialog"]')?.textContent).toContain('Move TELLO-09 to the trash?');
     http.expectNone({ method: 'DELETE' });
 
     (element.querySelector('.dialog-confirm') as HTMLButtonElement).click();
@@ -139,7 +139,7 @@ describe('DronesPage edit and delete', () => {
     expect(names()).toEqual(['TELO-07']);
   });
 
-  it('shows why a drone with loans cannot be deleted (scenario "Drone has a returned loan")', async () => {
+  it('shows why a loaned drone cannot be deleted (scenario "Drone is loaned")', async () => {
     button('button.delete').click();
     await settle();
     (element.querySelector('.dialog-confirm') as HTMLButtonElement).click();
@@ -148,12 +148,12 @@ describe('DronesPage edit and delete', () => {
     http
       .expectOne({ method: 'DELETE', url: '/api/drones/7' })
       .flush(
-        { detail: 'The drone "TELO-07" has loans and cannot be deleted, so the loan history stays complete.' },
+        { detail: 'The drone "TELO-07" is loaned. Return it first.' },
         { status: 409, statusText: 'Conflict' },
       );
     await settle();
 
-    expect(element.querySelector('[role="alert"]')?.textContent).toContain('has loans and cannot be deleted');
+    expect(element.querySelector('[role="alert"]')?.textContent).toContain('Return it first');
     expect(names()).toEqual(['TELO-07', 'TELLO-09']);
   });
 

@@ -74,8 +74,8 @@ import { EmptyState } from '../shared/empty-state';
 
     @if (pendingPermanent(); as group) {
       <app-confirm-dialog
-        [heading]="i18n.t('trash.permanentTitle', { group: group.name })"
-        [text]="i18n.t('trash.permanentText', { group: group.name })"
+        [heading]="i18n.t('trash.permanentTitle', { name: group.name })"
+        [text]="i18n.t('trash.permanentText', { name: group.name })"
         [confirmLabel]="history() === 'keep' ? i18n.t('trash.confirmKeep') : i18n.t('trash.confirmAll')"
         [cancelLabel]="i18n.t('dialog.cancel')"
         (confirmed)="confirmPermanent()"
@@ -85,7 +85,7 @@ import { EmptyState } from '../shared/empty-state';
           <legend>{{ i18n.t('trash.historyLegend') }}</legend>
           <label>
             <input type="radio" name="history" value="keep" [checked]="history() === 'keep'" (change)="history.set('keep')" />
-            {{ i18n.t('trash.keepHistory', { group: group.name }) }}
+            {{ i18n.t('trash.keepHistory', { name: group.name }) }}
           </label>
           <label>
             <input type="radio" name="history" value="delete" [checked]="history() === 'delete'" (change)="history.set('delete')" />

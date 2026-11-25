@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { afterNextRender, Component, computed, effect, inject, Injector, OnInit, signal, untracked } from '@angular/core';
+import { afterNextRender, Component, computed, effect, inject, Injector, OnInit, signal, untracked, viewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -13,10 +13,11 @@ import { statusKey } from '../shared/status';
 import { SortState, sortItems, SortValue } from '../shared/sort';
 import { matchesSearch, SearchField } from '../shared/search-field';
 import { StripSkeleton } from '../shared/strip-skeleton';
+import { DroneTrashSection } from './drone-trash-section';
 
 @Component({
   selector: 'app-drones-page',
-  imports: [ConfirmDialog, EmptyState, PageHead, ReactiveFormsModule, RouterLink, SearchField, SortHeader, StripSkeleton],
+  imports: [ConfirmDialog, DroneTrashSection, EmptyState, PageHead, ReactiveFormsModule, RouterLink, SearchField, SortHeader, StripSkeleton],
   template: `
     <app-page-head
       bay="01"
@@ -190,11 +191,13 @@ import { StripSkeleton } from '../shared/strip-skeleton';
       />
     }
 
+    <app-drone-trash-section (restored)="loadDrones()" />
+
     @if (pendingDelete(); as drone) {
       <app-confirm-dialog
         [heading]="i18n.t('drones.deleteTitle', { drone: drone.name })"
         [text]="i18n.t('drones.deleteText', { drone: drone.name })"
-        [confirmLabel]="i18n.t('action.delete')"
+        [confirmLabel]="i18n.t('groups.toTrash')"
         [cancelLabel]="i18n.t('dialog.cancel')"
         (confirmed)="confirmDelete()"
         (cancelled)="cancelDelete()"
@@ -206,6 +209,7 @@ export class DronesPage implements OnInit {
   private readonly api = inject(ApiService);
   private readonly document = inject(DOCUMENT);
   private readonly injector = inject(Injector);
+  private readonly trash = viewChild.required(DroneTrashSection);
   protected readonly i18n = inject(I18nService);
 
   protected readonly form = inject(FormBuilder).nonNullable.group({
@@ -375,7 +379,7 @@ export class DronesPage implements OnInit {
     this.deleteTrigger = null;
   }
 
-  // The backend refuses drones with loans; the page shows its message.
+  // Deleting moves the drone into the trash (REQ-034). The backend refuses a loaned drone; the page shows its message.
   protected confirmDelete(): void {
     const drone = this.pendingDelete();
     this.pendingDelete.set(null);
@@ -391,6 +395,7 @@ export class DronesPage implements OnInit {
       next: () => {
         this.busyId.set(null);
         this.loadDrones();
+        this.trash().reload();
       },
       error: (error: unknown) => {
         this.busyId.set(null);

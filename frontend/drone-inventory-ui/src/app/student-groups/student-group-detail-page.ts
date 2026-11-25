@@ -77,7 +77,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
             <tbody>
               @for (loan of activeLoans(); track loan.id) {
                 <tr>
-                  <td><a [routerLink]="['/drones', loan.droneId]">{{ loan.droneName }}</a></td>
+                  <td>@if (loan.droneId !== null) {<a [routerLink]="['/drones', loan.droneId]">{{ loan.droneName }}</a>} @else {<span class="former-group">{{ loan.droneName }}</span>}</td>
                   <td [attr.data-label]="i18n.t('field.batteries')">{{ loan.batteries }}</td>
                   <td [attr.data-label]="i18n.t('field.propellers')">{{ loan.propellers }}</td>
                   <td [attr.data-label]="i18n.t('field.loanDate')">{{ loan.loanDate | date: 'dd.MM.yyyy' }}</td>
@@ -106,7 +106,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
             <tbody>
               @for (loan of returnedLoans(); track loan.id) {
                 <tr>
-                  <td><a [routerLink]="['/drones', loan.droneId]">{{ loan.droneName }}</a></td>
+                  <td>@if (loan.droneId !== null) {<a [routerLink]="['/drones', loan.droneId]">{{ loan.droneName }}</a>} @else {<span class="former-group">{{ loan.droneName }}</span>}</td>
                   <td [attr.data-label]="i18n.t('field.batteries')">{{ loan.batteries }}</td>
                   <td [attr.data-label]="i18n.t('field.propellers')">{{ loan.propellers }}</td>
                   <td [attr.data-label]="i18n.t('field.loanDate')">{{ loan.loanDate | date: 'dd.MM.yyyy' }}</td>
