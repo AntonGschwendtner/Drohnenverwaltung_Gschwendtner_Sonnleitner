@@ -90,10 +90,11 @@ describe('StudentGroupsPage edit and delete', () => {
     http.expectNone({ method: 'PUT' });
   });
 
-  it('deletes a group after the confirmation (scenario "Delete a group without loans")', async () => {
+  it('moves a group into the trash after the confirmation (scenario "Delete a group without loans")', async () => {
     button('button.delete', 1).click();
     await settle();
-    expect(element.querySelector('[role="alertdialog"]')?.textContent).toContain('Delete Group 4?');
+    expect(element.querySelector('[role="alertdialog"]')?.textContent).toContain('Move Group 4 to the trash?');
+    expect((element.querySelector('.dialog-confirm') as HTMLButtonElement).textContent).toContain('Move to trash');
     (element.querySelector('.dialog-confirm') as HTMLButtonElement).click();
     await settle();
 
@@ -105,7 +106,7 @@ describe('StudentGroupsPage edit and delete', () => {
     expect(names()).toEqual(['Grup 3']);
   });
 
-  it('shows why a group with loans cannot be deleted (scenario "Group has loans")', async () => {
+  it('shows why a group with a drone cannot be deleted (scenario "Group has an active loan")', async () => {
     button('button.delete').click();
     await settle();
     (element.querySelector('.dialog-confirm') as HTMLButtonElement).click();
@@ -113,10 +114,10 @@ describe('StudentGroupsPage edit and delete', () => {
 
     http
       .expectOne({ method: 'DELETE', url: '/api/student-groups/3' })
-      .flush({ detail: 'The student group "Grup 3" has loans and cannot be deleted.' }, { status: 409, statusText: 'Conflict' });
+      .flush({ detail: '"Grup 3" still has "TELLO-07". Return the drone first.' }, { status: 409, statusText: 'Conflict' });
     await settle();
 
-    expect(element.querySelector('[role="alert"]')?.textContent).toContain('has loans and cannot be deleted');
+    expect(element.querySelector('[role="alert"]')?.textContent).toContain('Return the drone first');
     expect(names()).toEqual(['Grup 3', 'Group 4']);
   });
 

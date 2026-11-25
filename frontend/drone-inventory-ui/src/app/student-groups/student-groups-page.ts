@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { afterNextRender, Component, computed, effect, inject, Injector, OnInit, signal, untracked } from '@angular/core';
+import { afterNextRender, Component, computed, effect, inject, Injector, OnInit, signal, untracked, viewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ApiService, readErrorMessage, StudentGroup } from '../api.service';
@@ -12,10 +12,11 @@ import { SortState, sortItems, SortValue } from '../shared/sort';
 import { matchesSearch, SearchField } from '../shared/search-field';
 import { StripSkeleton } from '../shared/strip-skeleton';
 import { MembersDialog } from './members-dialog';
+import { TrashSection } from './trash-section';
 
 @Component({
   selector: 'app-student-groups-page',
-  imports: [ConfirmDialog, EmptyState, MembersDialog, PageHead, ReactiveFormsModule, RouterLink, SearchField, SortHeader, StripSkeleton],
+  imports: [ConfirmDialog, EmptyState, MembersDialog, PageHead, TrashSection, ReactiveFormsModule, RouterLink, SearchField, SortHeader, StripSkeleton],
   template: `
     <app-page-head
       bay="02"
@@ -109,6 +110,8 @@ import { MembersDialog } from './members-dialog';
       }
     }
 
+    <app-trash-section (restored)="loadStudentGroups()" />
+
     @if (membersGroup(); as studentGroup) {
       <app-members-dialog [group]="studentGroup" (changed)="membersChanged($event)" (closed)="closeMembers()" />
     }
@@ -117,7 +120,7 @@ import { MembersDialog } from './members-dialog';
       <app-confirm-dialog
         [heading]="i18n.t('groups.deleteTitle', { group: studentGroup.name })"
         [text]="i18n.t('groups.deleteText', { group: studentGroup.name })"
-        [confirmLabel]="i18n.t('action.delete')"
+        [confirmLabel]="i18n.t('groups.toTrash')"
         [cancelLabel]="i18n.t('dialog.cancel')"
         (confirmed)="confirmDelete()"
         (cancelled)="cancelDelete()"
@@ -129,6 +132,7 @@ export class StudentGroupsPage implements OnInit {
   private readonly api = inject(ApiService);
   private readonly document = inject(DOCUMENT);
   private readonly injector = inject(Injector);
+  private readonly trash = viewChild.required(TrashSection);
   protected readonly i18n = inject(I18nService);
 
   protected readonly form = inject(FormBuilder).nonNullable.group({ name: '' });
@@ -290,7 +294,7 @@ export class StudentGroupsPage implements OnInit {
     this.deleteTrigger = null;
   }
 
-  // The backend refuses groups with loans; the page shows its message.
+  // Deleting moves the group into the trash (REQ-033). The backend refuses a group with an active loan; the page shows its message.
   protected confirmDelete(): void {
     const studentGroup = this.pendingDelete();
     this.pendingDelete.set(null);
@@ -306,6 +310,7 @@ export class StudentGroupsPage implements OnInit {
       next: () => {
         this.busyId.set(null);
         this.loadStudentGroups();
+        this.trash().reload();
       },
       error: (error: unknown) => {
         this.busyId.set(null);

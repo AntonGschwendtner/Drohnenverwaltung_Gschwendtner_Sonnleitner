@@ -32,6 +32,17 @@ export interface StudentGroup {
   name: string;
   members: StudentGroupMember[];
   leaderName: string | null;
+  /** The day the group went into the trash, or null (REQ-033). */
+  deletedAt?: string | null;
+}
+
+/** A group in the trash with what a permanent delete would take with it (REQ-033). */
+export interface TrashedStudentGroup {
+  id: number;
+  name: string;
+  deletedAt: string;
+  loanCount: number;
+  memberCount: number;
 }
 
 export interface CreateStudentGroupRequest {
@@ -148,6 +159,14 @@ export class ApiService {
 
   deleteStudentGroup(id: number): Observable<void> {
     return this.http.delete<void>(`/api/student-groups/${id}`);
+  }
+
+  listTrash(): Observable<TrashedStudentGroup[]> {
+    return this.http.get<TrashedStudentGroup[]>('/api/student-groups/trash');
+  }
+
+  restoreStudentGroup(id: number): Observable<StudentGroup> {
+    return this.http.post<StudentGroup>(`/api/student-groups/${id}/restore`, null);
   }
 
   addMember(studentGroupId: number, name: string): Observable<StudentGroupMember> {
