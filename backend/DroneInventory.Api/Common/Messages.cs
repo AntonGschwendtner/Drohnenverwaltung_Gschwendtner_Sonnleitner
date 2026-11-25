@@ -140,6 +140,10 @@ public static class Messages
         $"This student group has no member with the id {id}.",
         $"Diese Schülergruppe hat kein Mitglied mit der ID {id}.");
 
+    public static string LeaderChangedAtTheSameTime => Pick(
+        "The group leader was changed at the same time. Look at the group again and choose once more.",
+        "Der Gruppenleiter wurde gleichzeitig geändert. Sieh dir die Gruppe noch einmal an und wähle erneut.");
+
     public static string[] CsvHeader => IsGerman
         ? ["Schülergruppe", "Drohne", "Akkus", "Propeller", "Ausleihdatum", "Rückgabedatum"]
         : ["Student group", "Drone", "Batteries", "Propellers", "Loan date", "Return date"];

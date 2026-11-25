@@ -43,6 +43,13 @@ public static class StudentGroupEndpoints
                 : Results.Created($"/api/student-groups/{id}/members/{result.Value!.Id}", result.Value);
         });
 
+        studentGroups.MapPut("/{id:int}/leader", async (int id, SetLeaderRequest request, StudentGroupService service, CancellationToken cancellationToken) =>
+        {
+            var result = await service.SetLeaderAsync(id, request, cancellationToken);
+
+            return result.Error is { } error ? error.ToProblem() : Results.Ok(result.Value);
+        });
+
         studentGroups.MapDelete("/{id:int}/members/{memberId:int}", async (int id, int memberId, StudentGroupService service, CancellationToken cancellationToken) =>
         {
             var result = await service.RemoveMemberAsync(id, memberId, cancellationToken);

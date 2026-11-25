@@ -2,6 +2,7 @@ using DroneInventory.Api.Common;
 using DroneInventory.Api.Data;
 using DroneInventory.Api.Domain;
 using System.Linq.Expressions;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace DroneInventory.Api.StudentGroups;
@@ -207,6 +208,54 @@ public class StudentGroupService(DroneInventoryDbContext dbContext)
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return ServiceResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Makes a member the group leader, or clears the leader with null (REQ-031). The old leader is cleared first and the
+    /// new one set second, in one transaction, so the "one leader per group" index never sees two leaders. A member of
+    /// another group counts as not found.
+    /// </summary>
+    public async Task<ServiceResult<StudentGroupResponse>> SetLeaderAsync(
+        int studentGroupId,
+        SetLeaderRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (!await dbContext.StudentGroups.AnyAsync(studentGroup => studentGroup.Id == studentGroupId, cancellationToken))
+        {
+            return ServiceResult<StudentGroupResponse>.NotFound(Messages.UnknownStudentGroup(studentGroupId));
+        }
+
+        var memberId = request.MemberId;
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+        try
+        {
+            await dbContext.StudentGroupMembers
+                .Where(member => member.StudentGroupId == studentGroupId && member.IsLeader && member.Id != memberId)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(member => member.IsLeader, false), cancellationToken);
+
+            if (memberId is { } newLeaderId)
+            {
+                var changed = await dbContext.StudentGroupMembers
+                    .Where(member => member.Id == newLeaderId && member.StudentGroupId == studentGroupId)
+                    .ExecuteUpdateAsync(setters => setters.SetProperty(member => member.IsLeader, true), cancellationToken);
+
+                if (changed == 0)
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                    return ServiceResult<StudentGroupResponse>.NotFound(Messages.UnknownMember(newLeaderId));
+                }
+            }
+
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch (SqliteException exception) when (exception is { SqliteErrorCode: 19, SqliteExtendedErrorCode: 2067 })
+        {
+            // Another request chose a leader for this group at the same moment.
+            return ServiceResult<StudentGroupResponse>.Conflict(Messages.LeaderChangedAtTheSameTime);
+        }
+
+        return await GetAsync(studentGroupId, cancellationToken);
     }
 
     /// <summary>The name is required and unique. When editing, the group itself may keep its name.</summary>
