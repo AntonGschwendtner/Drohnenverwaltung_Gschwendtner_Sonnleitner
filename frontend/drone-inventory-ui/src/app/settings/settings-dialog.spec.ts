@@ -105,7 +105,7 @@ describe('Settings dialog', () => {
     expect(dialog()).toBeNull();
     expect(TestBed.inject(I18nService).language()).toBe('de');
     expect(TestBed.inject(ThemeService).theme()).toBe('dark');
-    expect(element.querySelector('button.settings-button')?.textContent).toContain('Einstellungen');
+    expect(element.querySelector('button.settings-button')?.getAttribute('aria-label')).toBe('Einstellungen');
     http.expectNone({ method: 'POST' });
     expect(reload).not.toHaveBeenCalled();
   });
