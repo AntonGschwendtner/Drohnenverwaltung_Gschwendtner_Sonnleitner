@@ -35,6 +35,9 @@ public static class AdminEndpoints
             var result = await service.RestoreAsync(stream, file.Length, cancellationToken);
 
             return result.Error is { } error ? error.ToProblem() : Results.NoContent();
-        }).DisableAntiforgery();
+        })
+        .DisableAntiforgery()
+        // Kestrel allows 30 MB by default; a backup may be as large as the service accepts.
+        .WithMetadata(new Microsoft.AspNetCore.Mvc.RequestSizeLimitAttribute(AdminService.MaxBackupBytes + 1024 * 1024));
     }
 }

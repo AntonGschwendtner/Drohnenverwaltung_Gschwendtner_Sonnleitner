@@ -140,6 +140,19 @@ public sealed class AdminApiTests : IDisposable
     }
 
     [Fact]
+    public async Task Backup_without_the_main_tables_is_rejected()
+    {
+        await CreateAsync("/api/drones", new { name = "TELLO-07" });
+        var backup = await (await _client.GetAsync("/api/admin/backup")).Content.ReadAsByteArrayAsync();
+        backup = await WithSqlAsync(backup, "DROP TABLE LoanItems");
+
+        var response = await RestoreAsync(backup);
+
+        await ApiResponseAssert.IsProblemAsync(response, HttpStatusCode.BadRequest);
+        Assert.Single(await ListAsync("/api/drones"));
+    }
+
+    [Fact]
     public async Task Backup_of_a_newer_version()
     {
         await CreateAsync("/api/drones", new { name = "TELLO-07" });
@@ -229,7 +242,10 @@ public sealed class AdminApiTests : IDisposable
         }
     }
 
-    private static async Task<byte[]> WithMigrationAsync(byte[] backup, string migrationId)
+    private static Task<byte[]> WithMigrationAsync(byte[] backup, string migrationId) =>
+        WithSqlAsync(backup, $"INSERT INTO __EFMigrationsHistory (MigrationId, ProductVersion) VALUES ('{migrationId}', '10.0.13')");
+
+    private static async Task<byte[]> WithSqlAsync(byte[] backup, string sql)
     {
         var file = Path.Combine(Path.GetTempPath(), $"test-newer-{Guid.NewGuid():N}.db");
         await File.WriteAllBytesAsync(file, backup);
@@ -239,7 +255,7 @@ public sealed class AdminApiTests : IDisposable
             {
                 await connection.OpenAsync();
                 await using var command = connection.CreateCommand();
-                command.CommandText = $"INSERT INTO __EFMigrationsHistory (MigrationId, ProductVersion) VALUES ('{migrationId}', '10.0.13')";
+                command.CommandText = sql;
                 await command.ExecuteNonQueryAsync();
             }
 

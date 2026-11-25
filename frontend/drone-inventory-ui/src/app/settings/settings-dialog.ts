@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { afterNextRender, Component, computed, ElementRef, inject, InjectionToken, output, signal, viewChild } from '@angular/core';
-import { concat, last, Observable } from 'rxjs';
+import { concat, last, Observable, tap } from 'rxjs';
 import { ApiService, readErrorMessage, ResetRequest } from '../api.service';
 import { I18nService, Language } from '../i18n.service';
 import { Theme, ThemeService } from '../theme.service';
@@ -114,6 +114,7 @@ export class SettingsDialog {
   protected readonly pendingConfirm = signal(false);
   protected readonly busy = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  private changedData = false;
 
   protected readonly resetChoices: ResetChoice[] = ['returnAllDrones', 'deleteAllDrones', 'deleteAllStudentGroups', 'deleteHistory'];
   protected readonly resetLabels = {
@@ -172,13 +173,14 @@ export class SettingsDialog {
       return;
     }
 
+    // The restore comes first, so a ticked reset applies to the restored data and is not overwritten by it.
     const requests: Observable<unknown>[] = [];
-    if (this.resetChoices.some((choice) => this.reset()[choice])) {
-      requests.push(this.api.reset(this.reset()));
-    }
     const file = this.backupFile();
     if (file) {
-      requests.push(this.api.restoreBackup(file));
+      requests.push(this.api.restoreBackup(file).pipe(tap(() => (this.changedData = true))));
+    }
+    if (this.resetChoices.some((choice) => this.reset()[choice])) {
+      requests.push(this.api.reset(this.reset()));
     }
 
     this.busy.set(true);
@@ -191,6 +193,12 @@ export class SettingsDialog {
           this.reloadPage();
         },
         error: (error: unknown) => {
+          // When the restore already replaced the data, the page must show it even though the reset failed.
+          if (this.changedData) {
+            this.reloadPage();
+            return;
+          }
+
           this.busy.set(false);
           this.pendingConfirm.set(false);
           this.errorMessage.set(readErrorMessage(error, this.i18n.t('error.fallback')));

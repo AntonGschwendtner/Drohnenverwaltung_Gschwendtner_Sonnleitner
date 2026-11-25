@@ -39,7 +39,6 @@ export interface StudentGroup {
 }
 
 /** A group in the trash with what a permanent delete would take with it (REQ-033). */
-/** A drone in the trash with the number of loans a permanent delete would take with it (REQ-034). */
 /** The parts of the general reset; only what is true happens (REQ-038). */
 export interface ResetRequest {
   returnAllDrones: boolean;
@@ -48,6 +47,7 @@ export interface ResetRequest {
   deleteHistory: boolean;
 }
 
+/** A drone in the trash with the number of loans a permanent delete would take with it (REQ-034). */
 export interface TrashedDrone {
   id: number;
   name: string;

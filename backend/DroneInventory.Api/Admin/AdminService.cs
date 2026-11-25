@@ -169,6 +169,12 @@ public class AdminService(DroneInventoryDbContext dbContext, TimeProvider timePr
                 return ServiceResult<bool>.Invalid(Messages.BackupNewer);
             }
 
+            // A damaged file or one without the main tables never replaces the live data.
+            if (!await IsIntactAsync(source, cancellationToken))
+            {
+                return ServiceResult<bool>.Invalid(Messages.BackupInvalid);
+            }
+
             await using (var target = new SqliteConnection(dbContext.Database.GetConnectionString()))
             {
                 await target.OpenAsync(cancellationToken);
@@ -188,6 +194,20 @@ public class AdminService(DroneInventoryDbContext dbContext, TimeProvider timePr
             SqliteConnection.ClearAllPools();
             File.Delete(file);
         }
+    }
+
+    private static async Task<bool> IsIntactAsync(SqliteConnection connection, CancellationToken cancellationToken)
+    {
+        await using var command = connection.CreateCommand();
+        command.CommandText = "PRAGMA quick_check";
+        if (await command.ExecuteScalarAsync(cancellationToken) is not "ok")
+        {
+            return false;
+        }
+
+        command.CommandText =
+            "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name IN ('Drones', 'StudentGroups', 'Loans', 'LoanItems')";
+        return Convert.ToInt32(await command.ExecuteScalarAsync(cancellationToken)) == 4;
     }
 
     private static async Task<List<string>?> ReadMigrationsAsync(SqliteConnection connection, CancellationToken cancellationToken)

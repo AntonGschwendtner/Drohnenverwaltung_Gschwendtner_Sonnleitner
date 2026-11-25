@@ -25,6 +25,9 @@ Schulprojekt im Fach SYP, 4. INF, 2026/27, von Gschwendtner und Sonnleitner. Bet
 - Beim Ausleihen eine Notiz (zum Beispiel das Projekt) und ein geplantes Rückgabedatum angeben. Am Tag selbst steht „Heute fällig“ (orange), danach „Seit X Tagen überfällig“ (rot). Mit geplantem Datum ersetzt das die 7-Tage-Markierung.
 - **Einstellungen** (Zahnrad oben rechts) als Pop-up: Sprache, Hell/Dunkel, **Generalreset** zum Ankreuzen (alle Drohnen zurückgeben, alle Drohnen löschen, alle Schülergruppen löschen, ganze Historie löschen) sowie **Backup** herunterladen und wieder einspielen. X schließt ohne Änderung, „Übernehmen“ wendet an; Reset und Wiederherstellen fragen vorher noch einmal.
 - „Historie löschen“ auf der Historienseite löscht alle zurückgegebenen Ausleihen nach einer Rückfrage.
+
+> **Nur im Schulnetz betreiben.** Die App hat kein Login. Wer sie im Netz erreicht, kann auch den Generalreset auslösen, ein Backup herunterladen oder einspielen. Deshalb gehört sie nicht offen ins Internet.
+
 - Die Startseite „Heute“ zeigt auf einen Blick aktive, heute fällige und überfällige Ausleihen, verfügbare Drohnen und listet, was zu tun ist.
 - Über der Drohnenliste zählen, wie viele Drohnen es gibt und wie viele davon verfügbar und ausgeliehen sind.
 - Die ganze Anwendung als ein Docker-Container `drohnenverwaltung` starten, mit dauerhafter Datenbank im Volume.
