@@ -2246,7 +2246,7 @@ td button.busy::after {
   }
 }
 
-@media (max-width: 1020px) {
+@media (max-width: 1180px) {
   nav {
     overflow-x: auto;
     scrollbar-width: none;
