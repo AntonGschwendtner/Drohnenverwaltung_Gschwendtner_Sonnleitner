@@ -10,4 +10,4 @@
 
 ## 3. Documentation
 
-- [ ] 3.1 REQ-034 in `docs/requirements.md`, domain model and rules, `openspec/config.yaml`, README, `AGENTS.md` (several tasks per branch) (#218)
+- [x] 3.1 REQ-034 in `docs/requirements.md`, domain model and rules, `openspec/config.yaml`, README, `AGENTS.md` (several tasks per branch) (#218)
