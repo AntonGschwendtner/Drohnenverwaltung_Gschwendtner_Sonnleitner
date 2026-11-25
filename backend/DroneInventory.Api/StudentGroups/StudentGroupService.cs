@@ -177,6 +177,64 @@ public class StudentGroupService(DroneInventoryDbContext dbContext, TimeProvider
     }
 
     /// <summary>
+    /// Deletes a group from the trash for good, with its members (REQ-033). With "keep" its loans stay in the history
+    /// under the group's name; with "delete" they are deleted too. Everything runs in one transaction, and a group that
+    /// still has a drone stays.
+    /// </summary>
+    public async Task<ServiceResult<bool>> DeletePermanentlyAsync(int id, string? history, CancellationToken cancellationToken)
+    {
+        if (history is not (KeepHistory or DeleteHistory))
+        {
+            return ServiceResult<bool>.Invalid(Messages.HistoryChoiceMissing);
+        }
+
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+        var studentGroup = await dbContext.StudentGroups.FindAsync([id], cancellationToken);
+        if (studentGroup is null)
+        {
+            return ServiceResult<bool>.NotFound(Messages.UnknownStudentGroup(id));
+        }
+
+        if (studentGroup.DeletedAt is null)
+        {
+            return ServiceResult<bool>.Conflict(Messages.StudentGroupNotInTrash(studentGroup.Name));
+        }
+
+        var loanedDrone = await dbContext.Loans
+            .Where(loan => loan.StudentGroupId == id && loan.Status == LoanStatus.Active)
+            .Select(loan => loan.Drone!.Name)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (loanedDrone is not null)
+        {
+            return ServiceResult<bool>.Conflict(Messages.StudentGroupHasActiveLoan(studentGroup.Name, loanedDrone));
+        }
+
+        var loansOfGroup = dbContext.Loans.Where(loan => loan.StudentGroupId == id);
+        if (history == KeepHistory)
+        {
+            var name = studentGroup.Name;
+            await loansOfGroup.ExecuteUpdateAsync(
+                setters => setters
+                    .SetProperty(loan => loan.FormerStudentGroupName, name)
+                    .SetProperty(loan => loan.StudentGroupId, (int?)null),
+                cancellationToken);
+        }
+        else
+        {
+            // The loan items go with their loans through the cascade of the database.
+            await loansOfGroup.ExecuteDeleteAsync(cancellationToken);
+        }
+
+        // The members go with the group through the cascade of the database.
+        dbContext.StudentGroups.Remove(studentGroup);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+        return ServiceResult<bool>.Success(true);
+    }
+
+    /// <summary>
     /// Adds a person to a group (REQ-031). The name is required, at most 100 characters and unique within the group,
     /// ignoring upper and lower case; the database compares with NOCASE and catches parallel requests.
     /// </summary>
@@ -343,6 +401,10 @@ public class StudentGroupService(DroneInventoryDbContext dbContext, TimeProvider
             ? (name, NameAlreadyExists(name))
             : (name, ServiceResult<StudentGroupResponse>.Conflict(Messages.StudentGroupNameInTrash(name)));
     }
+
+    public const string KeepHistory = "keep";
+
+    public const string DeleteHistory = "delete";
 
     private DateOnly Today() => DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime);
 
