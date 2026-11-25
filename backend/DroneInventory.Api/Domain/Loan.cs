@@ -4,9 +4,13 @@ public class Loan
 {
     public int Id { get; set; }
 
-    public int DroneId { get; set; }
+    /// <summary>Empty only after the drone was deleted for good and its history was kept (REQ-034).</summary>
+    public int? DroneId { get; set; }
 
     public Drone? Drone { get; set; }
+
+    /// <summary>The name of the drone, kept when the drone was deleted for good with "keep the history" (REQ-034).</summary>
+    public string? FormerDroneName { get; set; }
 
     /// <summary>Empty only after the group was deleted for good and its history was kept (REQ-033).</summary>
     public int? StudentGroupId { get; set; }

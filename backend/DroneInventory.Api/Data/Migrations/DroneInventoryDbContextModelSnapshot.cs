@@ -27,6 +27,9 @@ namespace DroneInventory.Api.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
+                    b.Property<DateOnly?>("DeletedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -49,10 +52,13 @@ namespace DroneInventory.Api.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("DroneId")
+                    b.Property<int?>("DroneId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateOnly?>("DueDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FormerDroneName")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FormerStudentGroupName")
@@ -169,8 +175,7 @@ namespace DroneInventory.Api.Data.Migrations
                     b.HasOne("DroneInventory.Api.Domain.Drone", "Drone")
                         .WithMany()
                         .HasForeignKey("DroneId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("DroneInventory.Api.Domain.StudentGroup", "StudentGroup")
                         .WithMany()

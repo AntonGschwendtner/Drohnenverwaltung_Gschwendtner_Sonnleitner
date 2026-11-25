@@ -18,7 +18,8 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
     private static readonly Expression<Func<Loan, LoanResponse>> ToResponse = loan => new LoanResponse(
         loan.Id,
         loan.DroneId,
-        loan.Drone!.Name,
+        // The current name of the drone; the kept name once the drone was deleted for good (REQ-034).
+        loan.Drone != null ? loan.Drone.Name : loan.FormerDroneName ?? string.Empty,
         loan.StudentGroupId,
         // The current name of the group; the kept name once the group was deleted for good (REQ-033).
         loan.StudentGroup != null ? loan.StudentGroup.Name : loan.FormerStudentGroupName ?? string.Empty,
@@ -116,6 +117,11 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
         if (drone is null)
         {
             return ServiceResult<LoanResponse>.Invalid(Messages.UnknownDrone(droneId));
+        }
+
+        if (drone.DeletedAt is not null)
+        {
+            return ServiceResult<LoanResponse>.Conflict(Messages.DroneInTrash(drone.Name));
         }
 
         var studentGroup = await dbContext.StudentGroups.FindAsync([studentGroupId], cancellationToken);

@@ -21,7 +21,7 @@ public sealed record CreateLoanRequest(
 
 public sealed record LoanResponse(
     int Id,
-    int DroneId,
+    int? DroneId,
     string DroneName,
     int? StudentGroupId,
     string StudentGroupName,

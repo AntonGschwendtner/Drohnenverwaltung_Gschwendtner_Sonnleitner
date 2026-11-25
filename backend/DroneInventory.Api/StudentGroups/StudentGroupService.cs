@@ -9,11 +9,6 @@ namespace DroneInventory.Api.StudentGroups;
 
 public class StudentGroupService(DroneInventoryDbContext dbContext, TimeProvider timeProvider)
 {
-    /// <summary>The choices for the history when a group is deleted for good (REQ-033).</summary>
-    public const string KeepHistory = "keep";
-
-    public const string DeleteHistory = "delete";
-
     /// <summary>
     /// The shape of a group in every answer: members alphabetical (NOCASE column), the leader's name or null (REQ-031).
     /// </summary>
@@ -188,7 +183,7 @@ public class StudentGroupService(DroneInventoryDbContext dbContext, TimeProvider
     /// </summary>
     public async Task<ServiceResult<bool>> DeletePermanentlyAsync(int id, string? history, CancellationToken cancellationToken)
     {
-        if (history is not (KeepHistory or DeleteHistory))
+        if (!HistoryChoice.IsValid(history))
         {
             return ServiceResult<bool>.Invalid(Messages.HistoryChoiceMissing);
         }
@@ -216,7 +211,7 @@ public class StudentGroupService(DroneInventoryDbContext dbContext, TimeProvider
         }
 
         var loansOfGroup = dbContext.Loans.Where(loan => loan.StudentGroupId == id);
-        if (history == KeepHistory)
+        if (history == HistoryChoice.Keep)
         {
             var name = studentGroup.Name;
             await loansOfGroup.ExecuteUpdateAsync(

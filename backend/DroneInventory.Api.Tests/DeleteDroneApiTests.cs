@@ -40,8 +40,10 @@ public sealed class DeleteDroneApiTests : IDisposable
 
         var response = await _client.DeleteAsync($"/api/drones/{droneId}");
 
-        await ApiResponseAssert.IsProblemAsync(response, HttpStatusCode.Conflict);
-        Assert.Single(await ListAsync("/api/drones"));
+        // Since REQ-034 the drone goes into the trash and the history stays.
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        Assert.Empty(await ListAsync("/api/drones"));
+        Assert.Single(await ListAsync("/api/drones/trash"));
         var loan = Assert.Single(await ListAsync("/api/loans?status=Returned"));
         Assert.Equal("TELLO-07", loan.GetProperty("droneName").GetString());
     }
@@ -97,7 +99,7 @@ public sealed class DeleteDroneApiTests : IDisposable
         var response = await _client.SendAsync(request);
 
         var problem = await response.Content.ReadFromJsonAsync<JsonElement>();
-        Assert.Contains("kann nicht gelöscht werden", problem.GetProperty("detail").GetString());
+        Assert.Equal("Die Drohne „TELLO-07“ ist ausgeliehen. Gib sie zuerst zurück.", problem.GetProperty("detail").GetString());
     }
 
     public void Dispose()

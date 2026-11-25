@@ -11,6 +11,23 @@ public static class DroneEndpoints
         drones.MapGet("/", async (DroneService service, CancellationToken cancellationToken) =>
             await service.ListAsync(cancellationToken));
 
+        drones.MapGet("/trash", async (DroneService service, CancellationToken cancellationToken) =>
+            await service.ListTrashAsync(cancellationToken));
+
+        drones.MapPost("/{id:int}/restore", async (int id, DroneService service, CancellationToken cancellationToken) =>
+        {
+            var result = await service.RestoreAsync(id, cancellationToken);
+
+            return result.Error is { } error ? error.ToProblem() : Results.Ok(result.Value);
+        });
+
+        drones.MapDelete("/{id:int}/permanent", async (int id, string? history, DroneService service, CancellationToken cancellationToken) =>
+        {
+            var result = await service.DeletePermanentlyAsync(id, history, cancellationToken);
+
+            return result.Error is { } error ? error.ToProblem() : Results.NoContent();
+        });
+
         drones.MapGet("/{id:int}", async (int id, DroneService service, CancellationToken cancellationToken) =>
         {
             var result = await service.GetAsync(id, cancellationToken);

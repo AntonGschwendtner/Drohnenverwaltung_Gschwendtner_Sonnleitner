@@ -84,10 +84,6 @@ public static class Messages
         $"The accessory type {type} appears more than once.",
         $"Der Zubehörtyp {type} kommt mehrfach vor.");
 
-    public static string DroneHasLoans(string name) => Pick(
-        $"The drone \"{name}\" has loans and cannot be deleted, so the loan history stays complete.",
-        $"Die Drohne „{name}“ hat Ausleihen und kann nicht gelöscht werden, damit die Historie vollständig bleibt.");
-
     public static string NoteTooLong(int maxLength) => Pick(
         $"A note can have at most {maxLength} characters.",
         $"Eine Notiz darf höchstens {maxLength} Zeichen haben.");
@@ -159,6 +155,22 @@ public static class Messages
     public static string HistoryChoiceMissing => Pick(
         "Say what happens to the history of the group: history=keep or history=delete.",
         "Gib an, was mit der Historie der Gruppe passiert: history=keep oder history=delete.");
+
+    public static string DroneInTrash(string name) => Pick(
+        $"The drone \"{name}\" is in the trash. Restore it first.",
+        $"Die Drohne „{name}“ liegt im Papierkorb. Stell sie zuerst wieder her.");
+
+    public static string DroneNameInTrash(string name) => Pick(
+        $"A drone named \"{name}\" is in the trash. Restore it or delete it for good.",
+        $"Eine Drohne mit dem Namen „{name}“ liegt im Papierkorb. Stell sie wieder her oder lösche sie endgültig.");
+
+    public static string DroneIsLoanedCannotDelete(string name) => Pick(
+        $"The drone \"{name}\" is loaned. Return it first.",
+        $"Die Drohne „{name}“ ist ausgeliehen. Gib sie zuerst zurück.");
+
+    public static string DroneNotInTrash(string name) => Pick(
+        $"The drone \"{name}\" is not in the trash.",
+        $"Die Drohne „{name}“ liegt nicht im Papierkorb.");
 
     public static string[] CsvHeader => IsGerman
         ? ["Schülergruppe", "Drohne", "Akkus", "Propeller", "Ausleihdatum", "Rückgabedatum"]

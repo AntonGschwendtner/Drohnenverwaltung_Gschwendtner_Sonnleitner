@@ -61,9 +61,11 @@ public class DroneInventoryDbContext(DbContextOptions<DroneInventoryDbContext> o
 
             // Returned loans must stay in the history, so a drone or student group
             // that is part of a loan cannot be deleted.
+            // Optional only for loans whose drone was deleted for good with "keep the history" (REQ-034).
             loan.HasOne(l => l.Drone)
                 .WithMany()
                 .HasForeignKey(l => l.DroneId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Optional only for loans whose group was deleted for good with "keep the history" (REQ-033).

@@ -5,10 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DroneInventory.Api.Drones;
 
-public class DroneService(DroneInventoryDbContext dbContext)
+public class DroneService(DroneInventoryDbContext dbContext, TimeProvider timeProvider)
 {
     public async Task<IReadOnlyList<DroneResponse>> ListAsync(CancellationToken cancellationToken) =>
         await dbContext.Drones
+            .Where(drone => drone.DeletedAt == null)
             .OrderBy(drone => drone.Name)
             .Select(ToResponse())
             .ToListAsync(cancellationToken);
@@ -37,7 +38,8 @@ public class DroneService(DroneInventoryDbContext dbContext)
                     ? DroneStatus.Loaned
                     : DroneStatus.Available,
             drone.Description,
-            drone.DefectNote);
+            drone.DefectNote,
+            drone.DeletedAt);
 
     public async Task<ServiceResult<DroneResponse>> CreateAsync(CreateDroneRequest request, CancellationToken cancellationToken)
     {
@@ -73,6 +75,11 @@ public class DroneService(DroneInventoryDbContext dbContext)
         if (drone is null)
         {
             return ServiceResult<DroneResponse>.NotFound(Messages.UnknownDrone(id));
+        }
+
+        if (drone.DeletedAt is not null)
+        {
+            return ServiceResult<DroneResponse>.Conflict(Messages.DroneInTrash(drone.Name));
         }
 
         var (name, error) = await CheckNameAsync(request.Name, exceptId: id, cancellationToken);
@@ -115,6 +122,11 @@ public class DroneService(DroneInventoryDbContext dbContext)
             return ServiceResult<DroneResponse>.NotFound(Messages.UnknownDrone(id));
         }
 
+        if (drone.DeletedAt is not null)
+        {
+            return ServiceResult<DroneResponse>.Conflict(Messages.DroneInTrash(drone.Name));
+        }
+
         var description = request.Description?.Trim();
         if (string.IsNullOrEmpty(description))
         {
@@ -148,6 +160,11 @@ public class DroneService(DroneInventoryDbContext dbContext)
             return ServiceResult<DroneResponse>.NotFound(Messages.UnknownDrone(id));
         }
 
+        if (drone.DeletedAt is not null)
+        {
+            return ServiceResult<DroneResponse>.Conflict(Messages.DroneInTrash(drone.Name));
+        }
+
         if (drone.DefectNote is null)
         {
             return ServiceResult<DroneResponse>.Conflict(Messages.DroneNotDefective(drone.Name));
@@ -159,35 +176,121 @@ public class DroneService(DroneInventoryDbContext dbContext)
     }
 
     /// <summary>
-    /// Deletes a drone that never had a loan (REQ-016). A drone with any loan stays, so the history stays complete.
+    /// Moves a drone into the trash (REQ-034). It keeps its loans and can be restored. A loaned drone stays, so it can
+    /// still be returned through the loan page.
     /// </summary>
     public async Task<ServiceResult<bool>> DeleteAsync(int id, CancellationToken cancellationToken)
     {
+        // The transaction takes the write lock first, so the check and the move see the same loans.
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+        var drone = await dbContext.Drones.FindAsync([id], cancellationToken);
+        if (drone is null || drone.DeletedAt is not null)
+        {
+            return ServiceResult<bool>.NotFound(Messages.UnknownDrone(id));
+        }
+
+        if (await IsLoanedAsync(id, cancellationToken))
+        {
+            return ServiceResult<bool>.Conflict(Messages.DroneIsLoanedCannotDelete(drone.Name));
+        }
+
+        drone.DeletedAt = Today();
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+        return ServiceResult<bool>.Success(true);
+    }
+
+    /// <summary>The drones in the trash, the most recently deleted first (REQ-034).</summary>
+    public async Task<IReadOnlyList<TrashedDroneResponse>> ListTrashAsync(CancellationToken cancellationToken) =>
+        await dbContext.Drones
+            .Where(drone => drone.DeletedAt != null)
+            .OrderByDescending(drone => drone.DeletedAt)
+            .ThenBy(drone => drone.Name)
+            .Select(drone => new TrashedDroneResponse(
+                drone.Id,
+                drone.Name,
+                drone.DeletedAt!.Value,
+                dbContext.Loans.Count(loan => loan.DroneId == drone.Id)))
+            .ToListAsync(cancellationToken);
+
+    /// <summary>Takes a drone out of the trash with its loans and its defect (REQ-034).</summary>
+    public async Task<ServiceResult<DroneResponse>> RestoreAsync(int id, CancellationToken cancellationToken)
+    {
+        var drone = await dbContext.Drones.FindAsync([id], cancellationToken);
+        if (drone is null)
+        {
+            return ServiceResult<DroneResponse>.NotFound(Messages.UnknownDrone(id));
+        }
+
+        if (drone.DeletedAt is null)
+        {
+            return ServiceResult<DroneResponse>.NotFound(Messages.DroneNotInTrash(drone.Name));
+        }
+
+        drone.DeletedAt = null;
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return await GetAsync(id, cancellationToken);
+    }
+
+    /// <summary>
+    /// Deletes a drone from the trash for good (REQ-034). With "keep" its loans stay in the history under the drone's
+    /// name; with "delete" they are deleted too. Everything runs in one transaction, and a loaned drone stays.
+    /// </summary>
+    public async Task<ServiceResult<bool>> DeletePermanentlyAsync(int id, string? history, CancellationToken cancellationToken)
+    {
+        if (!HistoryChoice.IsValid(history))
+        {
+            return ServiceResult<bool>.Invalid(Messages.HistoryChoiceMissing);
+        }
+
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
         var drone = await dbContext.Drones.FindAsync([id], cancellationToken);
         if (drone is null)
         {
             return ServiceResult<bool>.NotFound(Messages.UnknownDrone(id));
         }
 
-        if (await dbContext.Loans.AnyAsync(loan => loan.DroneId == id, cancellationToken))
+        if (drone.DeletedAt is null)
         {
-            return ServiceResult<bool>.Conflict(Messages.DroneHasLoans(drone.Name));
+            return ServiceResult<bool>.Conflict(Messages.DroneNotInTrash(drone.Name));
+        }
+
+        if (await IsLoanedAsync(id, cancellationToken))
+        {
+            return ServiceResult<bool>.Conflict(Messages.DroneIsLoanedCannotDelete(drone.Name));
+        }
+
+        var loansOfDrone = dbContext.Loans.Where(loan => loan.DroneId == id);
+        if (history == HistoryChoice.Keep)
+        {
+            var name = drone.Name;
+            await loansOfDrone.ExecuteUpdateAsync(
+                setters => setters
+                    .SetProperty(loan => loan.FormerDroneName, name)
+                    .SetProperty(loan => loan.DroneId, (int?)null),
+                cancellationToken);
+        }
+        else
+        {
+            // The loan items go with their loans through the cascade of the database.
+            await loansOfDrone.ExecuteDeleteAsync(cancellationToken);
         }
 
         dbContext.Drones.Remove(drone);
-
-        try
-        {
-            await dbContext.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateException exception) when (exception.IsForeignKeyViolation())
-        {
-            // A loan was created after the check above; the database refuses the delete.
-            return ServiceResult<bool>.Conflict(Messages.DroneHasLoans(drone.Name));
-        }
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         return ServiceResult<bool>.Success(true);
     }
+
+    private Task<bool> IsLoanedAsync(int id, CancellationToken cancellationToken) =>
+        dbContext.Loans.AnyAsync(loan => loan.DroneId == id && loan.Status == LoanStatus.Active, cancellationToken);
+
+    private DateOnly Today() => DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime);
 
     /// <summary>The name is required and unique. When editing, the drone itself may keep its name.</summary>
     private async Task<(string Name, ServiceResult<DroneResponse>? Error)> CheckNameAsync(
@@ -201,11 +304,20 @@ public class DroneService(DroneInventoryDbContext dbContext)
             return (string.Empty, ServiceResult<DroneResponse>.Invalid(Messages.DroneNeedsName));
         }
 
-        var nameIsTaken = await dbContext.Drones.AnyAsync(
-            drone => drone.Name == name && drone.Id != exceptId,
-            cancellationToken);
+        // The name of a drone in the trash stays taken, so a restore never collides (REQ-034).
+        var takenBy = await dbContext.Drones
+            .Where(drone => drone.Name == name && drone.Id != exceptId)
+            .Select(drone => new { drone.DeletedAt })
+            .FirstOrDefaultAsync(cancellationToken);
 
-        return nameIsTaken ? (name, NameAlreadyExists(name)) : (name, null);
+        if (takenBy is null)
+        {
+            return (name, null);
+        }
+
+        return takenBy.DeletedAt is null
+            ? (name, NameAlreadyExists(name))
+            : (name, ServiceResult<DroneResponse>.Conflict(Messages.DroneNameInTrash(name)));
     }
 
     private static ServiceResult<DroneResponse> NameAlreadyExists(string name) =>
