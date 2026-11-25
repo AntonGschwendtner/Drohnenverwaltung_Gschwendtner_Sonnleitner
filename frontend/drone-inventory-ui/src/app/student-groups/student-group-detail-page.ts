@@ -30,6 +30,24 @@ import { StripSkeleton } from '../shared/strip-skeleton';
         [lede]="i18n.t('groups.detailLede', { count: '' + activeLoans().length })"
       />
 
+      <section aria-labelledby="group-members">
+        <h2 id="group-members">{{ i18n.t('details.members') }}</h2>
+        @if (studentGroup.members.length === 0) {
+          <app-empty-state>{{ i18n.t('members.empty') }}</app-empty-state>
+        } @else {
+          <ul class="member-list">
+            @for (member of studentGroup.members; track member.id) {
+              <li [class.leader]="member.isLeader">
+                <span class="member-name">{{ member.name }}</span>
+                @if (member.isLeader) {
+                  <span class="leader-badge">{{ i18n.t('members.leader') }}</span>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
       <section aria-labelledby="group-active-loans">
         <h2 id="group-active-loans">{{ i18n.t('loans.active') }}</h2>
         @if (activeLoans().length === 0) {
