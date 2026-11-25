@@ -128,7 +128,7 @@ The system SHALL store the current date as return date when a loan is returned. 
 - **THEN** the loan has no return date
 
 ### Requirement: Loan history
-Returned loans SHALL stay stored and SHALL NOT be deleted, except when a user deletes a student group (REQ-033) or a drone (REQ-034) permanently together with its history. The system SHALL list returned loans with student group, drone, accessory quantities, loan date and return date (REQ-010). A loan of a permanently deleted group or drone whose history was kept SHALL keep showing its name.
+Returned loans SHALL stay stored and SHALL NOT be deleted, except when a user deletes a student group (REQ-033) or a drone (REQ-034) permanently together with its history, deletes the history (REQ-040) or chooses it in the general reset (REQ-038). The system SHALL list returned loans with student group, drone, accessory quantities, loan date and return date (REQ-010). A loan of a permanently deleted group or drone whose history was kept SHALL keep showing its name.
 
 #### Scenario: Returned loan stays in the history
 - **GIVEN** "TELLO-07" was loaned to "Group 3" with 4 batteries and 8 propellers
@@ -364,3 +364,17 @@ An active loan whose planned return date is today SHALL be marked as due today (
 - **GIVEN** a returned loan and an active loan without a planned return date
 - **WHEN** the loans are listed
 - **THEN** neither loan is marked as due today or overdue
+
+### Requirement: Delete the history
+The history page SHALL offer to delete all returned loans at once after a confirmation (REQ-040). Active loans SHALL stay.
+
+#### Scenario: Delete the history
+- **GIVEN** two returned loans and one active loan exist
+- **WHEN** the user deletes the history and confirms
+- **THEN** the history is empty
+- **AND** the active loan is still listed
+
+#### Scenario: Cancel deleting the history
+- **GIVEN** returned loans exist
+- **WHEN** the user clicks "Delete history" and cancels the confirmation
+- **THEN** the history stays unchanged
