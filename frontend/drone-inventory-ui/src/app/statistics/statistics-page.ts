@@ -1,5 +1,6 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { ApiService, readErrorMessage, Statistics, Usage } from '../api.service';
 import { I18nService } from '../i18n.service';
 import { PageHead } from '../shared/page-head';
@@ -90,6 +91,7 @@ export class StatisticsPage implements OnInit {
   protected readonly statistics = signal<Statistics | null>(null);
   protected readonly loading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
+  private request: Subscription | null = null;
 
   protected readonly maxDroneLoans = computed(() => Math.max(0, ...(this.statistics()?.drones ?? []).map((row) => row.loanCount)));
   protected readonly maxGroupLoans = computed(() => Math.max(0, ...(this.statistics()?.studentGroups ?? []).map((row) => row.loanCount)));
@@ -117,9 +119,11 @@ export class StatisticsPage implements OnInit {
           ? { from: '2000-01-01', to: StatisticsPage.localDate(today) }
           : {};
 
+    // A newer period replaces an answer that is still on its way.
+    this.request?.unsubscribe();
     this.loading.set(true);
     this.errorMessage.set(null);
-    this.api.getStatistics(range).subscribe({
+    this.request = this.api.getStatistics(range).subscribe({
       next: (statistics) => {
         this.statistics.set(statistics);
         this.loading.set(false);

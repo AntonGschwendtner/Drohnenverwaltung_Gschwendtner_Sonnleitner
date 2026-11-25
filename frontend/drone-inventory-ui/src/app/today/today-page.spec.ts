@@ -100,6 +100,7 @@ describe('TodayPage', () => {
     );
 
     expect(names(element, 'today-reserved')).toEqual(['TELLO-07 · Group 3']);
+    expect(element.querySelector('section[aria-labelledby="today-reserved"] a.today-go')?.getAttribute('href')).toBe('/loans?drone=7');
     expect(element.querySelector('app-empty-state')).toBeNull();
   });
 

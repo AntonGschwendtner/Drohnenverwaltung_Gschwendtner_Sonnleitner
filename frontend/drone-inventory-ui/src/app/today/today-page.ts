@@ -88,7 +88,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
             @for (reservation of reservedToday(); track reservation.id) {
               <li class="today-item due-today-item" [attr.data-reservation]="reservation.id">
                 <span class="today-what">{{ reservation.droneName }} · {{ reservation.studentGroupName }}</span>
-                <a class="tool-link today-go" routerLink="/loans">{{ i18n.t('today.toLoans') }}</a>
+                <a class="tool-link today-go" routerLink="/loans" [queryParams]="{ drone: reservation.droneId }">{{ i18n.t('today.toLoans') }}</a>
               </li>
             }
           </ul>
