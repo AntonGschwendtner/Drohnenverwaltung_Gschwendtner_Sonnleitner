@@ -4,6 +4,8 @@ using DroneInventory.Api.Common;
 using DroneInventory.Api.Data;
 using DroneInventory.Api.Drones;
 using DroneInventory.Api.Loans;
+using DroneInventory.Api.Reservations;
+using DroneInventory.Api.Statistics;
 using DroneInventory.Api.StudentGroups;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,6 +27,8 @@ builder.Services.AddScoped<DroneService>();
 builder.Services.AddScoped<StudentGroupService>();
 builder.Services.AddScoped<LoanService>();
 builder.Services.AddScoped<AdminService>();
+builder.Services.AddScoped<ReservationService>();
+builder.Services.AddScoped<StatisticsService>();
 
 var app = builder.Build();
 
@@ -62,6 +66,8 @@ app.MapDroneEndpoints();
 app.MapStudentGroupEndpoints();
 app.MapLoanEndpoints();
 app.MapAdminEndpoints();
+app.MapReservationEndpoints();
+app.MapStatisticsEndpoints();
 
 // For monitoring or a reverse proxy in front of the container (REQ-041): healthy when the database opens.
 app.MapGet("/api/health", async (DroneInventoryDbContext dbContext, CancellationToken cancellationToken) =>

@@ -188,6 +188,34 @@ public static class Messages
         "The database of the app cannot be opened.",
         "Die Datenbank der App lässt sich nicht öffnen.");
 
+    public static string ReservationNeedsDrone => Pick("Choose a drone for the reservation.", "Wähle eine Drohne für die Reservierung.");
+
+    public static string ReservationNeedsStudentGroup => Pick("Choose a student group for the reservation.", "Wähle eine Schülergruppe für die Reservierung.");
+
+    public static string ReservationNeedsDate => Pick("Choose the day of the reservation.", "Wähle den Tag der Reservierung.");
+
+    public static string ReservationInThePast => Pick("A reservation is for today or a later day.", "Eine Reservierung gilt für heute oder einen späteren Tag.");
+
+    public static string DroneAlreadyReserved(string drone, DateOnly date) => Pick(
+        $"The drone \"{drone}\" is already reserved on {date:dd.MM.yyyy}.",
+        $"Die Drohne „{drone}“ ist am {date:dd.MM.yyyy} schon reserviert.");
+
+    public static string UnknownReservation(int id) => Pick(
+        $"There is no reservation with the id {id}.",
+        $"Es gibt keine Reservierung mit der ID {id}.");
+
+    public static string ReservedForOtherGroup(string drone, string group) => Pick(
+        $"The drone \"{drone}\" is reserved for \"{group}\" today.",
+        $"Die Drohne „{drone}“ ist heute für „{group}“ reserviert.");
+
+    public static string ReservedCannotDelete(string name, DateOnly date) => Pick(
+        $"\"{name}\" has a reservation on {date:dd.MM.yyyy}. Cancel the reservation first.",
+        $"„{name}“ hat eine Reservierung am {date:dd.MM.yyyy}. Storniere die Reservierung zuerst.");
+
+    public static string StatisticsPeriodInvalid => Pick(
+        "The start of the period lies after its end.",
+        "Der Beginn des Zeitraums liegt nach seinem Ende.");
+
     public static string[] CsvHeader => IsGerman
         ? ["Schülergruppe", "Drohne", "Akkus", "Propeller", "Ausleihdatum", "Rückgabedatum"]
         : ["Student group", "Drone", "Batteries", "Propellers", "Loan date", "Return date"];

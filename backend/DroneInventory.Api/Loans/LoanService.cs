@@ -149,6 +149,16 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             return AlreadyLoaned(drone);
         }
 
+        // On a reserved day only the reserving group gets the drone (REQ-029).
+        var reservedFor = await dbContext.Reservations
+            .Where(reservation => reservation.DroneId == drone.Id && reservation.Date == today && reservation.StudentGroupId != studentGroup.Id)
+            .Select(reservation => reservation.StudentGroup!.Name)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (reservedFor is not null)
+        {
+            return ServiceResult<LoanResponse>.Conflict(Messages.ReservedForOtherGroup(drone.Name, reservedFor));
+        }
+
         var loan = new Loan
         {
             DroneId = drone.Id,

@@ -135,7 +135,19 @@ public class StudentGroupService(DroneInventoryDbContext dbContext, TimeProvider
             return ServiceResult<bool>.Conflict(Messages.StudentGroupHasActiveLoan(studentGroup.Name, loanedDrone));
         }
 
-        studentGroup.DeletedAt = Today();
+        // A group with an upcoming reservation stays until the reservation is cancelled (decision of 2026-11-12).
+        var today = Today();
+        var reservedOn = await dbContext.Reservations
+            .Where(reservation => reservation.StudentGroupId == id && reservation.Date >= today)
+            .OrderBy(reservation => reservation.Date)
+            .Select(reservation => (DateOnly?)reservation.Date)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (reservedOn is { } reservedDate)
+        {
+            return ServiceResult<bool>.Conflict(Messages.ReservedCannotDelete(studentGroup.Name, reservedDate));
+        }
+
+        studentGroup.DeletedAt = today;
         await dbContext.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
