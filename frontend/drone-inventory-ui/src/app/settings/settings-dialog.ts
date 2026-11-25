@@ -52,23 +52,27 @@ type ResetChoice = keyof ResetRequest;
           </div>
         </div>
       } @else {
-        <fieldset class="settings-group">
+        <fieldset class="settings-group settings-choice">
           <legend>{{ i18n.t('settings.language') }}</legend>
-          <label><input type="radio" name="language" value="de" [checked]="language() === 'de'" (change)="language.set('de')" /> Deutsch</label>
-          <label><input type="radio" name="language" value="en" [checked]="language() === 'en'" (change)="language.set('en')" /> English</label>
+          <div class="segments">
+            <label class="segment"><input type="radio" name="language" value="de" [checked]="language() === 'de'" (change)="language.set('de')" /><span class="segment-code" aria-hidden="true">DE</span> Deutsch</label>
+            <label class="segment"><input type="radio" name="language" value="en" [checked]="language() === 'en'" (change)="language.set('en')" /><span class="segment-code" aria-hidden="true">EN</span> English</label>
+          </div>
         </fieldset>
 
-        <fieldset class="settings-group">
+        <fieldset class="settings-group settings-choice">
           <legend>{{ i18n.t('settings.mode') }}</legend>
-          <label><input type="radio" name="theme" value="light" [checked]="theme() === 'light'" (change)="theme.set('light')" /> {{ i18n.t('theme.day') }}</label>
-          <label><input type="radio" name="theme" value="dark" [checked]="theme() === 'dark'" (change)="theme.set('dark')" /> {{ i18n.t('theme.night') }}</label>
+          <div class="segments">
+            <label class="segment"><input type="radio" name="theme" value="light" [checked]="theme() === 'light'" (change)="theme.set('light')" /><span class="segment-code" aria-hidden="true">☀</span> {{ i18n.t('theme.day') }}</label>
+            <label class="segment"><input type="radio" name="theme" value="dark" [checked]="theme() === 'dark'" (change)="theme.set('dark')" /><span class="segment-code" aria-hidden="true">☾</span> {{ i18n.t('theme.night') }}</label>
+          </div>
         </fieldset>
 
         <fieldset class="settings-group settings-reset">
           <legend>{{ i18n.t('settings.reset') }}</legend>
           @for (choice of resetChoices; track choice) {
-            <label>
-              <input type="checkbox" [name]="choice" [checked]="reset()[choice]" (change)="toggleReset(choice)" />
+            <label class="switch-row">
+              <input type="checkbox" role="switch" class="switch" [name]="choice" [checked]="reset()[choice]" (change)="toggleReset(choice)" />
               {{ i18n.t(resetLabels[choice]) }}
             </label>
           }
