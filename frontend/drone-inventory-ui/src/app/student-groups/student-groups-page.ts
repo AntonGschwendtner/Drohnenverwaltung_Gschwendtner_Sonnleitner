@@ -62,6 +62,7 @@ import { MembersDialog } from './members-dialog';
         <thead>
           <tr>
             <th appSortHeader="name" [label]="i18n.t('field.name')" [(sort)]="sort"></th>
+            <th appSortHeader="leader" [label]="i18n.t('members.leader')" [(sort)]="sort"></th>
             <th><span class="visually-hidden">{{ i18n.t('field.action') }}</span></th>
           </tr>
         </thead>
@@ -73,6 +74,7 @@ import { MembersDialog } from './members-dialog';
                   <label class="visually-hidden" [for]="'edit-group-' + studentGroup.id">{{ i18n.t('field.name') }}</label>
                   <input [id]="'edit-group-' + studentGroup.id" formControlName="name" name="editName" autocomplete="off" />
                 </td>
+                <td [attr.data-label]="i18n.t('members.leader')">{{ studentGroup.leaderName ?? i18n.t('groups.noLeader') }}</td>
                 <td class="row-actions">
                   <button type="button" class="save" (click)="saveEdit(studentGroup)" [disabled]="busyId() !== null" [class.busy]="busyId() === studentGroup.id">
                     {{ i18n.t('action.save') }}
@@ -83,6 +85,9 @@ import { MembersDialog } from './members-dialog';
             } @else {
               <tr [attr.data-group]="studentGroup.id">
                 <td><a [routerLink]="['/student-groups', studentGroup.id]">{{ studentGroup.name }}</a></td>
+                <td class="leader-cell" [attr.data-label]="i18n.t('members.leader')" [class.none]="!studentGroup.leaderName">
+                  {{ studentGroup.leaderName ?? i18n.t('groups.noLeader') }}
+                </td>
                 <td class="row-actions">
                   <button type="button" class="quiet members" (click)="openMembers(studentGroup, $event)" [disabled]="busyId() !== null">
                     {{ i18n.t('groups.members', { count: '' + studentGroup.members.length }) }}<span class="visually-hidden"> {{ studentGroup.name }}</span>
@@ -143,15 +148,19 @@ export class StudentGroupsPage implements OnInit {
   protected readonly saving = signal(false);
   protected readonly loading = signal(true);
 
-  /** The search narrows the loaded list in the browser (REQ-011). */
+  /** The search narrows the loaded list in the browser by group name (REQ-011) or member name (REQ-031). */
   protected readonly search = signal('');
   /** Sorting by the name header (REQ-020). */
   protected readonly sort = signal<SortState<string> | null>(null);
   protected readonly visibleStudentGroups = computed(() =>
     sortItems(
-      this.studentGroups().filter((studentGroup) => matchesSearch(studentGroup.name, this.search())),
+      this.studentGroups().filter(
+        (studentGroup) =>
+          matchesSearch(studentGroup.name, this.search()) ||
+          studentGroup.members.some((member) => matchesSearch(member.name, this.search())),
+      ),
       this.sort(),
-      (studentGroup): SortValue => studentGroup.name,
+      (studentGroup, key): SortValue => (key === 'leader' ? studentGroup.leaderName : studentGroup.name),
     ),
   );
 
