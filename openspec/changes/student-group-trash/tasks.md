@@ -17,4 +17,4 @@
 
 ## 4. Documentation
 
-- [ ] 4.1 REQ-033 in `docs/requirements.md`, domain rule 5 and model in `docs/domain-model.md` and `openspec/config.yaml`, README (#206)
+- [x] 4.1 REQ-033 in `docs/requirements.md`, domain rule 5 and model in `docs/domain-model.md` and `openspec/config.yaml`, README (#206)
