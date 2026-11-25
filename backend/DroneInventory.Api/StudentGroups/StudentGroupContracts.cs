@@ -13,4 +13,7 @@ public sealed record StudentGroupResponse(
 
 public sealed record AddMemberRequest(string? Name);
 
+/// <summary>The member to make group leader, or null to leave the group without a leader (REQ-031).</summary>
+public sealed record SetLeaderRequest(int? MemberId);
+
 public sealed record StudentGroupMemberResponse(int Id, string Name, bool IsLeader);
