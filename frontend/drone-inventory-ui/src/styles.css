@@ -1777,30 +1777,40 @@ td button.busy::after {
 
 /* ───────────── Settings pop-up (REQ-037) ───────────── */
 
+/* A plain gear in the line style of the header, no frame; it turns a little and lights up on hover. */
 .settings-button {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
   min-height: auto;
-  padding: 0.35rem 0.65rem;
-  border: 2px solid var(--line-strong);
+  padding: 0.3rem;
+  border: 0;
   background: transparent;
   box-shadow: none;
   color: var(--ink);
-  font: 500 0.72rem var(--font-mono);
-  letter-spacing: 0.14em;
 }
 
-.settings-button:hover:not(:disabled) {
-  border-color: var(--accent);
+.settings-button .gear {
+  width: 1.45rem;
+  height: 1.45rem;
+  transition:
+    transform 0.4s var(--ease),
+    color 0.2s var(--ease);
+}
+
+.settings-button:hover:not(:disabled),
+.settings-button:active:not(:disabled) {
+  border: 0;
+  background: transparent;
   box-shadow: none;
+  color: var(--accent);
   transform: none;
 }
 
-.settings-button span[aria-hidden] {
-  font-size: 1.1rem;
-  line-height: 1;
+.settings-button:hover:not(:disabled) .gear {
+  transform: rotate(60deg);
 }
+
 
 .settings-dialog {
   width: min(34rem, calc(100vw - 2rem));
