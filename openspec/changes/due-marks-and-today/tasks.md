@@ -10,4 +10,4 @@
 
 ## 3. Documentation
 
-- [ ] 3.1 REQ-035 and REQ-036 in `docs/requirements.md`, README (#222)
+- [x] 3.1 REQ-035 and REQ-036 in `docs/requirements.md`, README (#222)
