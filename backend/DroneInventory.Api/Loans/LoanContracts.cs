@@ -23,7 +23,7 @@ public sealed record LoanResponse(
     int Id,
     int DroneId,
     string DroneName,
-    int StudentGroupId,
+    int? StudentGroupId,
     string StudentGroupName,
     int Batteries,
     int Propellers,

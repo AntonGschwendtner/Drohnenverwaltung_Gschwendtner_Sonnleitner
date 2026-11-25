@@ -2,7 +2,7 @@
 
 ## 1. Data (REQ-033)
 
-- [ ] 1.1 `StudentGroup.DeletedAt`, optional `Loan.StudentGroupId` and `Loan.FormerStudentGroupName`, migration; entity tests (existing loans keep their group) (#200)
+- [x] 1.1 `StudentGroup.DeletedAt`, optional `Loan.StudentGroupId` and `Loan.FormerStudentGroupName`, migration; entity tests (existing loans keep their group) (#200)
 
 ## 2. API (REQ-033)
 
