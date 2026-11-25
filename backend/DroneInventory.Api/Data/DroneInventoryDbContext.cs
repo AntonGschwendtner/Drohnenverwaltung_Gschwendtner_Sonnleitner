@@ -10,6 +10,8 @@ public class DroneInventoryDbContext(DbContextOptions<DroneInventoryDbContext> o
 
     public DbSet<StudentGroup> StudentGroups => Set<StudentGroup>();
 
+    public DbSet<StudentGroupMember> StudentGroupMembers => Set<StudentGroupMember>();
+
     public DbSet<Loan> Loans => Set<Loan>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -25,6 +27,32 @@ public class DroneInventoryDbContext(DbContextOptions<DroneInventoryDbContext> o
         modelBuilder.Entity<StudentGroup>()
             .HasIndex(studentGroup => studentGroup.Name)
             .IsUnique();
+
+        modelBuilder.Entity<StudentGroupMember>(member =>
+        {
+            member.ToTable("StudentGroupMembers");
+
+            // NOCASE makes the unique index and the sorting ignore upper and lower case (REQ-031).
+            member.Property(m => m.Name)
+                .HasMaxLength(StudentGroupMember.MaxNameLength)
+                .UseCollation("NOCASE");
+
+            member.HasIndex(m => new { m.StudentGroupId, m.Name })
+                .IsUnique();
+
+            // At most one leader per group, even when two requests arrive at the same time.
+            member.HasIndex(m => m.StudentGroupId)
+                .IsUnique()
+                .HasFilter($"\"{nameof(StudentGroupMember.IsLeader)}\" = 1")
+                .HasDatabaseName("IX_StudentGroupMembers_Leader");
+        });
+
+        // Members belong to their group and go with it. A group with loans cannot be deleted anyway.
+        modelBuilder.Entity<StudentGroup>()
+            .HasMany(studentGroup => studentGroup.Members)
+            .WithOne()
+            .HasForeignKey(member => member.StudentGroupId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Loan>(loan =>
         {

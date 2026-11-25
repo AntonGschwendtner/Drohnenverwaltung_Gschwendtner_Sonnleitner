@@ -2,7 +2,7 @@
 
 ## 1. Data (REQ-031)
 
-- [ ] 1.1 Entity `StudentGroupMember` with cascade delete, unique name per group ignoring case and at most one leader per group, migration; tests for "Delete a group with members" and both unique indexes (#177)
+- [x] 1.1 Entity `StudentGroupMember` with cascade delete, unique name per group ignoring case and at most one leader per group, migration; tests for "Delete a group with members" and both unique indexes (#177)
 
 ## 2. Member API (REQ-031)
 
