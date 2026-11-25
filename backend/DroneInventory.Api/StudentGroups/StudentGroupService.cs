@@ -114,6 +114,56 @@ public class StudentGroupService(DroneInventoryDbContext dbContext)
         return ServiceResult<bool>.Success(true);
     }
 
+    /// <summary>
+    /// Adds a person to a group (REQ-031). The name is required, at most 100 characters and unique within the group,
+    /// ignoring upper and lower case; the database compares with NOCASE and catches parallel requests.
+    /// </summary>
+    public async Task<ServiceResult<StudentGroupMemberResponse>> AddMemberAsync(
+        int studentGroupId,
+        AddMemberRequest request,
+        CancellationToken cancellationToken)
+    {
+        var studentGroup = await dbContext.StudentGroups.FindAsync([studentGroupId], cancellationToken);
+        if (studentGroup is null)
+        {
+            return ServiceResult<StudentGroupMemberResponse>.NotFound(Messages.UnknownStudentGroup(studentGroupId));
+        }
+
+        var name = request.Name?.Trim();
+        if (string.IsNullOrEmpty(name))
+        {
+            return ServiceResult<StudentGroupMemberResponse>.Invalid(Messages.MemberNeedsName);
+        }
+
+        if (name.Length > StudentGroupMember.MaxNameLength)
+        {
+            return ServiceResult<StudentGroupMemberResponse>.Invalid(Messages.MemberNameTooLong(StudentGroupMember.MaxNameLength));
+        }
+
+        var memberExists = ServiceResult<StudentGroupMemberResponse>.Conflict(Messages.MemberExists(name, studentGroup.Name));
+        if (await dbContext.StudentGroupMembers.AnyAsync(
+                member => member.StudentGroupId == studentGroupId && member.Name == name,
+                cancellationToken))
+        {
+            return memberExists;
+        }
+
+        var member = new StudentGroupMember { StudentGroupId = studentGroupId, Name = name };
+        dbContext.StudentGroupMembers.Add(member);
+
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException exception) when (exception.IsUniqueConstraintViolation())
+        {
+            return memberExists;
+        }
+
+        return ServiceResult<StudentGroupMemberResponse>.Success(
+            new StudentGroupMemberResponse(member.Id, member.Name, member.IsLeader));
+    }
+
     /// <summary>The name is required and unique. When editing, the group itself may keep its name.</summary>
     private async Task<(string Name, ServiceResult<StudentGroupResponse>? Error)> CheckNameAsync(
         string? requestedName,

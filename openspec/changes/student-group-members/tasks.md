@@ -6,7 +6,7 @@
 
 ## 2. Member API (REQ-031)
 
-- [ ] 2.1 `POST /api/student-groups/{id}/members`; tests for "Add a member", "Name is missing", "Name is too long", "Member already in the group", "Same name in another group", "Unknown student group" and the German message (#178)
+- [x] 2.1 `POST /api/student-groups/{id}/members`; tests for "Add a member", "Name is missing", "Name is too long", "Member already in the group", "Same name in another group", "Unknown student group" and the German message (#178)
 - [ ] 2.2 `DELETE /api/student-groups/{id}/members/{memberId}` and members with leader in the group responses (alphabetical); tests for "Remove a member", "Member of a group with loans", "Unknown member", "Members and leader in the list", "Group without a leader", "Group with members" (#179)
 - [ ] 2.3 `PUT /api/student-groups/{id}/leader`; tests for "Choose a group leader", "Change the group leader", "Clear the group leader", "Leader from another group", "Remove the group leader" (#180)
 
