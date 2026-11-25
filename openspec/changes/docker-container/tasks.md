@@ -2,7 +2,7 @@
 
 ## 1. Backend serves the app (REQ-032)
 
-- [ ] 1.1 Static files and app fallback outside `/api` when the built app is present; integration tests for "Open a page directly", "Unknown API address" and unchanged behavior without the built app (#184)
+- [x] 1.1 Static files and app fallback outside `/api` when the built app is present; integration tests for "Open a page directly", "Unknown API address" and unchanged behavior without the built app (#184)
 
 ## 2. Container (REQ-032)
 
