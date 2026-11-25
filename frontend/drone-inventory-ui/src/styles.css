@@ -1569,6 +1569,56 @@ td button.busy::after {
   flex: 1 1 14rem;
 }
 
+/* ───────────── Today page (REQ-036) ───────────── */
+
+.overview-due-today {
+  --tile: var(--signal);
+}
+
+.today-list {
+  margin-top: 2.5rem;
+}
+
+.today-list ul {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.today-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--strip);
+  border: 2px solid var(--edge);
+  border-left: 0.6rem solid var(--edge);
+}
+
+.today-item.overdue-item {
+  border-left-color: var(--error);
+  background: var(--error-surface);
+}
+
+.today-item.due-today-item {
+  border-left-color: var(--signal);
+}
+
+.today-what {
+  font-weight: 700;
+}
+
+.today-when {
+  color: var(--muted);
+}
+
+.today-go {
+  margin-left: auto;
+}
+
 /* ───────────── Trash of the student groups (REQ-033) ───────────── */
 
 .trash {

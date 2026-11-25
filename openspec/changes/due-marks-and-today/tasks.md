@@ -6,7 +6,7 @@
 
 ## 2. Today page (REQ-036)
 
-- [ ] 2.1 `TodayPage` as start page with numbers and the three lists, navigation entry, redirects; component tests for "Open the app", "Something is due or late", "Nothing is due", "Go to the loan" (#221)
+- [x] 2.1 `TodayPage` as start page with numbers and the three lists, navigation entry, redirects; component tests for "Open the app", "Something is due or late", "Nothing is due", "Go to the loan" (#221)
 
 ## 3. Documentation
 
