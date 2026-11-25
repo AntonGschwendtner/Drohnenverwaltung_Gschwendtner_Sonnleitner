@@ -160,7 +160,7 @@ The system SHALL store the return date of a loan. The return date SHALL be set b
 
 ## REQ-010 Ausleihhistorie anzeigen
 
-Returned loans SHALL stay stored and SHALL NOT be deleted, except when a student group (REQ-033) or a drone (REQ-034) is deleted for good together with its history. The system SHALL list past loans with student group, drone, accessory quantities, loan date and return date.
+Returned loans SHALL stay stored and SHALL NOT be deleted, except when a student group (REQ-033) or a drone (REQ-034) is deleted for good together with its history, the history is deleted (REQ-040) or the general reset deletes it (REQ-038). The system SHALL list past loans with student group, drone, accessory quantities, loan date and return date.
 
 **Scenario: Returned loan stays in the history**
 - GIVEN "TELLO-07" was loaned to "Group 3" with 4 batteries and 8 propellers
@@ -237,6 +237,10 @@ Diese Anforderungen sind als OpenSpec-Changes beschlossen (Freigabe am 2026-11-1
 | REQ-034 | Papierkorb für Drohnen | Wie REQ-033: Papierkorb, wiederherstellen, endgültig löschen mit oder ohne Historie | `drone-trash` |
 | REQ-035 | Fälligkeit markieren | „Heute fällig“ und „Seit X Tagen überfällig“, farbig in der Liste der aktiven Ausleihen | `due-marks-and-today` |
 | REQ-036 | Startseite „Heute“ | Kennzahlen, überfällige, heute fällige und lange Ausleihen auf einen Blick | `due-marks-and-today` |
+| REQ-037 | Einstellungen als Pop-up | Sprache und Hell/Dunkel, X schließt ohne Änderung, „Übernehmen“ wendet an, Adresse bleibt gleich | `settings-and-data` |
+| REQ-038 | Generalreset | Ankreuzen: alle Drohnen zurückgeben, alle Drohnen löschen, alle Schülergruppen löschen, ganze Historie löschen | `settings-and-data` |
+| REQ-039 | Backup und Wiederherstellen | Ganze Datenbank als Datei herunterladen und wieder einspielen | `settings-and-data` |
+| REQ-040 | Historie löschen | Knopf auf der Historienseite, löscht alle zurückgegebenen Ausleihen | `settings-and-data` |
 
 ## Out of Scope
 

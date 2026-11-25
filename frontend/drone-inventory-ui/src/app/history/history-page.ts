@@ -3,6 +3,7 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ApiService, Loan, readErrorMessage } from '../api.service';
 import { I18nService } from '../i18n.service';
+import { ConfirmDialog } from '../shared/confirm-dialog';
 import { EmptyState } from '../shared/empty-state';
 import { PageHead } from '../shared/page-head';
 import { SortHeader } from '../shared/sort-header';
@@ -12,7 +13,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
 
 @Component({
   selector: 'app-history-page',
-  imports: [DatePipe, EmptyState, PageHead, RouterLink, SearchField, SortHeader, StripSkeleton],
+  imports: [ConfirmDialog, DatePipe, EmptyState, PageHead, RouterLink, SearchField, SortHeader, StripSkeleton],
   template: `
     <app-page-head
       bay="04"
@@ -32,6 +33,9 @@ import { StripSkeleton } from '../shared/strip-skeleton';
         <app-search-field [label]="i18n.t('search.label')" [placeholder]="i18n.t('history.searchHint')" [(value)]="search" />
         <a class="tool-link export-link" [href]="exportUrl()" download>{{ i18n.t('history.export') }}</a>
         <button type="button" class="tool-link print-button" (click)="print()">{{ i18n.t('history.print') }}</button>
+        <button type="button" class="tool-link delete-history" (click)="askToDeleteHistory($event)" [disabled]="deleting()" [class.busy]="deleting()">
+          {{ i18n.t('history.delete') }}
+        </button>
       </div>
 
       <p class="print-only print-date">{{ i18n.t('history.printedOn', { date: (today | date: 'dd.MM.yyyy') ?? '' }) }}</p>
@@ -86,6 +90,16 @@ import { StripSkeleton } from '../shared/strip-skeleton';
       </table>
       }
     }
+    @if (confirmingDelete()) {
+      <app-confirm-dialog
+        [heading]="i18n.t('history.deleteTitle')"
+        [text]="i18n.t('history.deleteText', { count: '' + loans().length })"
+        [confirmLabel]="i18n.t('history.delete')"
+        [cancelLabel]="i18n.t('dialog.cancel')"
+        (confirmed)="deleteHistory()"
+        (cancelled)="cancelDeleteHistory()"
+      />
+    }
   `,
 })
 export class HistoryPage implements OnInit {
@@ -127,6 +141,39 @@ export class HistoryPage implements OnInit {
       loanSortValue,
     ),
   );
+
+  /** Deleting the whole history (REQ-040) waits for the confirmation. */
+  protected readonly confirmingDelete = signal(false);
+  protected readonly deleting = signal(false);
+  private deleteTrigger: HTMLElement | null = null;
+
+  protected askToDeleteHistory(event: Event): void {
+    this.deleteTrigger = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+    this.confirmingDelete.set(true);
+  }
+
+  protected cancelDeleteHistory(): void {
+    this.confirmingDelete.set(false);
+    this.deleteTrigger?.focus();
+    this.deleteTrigger = null;
+  }
+
+  protected deleteHistory(): void {
+    this.confirmingDelete.set(false);
+    this.deleteTrigger = null;
+    this.deleting.set(true);
+    this.errorMessage.set(null);
+    this.api.deleteHistory().subscribe({
+      next: () => {
+        this.deleting.set(false);
+        this.loans.set([]);
+      },
+      error: (error: unknown) => {
+        this.deleting.set(false);
+        this.errorMessage.set(readErrorMessage(error, this.i18n.t('error.fallback')));
+      },
+    });
+  }
 
   ngOnInit(): void {
     this.api.listLoans('Returned').subscribe({

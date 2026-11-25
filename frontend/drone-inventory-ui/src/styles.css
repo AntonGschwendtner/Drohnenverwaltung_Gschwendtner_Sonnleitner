@@ -1700,6 +1700,98 @@ td button.busy::after {
   color: var(--muted);
 }
 
+/* ───────────── Settings pop-up (REQ-037) ───────────── */
+
+.settings-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  border: 2px solid var(--edge);
+  background: var(--field);
+  color: var(--ink);
+  font-size: 0.82rem;
+}
+
+.settings-button span[aria-hidden] {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.settings-dialog {
+  width: min(34rem, calc(100vw - 2rem));
+}
+
+.dialog-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2.4rem;
+  min-height: 2.4rem;
+  padding: 0;
+  background: var(--field);
+  color: var(--ink);
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.settings-group {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0 0 1.25rem;
+  padding: 0.9rem 1rem;
+  border: 2px solid var(--edge);
+}
+
+.settings-group legend {
+  padding: 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.settings-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 0.95rem;
+}
+
+.settings-group input[type='radio'],
+.settings-group input[type='checkbox'] {
+  width: auto;
+}
+
+.settings-reset {
+  border-color: var(--error);
+}
+
+.settings-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.settings-file {
+  display: grid !important;
+  gap: 0.4rem;
+}
+
+.settings-confirm ul {
+  margin: 0 0 1rem;
+  padding-left: 1.2rem;
+  font-weight: 700;
+}
+
+.delete-history::before {
+  content: '\2715';
+  color: var(--error);
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;

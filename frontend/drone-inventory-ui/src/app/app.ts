@@ -2,10 +2,11 @@ import { DOCUMENT } from '@angular/common';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { I18nService } from './i18n.service';
+import { SettingsDialog } from './settings/settings-dialog';
 import { ThemeService } from './theme.service';
 
 @Component({
-  imports: [RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, SettingsDialog],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',
@@ -13,6 +14,21 @@ import { ThemeService } from './theme.service';
 export class App {
   protected readonly theme = inject(ThemeService);
   protected readonly i18n = inject(I18nService);
+
+  /** The settings pop-up (REQ-037); it is no route, so the address stays. */
+  protected readonly settingsOpen = signal(false);
+  private settingsTrigger: HTMLElement | null = null;
+
+  protected openSettings(event: Event): void {
+    this.settingsTrigger = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+    this.settingsOpen.set(true);
+  }
+
+  protected closeSettings(): void {
+    this.settingsOpen.set(false);
+    this.settingsTrigger?.focus();
+    this.settingsTrigger = null;
+  }
 
   /** A tower clock in the header. It is decoration only, the backend sets every date. */
   protected readonly time = signal(App.formatTime(new Date()));

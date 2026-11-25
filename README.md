@@ -23,13 +23,18 @@ Schulprojekt im Fach SYP, 4. INF, 2026/27, von Gschwendtner und Sonnleitner. Bet
 - Bei der Rückgabe die zurückgegebenen Akkus und Propeller erfassen. Fehlteile stehen danach in der Historie.
 - Einen Schaden melden, bei der Rückgabe oder jederzeit auf der Drohnenseite. Eine defekte Drohne hat den Status „Defective“ und lässt sich erst nach „Repaired“ wieder ausleihen.
 - Beim Ausleihen eine Notiz (zum Beispiel das Projekt) und ein geplantes Rückgabedatum angeben. Am Tag selbst steht „Heute fällig“ (orange), danach „Seit X Tagen überfällig“ (rot). Mit geplantem Datum ersetzt das die 7-Tage-Markierung.
+- **Einstellungen** (Zahnrad oben rechts) als Pop-up: Sprache, Hell/Dunkel, **Generalreset** zum Ankreuzen (alle Drohnen zurückgeben, alle Drohnen löschen, alle Schülergruppen löschen, ganze Historie löschen) sowie **Backup** herunterladen und wieder einspielen. X schließt ohne Änderung, „Übernehmen“ wendet an; Reset und Wiederherstellen fragen vorher noch einmal.
+- „Historie löschen“ auf der Historienseite löscht alle zurückgegebenen Ausleihen nach einer Rückfrage.
+
+> **Nur im Schulnetz betreiben.** Die App hat kein Login. Wer sie im Netz erreicht, kann auch den Generalreset auslösen, ein Backup herunterladen oder einspielen. Deshalb gehört sie nicht offen ins Internet.
+
 - Die Startseite „Heute“ zeigt auf einen Blick aktive, heute fällige und überfällige Ausleihen, verfügbare Drohnen und listet, was zu tun ist.
 - Über der Drohnenliste zählen, wie viele Drohnen es gibt und wie viele davon verfügbar und ausgeliehen sind.
 - Die ganze Anwendung als ein Docker-Container `drohnenverwaltung` starten, mit dauerhafter Datenbank im Volume.
 
 Nicht enthalten sind Login und Rollen sowie einzeln erfasste Akkus. Sie können später als eigener Change Request folgen.
 
-Die Changes `initial-drone-lending-system`, `improve-lending-overview`, `manage-drones-and-groups`, `drone-and-group-details`, `loan-notes-and-due-dates`, `return-check-and-damage`, `student-group-members`, `docker-container`, `student-group-trash`, `drone-trash` und `due-marks-and-today` sind abgeschlossen und archiviert. Die geltenden Anforderungen stehen in [openspec/specs](openspec/specs), die erledigten Aufgaben im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
+Die Changes `initial-drone-lending-system`, `improve-lending-overview`, `manage-drones-and-groups`, `drone-and-group-details`, `loan-notes-and-due-dates`, `return-check-and-damage`, `student-group-members`, `docker-container`, `student-group-trash`, `drone-trash`, `due-marks-and-today` und `settings-and-data` sind abgeschlossen und archiviert. Die geltenden Anforderungen stehen in [openspec/specs](openspec/specs), die erledigten Aufgaben im [GitHub Project](https://github.com/users/AntonGschwendtner/projects/4).
 
 ## Technik
 
@@ -124,6 +129,10 @@ dotnet tool restore
 | `GET /api/drones/{id}` | Eine Drohne mit Status |
 | `POST /api/drones` | Drohne anlegen |
 | `PUT /api/drones/{id}` | Name und Beschreibung ändern |
+| `DELETE /api/loans/history` | Alle zurückgegebenen Ausleihen löschen |
+| `POST /api/admin/reset` | Generalreset: `returnAllDrones`, `deleteAllDrones`, `deleteAllStudentGroups`, `deleteHistory` |
+| `GET /api/admin/backup` | Backup der ganzen Datenbank als Datei |
+| `POST /api/admin/restore` | Backup-Datei (Formularfeld `file`) einspielen |
 | `DELETE /api/drones/{id}` | Drohne in den Papierkorb verschieben (nicht wenn ausgeliehen) |
 | `GET /api/drones/trash` | Drohnen im Papierkorb mit Löschdatum und Ausleihen |
 | `POST /api/drones/{id}/restore` | Drohne aus dem Papierkorb wiederherstellen |
