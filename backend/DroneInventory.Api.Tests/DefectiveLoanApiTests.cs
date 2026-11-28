@@ -62,7 +62,7 @@ public sealed class DefectiveLoanApiTests : IDisposable
     {
         var droneId = await CreateAsync("/api/drones", new { name = "TELLO-07", description = "x" });
         var studentGroupId = await CreateAsync("/api/student-groups", new { name = "Group 3" });
-        var defect = await _client.PostAsJsonAsync($"/api/drones/{droneId}/defect", new { description = "Motor 3" });
+        var defect = await _client.PostAsJsonAsync($"/api/drones/{droneId}/defect", new { description = "Motor 3", studentGroupId });
         Assert.Equal(HttpStatusCode.OK, defect.StatusCode);
         return (droneId, studentGroupId);
     }

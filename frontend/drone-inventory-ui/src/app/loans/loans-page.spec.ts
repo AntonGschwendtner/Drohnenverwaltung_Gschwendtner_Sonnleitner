@@ -67,7 +67,7 @@ describe('LoansPage loan form', () => {
     await settle();
   }
 
-  it('offers the drones with their status and the student groups', () => {
+  it('offers only the available drones and the student groups', () => {
     const droneOptions = Array.from(element().querySelectorAll('select[name="droneId"] option')).map(
       (option) => option.textContent?.trim(),
     );
@@ -75,7 +75,7 @@ describe('LoansPage loan form', () => {
       (option) => option.textContent?.trim(),
     );
 
-    expect(droneOptions).toEqual(['Choose a drone', 'TELLO-07 (Available)', 'TELLO-08 (Loaned)']);
+    expect(droneOptions).toEqual(['Choose a drone', 'TELLO-07']);
     expect(groupOptions).toEqual(['Choose a student group', 'Group 3']);
   });
 
@@ -143,20 +143,20 @@ describe('LoansPage loan form', () => {
     expect(field.min).toBe(expected);
   });
 
-  it('shows the message when the drone is already loaned', async () => {
-    choose('droneId', 'TELLO-08');
+  it('shows the message when the drone was loaned in the meantime', async () => {
+    choose('droneId', 'TELLO-07');
     choose('studentGroupId', 'Group 3');
 
     await submit();
 
     http.expectOne({ method: 'POST', url: '/api/loans' }).flush(
-      { detail: 'The drone "TELLO-08" is already loaned.' },
+      { detail: 'The drone "TELLO-07" is already loaned.' },
       { status: 409, statusText: 'Conflict' },
     );
     await settle();
 
     expect(element().querySelector('[role="alert"]')?.textContent).toContain(
-      'The drone "TELLO-08" is already loaned.',
+      'The drone "TELLO-07" is already loaned.',
     );
     expect((element().querySelector('button') as HTMLButtonElement).disabled).toBe(false);
   });

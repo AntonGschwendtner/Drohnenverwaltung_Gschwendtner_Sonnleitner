@@ -3,7 +3,7 @@ import { afterNextRender, Component, computed, effect, inject, Injector, OnInit,
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
-import { ApiService, Drone, DroneStatus, readErrorMessage } from '../api.service';
+import { ApiService, Drone, DroneStatus, readErrorMessage, StudentGroup } from '../api.service';
 import { I18nService } from '../i18n.service';
 import { ConfirmDialog } from '../shared/confirm-dialog';
 import { EmptyState } from '../shared/empty-state';
@@ -134,7 +134,7 @@ import { DroneTrashSection } from './drone-trash-section';
                 <td [attr.data-label]="i18n.t('field.description')">
                   {{ drone.description }}
                   @if (drone.defectNote) {
-                    <span class="strip-note defect-note">{{ i18n.t('drones.defectLabel', { defect: drone.defectNote }) }}</span>
+                    <span class="strip-note defect-note">{{ i18n.t('drones.defectLabel', { defect: drone.defectNote }) }}@if (drone.defectGroupName) { ({{ drone.defectGroupName }})}</span>
                   }
                   @if (drone.nextReservationDate) {
                     <span class="strip-note reservation-note">
@@ -178,7 +178,16 @@ import { DroneTrashSection } from './drone-trash-section';
       >
         <div class="dialog-fields">
           <label class="wide">
-            {{ i18n.t('loans.defect') }}
+            {{ i18n.t('drones.defectGroup') }}
+            <select name="defectGroup" (change)="defectGroupId.set(+$any($event.target).value || null)">
+              <option value="" [selected]="defectGroupId() === null">{{ i18n.t('loans.chooseGroup') }}</option>
+              @for (studentGroup of studentGroups(); track studentGroup.id) {
+                <option [value]="studentGroup.id" [selected]="defectGroupId() === studentGroup.id">{{ studentGroup.name }}</option>
+              }
+            </select>
+          </label>
+          <label class="wide">
+            {{ i18n.t('drones.defectDescription') }}
             <textarea name="defectDescription" rows="2" maxlength="500" [value]="defectDescription()" (input)="defectDescription.set($any($event.target).value)"></textarea>
           </label>
         </div>
@@ -236,6 +245,9 @@ export class DronesPage implements OnInit {
   protected readonly pendingDefect = signal<Drone | null>(null);
   protected readonly pendingRepair = signal<Drone | null>(null);
   protected readonly defectDescription = signal('');
+  /** The student group that reports the defect; the backend requires it (REQ-024). */
+  protected readonly defectGroupId = signal<number | null>(null);
+  protected readonly studentGroups = signal<StudentGroup[]>([]);
   protected readonly statusKey = statusKey;
   private dialogTrigger: HTMLElement | null = null;
   protected readonly listErrorMessage = signal<string | null>(null);
@@ -412,7 +424,10 @@ export class DronesPage implements OnInit {
   protected askToReportDefect(drone: Drone, event: Event): void {
     this.dialogTrigger = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
     this.defectDescription.set('');
+    this.defectGroupId.set(null);
     this.pendingDefect.set(drone);
+    // The groups are loaded when needed, so the drone list loads as fast as before.
+    this.api.listStudentGroups().subscribe({ next: (groups) => this.studentGroups.set(groups), error: () => undefined });
   }
 
   protected askToRepair(drone: Drone, event: Event): void {
@@ -433,7 +448,7 @@ export class DronesPage implements OnInit {
     this.pendingDefect.set(null);
     this.dialogTrigger = null;
     if (drone) {
-      this.runOnDrone(drone, this.api.reportDefect(drone.id, this.defectDescription()));
+      this.runOnDrone(drone, this.api.reportDefect(drone.id, this.defectDescription(), this.defectGroupId()));
     }
   }
 

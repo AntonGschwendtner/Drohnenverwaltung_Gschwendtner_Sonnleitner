@@ -101,7 +101,7 @@ public sealed class DroneTrashApiTests : IDisposable
         var droneId = await CreateDroneAsync("TELLO-07");
         var groupId = await CreateAsync("/api/student-groups", new { name = "Group 3" });
         await ReturnedLoanAsync(droneId, groupId);
-        await _client.PostAsJsonAsync($"/api/drones/{droneId}/defect", new { description = "Motor" });
+        await _client.PostAsJsonAsync($"/api/drones/{droneId}/defect", new { description = "Motor", studentGroupId = groupId });
         await _client.DeleteAsync($"/api/drones/{droneId}");
 
         var response = await _client.PostAsync($"/api/drones/{droneId}/restore", null);

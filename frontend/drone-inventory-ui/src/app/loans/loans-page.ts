@@ -8,7 +8,6 @@ import { I18nService } from '../i18n.service';
 import { ConfirmDialog } from '../shared/confirm-dialog';
 import { EmptyState } from '../shared/empty-state';
 import { PageHead } from '../shared/page-head';
-import { statusKey } from '../shared/status';
 import { SortHeader } from '../shared/sort-header';
 import { loanSortValue, SortState, sortItems } from '../shared/sort';
 import { StripSkeleton } from '../shared/strip-skeleton';
@@ -45,10 +44,8 @@ import { StripSkeleton } from '../shared/strip-skeleton';
           {{ i18n.t('field.drone') }}
           <select formControlName="droneId" name="droneId">
             <option [ngValue]="null">{{ i18n.t('loans.chooseDrone') }}</option>
-            @for (drone of drones(); track drone.id) {
-              <option [ngValue]="drone.id">
-                {{ drone.name }} ({{ i18n.t(statusKey(drone.status)) }})
-              </option>
+            @for (drone of availableDrones(); track drone.id) {
+              <option [ngValue]="drone.id">{{ drone.name }}</option>
             }
           </select>
         </label>
@@ -188,7 +185,6 @@ import { StripSkeleton } from '../shared/strip-skeleton';
 export class LoansPage implements OnInit {
   private readonly api = inject(ApiService);
   protected readonly i18n = inject(I18nService);
-  protected readonly statusKey = statusKey;
 
   protected readonly form = inject(FormBuilder).group({
     droneId: null as number | null,
@@ -214,6 +210,8 @@ export class LoansPage implements OnInit {
   protected readonly today = LoansPage.localDate(new Date());
 
   protected readonly drones = signal<Drone[]>([]);
+  /** Only drones that can be loaned are offered; loaned and defective ones stay out of the choice (REQ-007). */
+  protected readonly availableDrones = computed(() => this.drones().filter((drone) => drone.status === 'Available'));
   protected readonly studentGroups = signal<StudentGroup[]>([]);
   protected readonly loadErrorMessage = signal<string | null>(null);
   protected readonly saveErrorMessage = signal<string | null>(null);

@@ -58,7 +58,7 @@ describe('LoansPage opened for one drone', () => {
   it('Available drone from a QR code', async () => {
     const element = await open('/loans?drone=7');
 
-    expect(chosenDrone(element)).toBe('TELLO-07 (Available)');
+    expect(chosenDrone(element)).toBe('TELLO-07');
     expect(element.querySelector('[role="alert"]')).toBeNull();
   });
 

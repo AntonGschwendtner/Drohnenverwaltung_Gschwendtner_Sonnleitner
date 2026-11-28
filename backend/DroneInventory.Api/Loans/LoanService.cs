@@ -225,6 +225,12 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
 
         var droneId = loanToReturn.DroneId;
 
+        // A defect found at the return is reported by the group of the loan (REQ-024).
+        var loanGroupName = await dbContext.Loans
+            .Where(loan => loan.Id == id)
+            .Select(loan => loan.StudentGroup != null ? loan.StudentGroup.Name : loan.FormerStudentGroupName)
+            .FirstOrDefaultAsync(cancellationToken);
+
         var items = await dbContext.Set<LoanItem>().Where(item => item.LoanId == id).ToListAsync(cancellationToken);
         var (returned, itemError) = ReadReturnedQuantities(request?.Items, items);
         if (itemError is not null)
@@ -264,7 +270,11 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
             {
                 await dbContext.Drones
                     .Where(drone => drone.Id == droneId)
-                    .ExecuteUpdateAsync(setters => setters.SetProperty(drone => drone.DefectNote, defect), cancellationToken);
+                    .ExecuteUpdateAsync(
+                        setters => setters
+                            .SetProperty(drone => drone.DefectNote, defect)
+                            .SetProperty(drone => drone.DefectGroupName, loanGroupName),
+                        cancellationToken);
             }
 
             await transaction.CommitAsync(cancellationToken);

@@ -314,6 +314,19 @@ The system SHALL delete a student group from the trash for good, together with i
 - **THEN** the deletion is rejected with a message that "TELLO-07" has to be returned first
 - **AND** "Group 3" and the active loan stay unchanged
 
+### Requirement: Empty the student group trash
+The system SHALL delete all student groups in the trash permanently at once after a confirmation (REQ-033), with their members and with one history choice for all of them. A group that still has an active loan SHALL stay in the trash.
+
+#### Scenario: Empty the student group trash
+- **GIVEN** "Group 3" with a returned loan and "Group 4" are in the trash and "Group 5" is not
+- **WHEN** the student group trash is emptied and the history is kept
+- **THEN** the trash is empty and "Group 5" is still listed
+- **AND** the history still shows the loan of "Group 3"
+
+#### Scenario: No choice about the history when emptying
+- **WHEN** the student group trash is emptied without saying what happens to the history
+- **THEN** the request is rejected
+
 ### Requirement: No changes in the trash
 The system SHALL reject renaming a student group in the trash, adding or removing its members and choosing or clearing its group leader (REQ-033). The group has to be restored first.
 

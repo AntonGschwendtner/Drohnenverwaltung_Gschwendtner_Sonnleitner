@@ -247,6 +247,35 @@ public class StudentGroupService(DroneInventoryDbContext dbContext, TimeProvider
     }
 
     /// <summary>
+    /// Empties the student group trash (REQ-033): every group in it is deleted for good with the same history choice.
+    /// A group that still has an active loan stays in the trash and is not counted.
+    /// </summary>
+    public async Task<ServiceResult<EmptyTrashResponse>> EmptyTrashAsync(string? history, CancellationToken cancellationToken)
+    {
+        if (!HistoryChoice.IsValid(history))
+        {
+            return ServiceResult<EmptyTrashResponse>.Invalid(Messages.HistoryChoiceMissing);
+        }
+
+        var ids = await dbContext.StudentGroups
+            .Where(group => group.DeletedAt != null)
+            .Select(group => group.Id)
+            .ToListAsync(cancellationToken);
+
+        var deleted = 0;
+        foreach (var id in ids)
+        {
+            var result = await DeletePermanentlyAsync(id, history, cancellationToken);
+            if (result.Error is null)
+            {
+                deleted++;
+            }
+        }
+
+        return ServiceResult<EmptyTrashResponse>.Success(new EmptyTrashResponse(deleted));
+    }
+
+    /// <summary>
     /// Adds a person to a group (REQ-031). The name is required, at most 100 characters and unique within the group,
     /// ignoring upper and lower case; the database compares with NOCASE and catches parallel requests.
     /// </summary>

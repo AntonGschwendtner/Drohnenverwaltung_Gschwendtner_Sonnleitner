@@ -159,12 +159,24 @@ The system SHALL show a single drone with name, description and status, its acti
 - **THEN** the request is answered as not found
 
 ### Requirement: Report and repair a defect
-The system SHALL allow a defect with a required description of at most 500 characters to be reported for a drone that is not loaned (REQ-024). A defective drone SHALL be marked as repaired, which removes the defect and makes it available again.
+The system SHALL allow a defect with a required description of at most 500 characters and a required reporting student group to be reported for a drone that is not loaned (REQ-024). A defect reported with a return SHALL be reported by the group of the loan. The drone SHALL show the name of the reporting group with the defect. A defective drone SHALL be marked as repaired, which removes the defect and its group and makes it available again.
 
 #### Scenario: Report a defect
 - **GIVEN** "TELLO-07" is available
-- **WHEN** a defect "Motor 3 dreht nicht" is reported for "TELLO-07"
+- **WHEN** "Group 3" reports a defect "Motor 3 dreht nicht" for "TELLO-07"
 - **THEN** "TELLO-07" is Defective
+- **AND** the defect shows "Group 3" as the reporting group
+
+#### Scenario: Student group is missing
+- **GIVEN** "TELLO-07" is available
+- **WHEN** a defect is reported without a student group or with an unknown one
+- **THEN** the report is rejected
+
+#### Scenario: Defect reported with a return
+- **GIVEN** "TELLO-07" is loaned to "Group 3"
+- **WHEN** the loan is returned with the defect "Propeller gebrochen"
+- **THEN** "TELLO-07" is Defective
+- **AND** the defect shows "Group 3" as the reporting group
 
 #### Scenario: Description is missing
 - **GIVEN** "TELLO-07" is available
@@ -246,6 +258,24 @@ The system SHALL delete a drone from the trash for good (REQ-034). The user SHAL
 - **GIVEN** "TELLO-07" is in the trash
 - **WHEN** "TELLO-07" is deleted permanently without saying what happens to its history
 - **THEN** the deletion is rejected
+
+### Requirement: Empty the drone trash
+The system SHALL delete all drones in the trash permanently at once after a confirmation (REQ-034). Like a single permanent delete, it SHALL require one choice for all of them whether their loans stay in the history or are deleted too.
+
+#### Scenario: Empty the drone trash and keep the history
+- **GIVEN** "TELLO-07" with a returned loan and "TELLO-08" are in the trash and "TELLO-09" is not
+- **WHEN** the drone trash is emptied and the history is kept
+- **THEN** the trash is empty and "TELLO-09" is still listed
+- **AND** the history still shows the loan of "TELLO-07"
+
+#### Scenario: Empty the drone trash with the history
+- **GIVEN** "TELLO-07" with a returned loan is in the trash
+- **WHEN** the drone trash is emptied together with the history
+- **THEN** the trash is empty and the loan of "TELLO-07" is no longer stored
+
+#### Scenario: No choice about the history when emptying
+- **WHEN** the drone trash is emptied without saying what happens to the history
+- **THEN** the request is rejected
 
 ### Requirement: No changes to a drone in the trash
 The system SHALL reject renaming a drone in the trash and reporting or repairing its defect (REQ-034). The drone has to be restored first.

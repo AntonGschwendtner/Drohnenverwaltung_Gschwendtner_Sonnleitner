@@ -13,6 +13,8 @@ export interface Drone {
   description: string;
   /** The reported defect while the drone is Defective (REQ-024). */
   defectNote?: string | null;
+  /** The student group that reported the defect (REQ-024). */
+  defectGroupName?: string | null;
   /** The day the drone went into the trash, or null (REQ-034). */
   deletedAt?: string | null;
   /** The next reservation of today or later, for the hints (REQ-029). */
@@ -192,8 +194,8 @@ export class ApiService {
     return this.http.put<Drone>(`/api/drones/${id}`, request);
   }
 
-  reportDefect(id: number, description: string): Observable<Drone> {
-    return this.http.post<Drone>(`/api/drones/${id}/defect`, { description });
+  reportDefect(id: number, description: string, studentGroupId: number | null): Observable<Drone> {
+    return this.http.post<Drone>(`/api/drones/${id}/defect`, { description, studentGroupId });
   }
 
   repairDrone(id: number): Observable<Drone> {
@@ -268,6 +270,16 @@ export class ApiService {
   /** Deletes a drone from the trash for good; its loans stay in the history ("keep") or go with it ("delete"). */
   deleteDronePermanently(id: number, history: 'keep' | 'delete'): Observable<void> {
     return this.http.delete<void>(`/api/drones/${id}/permanent`, { params: { history } });
+  }
+
+  /** Empties the drone trash for good with one history choice for all of them (REQ-034). */
+  emptyDroneTrash(history: 'keep' | 'delete'): Observable<{ deleted: number }> {
+    return this.http.delete<{ deleted: number }>('/api/drones/trash', { params: { history } });
+  }
+
+  /** Empties the student group trash for good with one history choice for all of them (REQ-033). */
+  emptyStudentGroupTrash(history: 'keep' | 'delete'): Observable<{ deleted: number }> {
+    return this.http.delete<{ deleted: number }>('/api/student-groups/trash', { params: { history } });
   }
 
   listTrash(): Observable<TrashedStudentGroup[]> {

@@ -63,6 +63,40 @@ describe('DronesPage trash', () => {
     expect(element.querySelector('section[aria-labelledby="drone-trash"]')?.textContent).toContain('The trash is empty.');
   });
 
+  it('Empty the whole trash after the dialog', async () => {
+    await openTrash([trashed, { id: 9, name: 'TELLO-09', deletedAt: '2026-08-20', loanCount: 1 }]);
+
+    (element.querySelector('button.empty-trash') as HTMLButtonElement).click();
+    await settle();
+    expect(dialog()?.textContent).toContain('All 2 drones in the trash are deleted for good.');
+    expect(dialog()?.textContent).toContain('3 loans are deleted');
+    (dialog()?.querySelector('input[value="delete"]') as HTMLInputElement).click();
+    await settle();
+    (dialog()?.querySelector('.dialog-confirm') as HTMLButtonElement).click();
+    await settle();
+
+    const request = http.expectOne((candidate) => candidate.method === 'DELETE' && candidate.url === '/api/drones/trash');
+    expect(request.request.params.get('history')).toBe('delete');
+    request.flush({ deleted: 2 });
+    await settle();
+    http.expectOne('/api/drones/trash').flush([]);
+    await settle();
+
+    expect(element.querySelector('section[aria-labelledby="drone-trash"]')?.textContent).toContain('The trash is empty.');
+  });
+
+  it('Cancelling the empty dialog sends nothing', async () => {
+    await openTrash([trashed]);
+
+    (element.querySelector('button.empty-trash') as HTMLButtonElement).click();
+    await settle();
+    (dialog()?.querySelector('.dialog-cancel') as HTMLButtonElement).click();
+    await settle();
+
+    http.expectNone({ method: 'DELETE' });
+    expect(row()).not.toBeNull();
+  });
+
   it('Restore a drone', async () => {
     await openTrash([trashed]);
 

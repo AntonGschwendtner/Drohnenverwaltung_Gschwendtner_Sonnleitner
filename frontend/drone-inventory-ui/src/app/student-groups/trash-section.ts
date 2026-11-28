@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject, output, signal } from '@angular/core';
+import { Component, computed, inject, output, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ApiService, readErrorMessage, StudentGroup, TrashedStudentGroup } from '../api.service';
 import { I18nService } from '../i18n.service';
@@ -67,6 +67,11 @@ import { EmptyState } from '../shared/empty-state';
                 }
               </tbody>
             </table>
+            <div class="trash-footer">
+              <button type="button" class="quiet empty-trash" (click)="askEmpty($event)" [disabled]="busyId() !== null">
+                {{ i18n.t('trash.emptyAll') }}
+              </button>
+            </div>
           }
         </div>
       }
@@ -90,6 +95,29 @@ import { EmptyState } from '../shared/empty-state';
           <label>
             <input type="radio" name="history" value="delete" [checked]="history() === 'delete'" (change)="history.set('delete')" />
             {{ i18n.t('trash.deleteHistory', { count: '' + group.loanCount }) }}
+          </label>
+        </fieldset>
+      </app-confirm-dialog>
+    }
+
+    @if (pendingEmpty()) {
+      <app-confirm-dialog
+        [heading]="i18n.t('trash.emptyTitle')"
+        [text]="i18n.t('trash.emptyTextGroups', { count: '' + groups().length })"
+        [confirmLabel]="history() === 'keep' ? i18n.t('trash.confirmKeep') : i18n.t('trash.confirmAll')"
+        [cancelLabel]="i18n.t('dialog.cancel')"
+        (confirmed)="confirmEmpty()"
+        (cancelled)="cancelEmpty()"
+      >
+        <fieldset class="history-choice">
+          <legend>{{ i18n.t('trash.historyLegendAll') }}</legend>
+          <label>
+            <input type="radio" name="history-all" value="keep" [checked]="history() === 'keep'" (change)="history.set('keep')" />
+            {{ i18n.t('trash.keepHistoryAll') }}
+          </label>
+          <label>
+            <input type="radio" name="history-all" value="delete" [checked]="history() === 'delete'" (change)="history.set('delete')" />
+            {{ i18n.t('trash.deleteHistory', { count: '' + totalLoans() }) }}
           </label>
         </fieldset>
       </app-confirm-dialog>
@@ -174,6 +202,39 @@ export class TrashSection {
       next: () => {
         this.busyId.set(null);
         this.groups.update((groups) => groups.filter((candidate) => candidate.id !== group.id));
+      },
+      error: (error: unknown) => {
+        this.busyId.set(null);
+        this.reloadAfterError(error);
+      },
+    });
+  }
+
+  /** The dialog for emptying the whole trash is open. */
+  protected readonly pendingEmpty = signal(false);
+  protected readonly totalLoans = computed(() => this.groups().reduce((sum, group) => sum + group.loanCount, 0));
+
+  protected askEmpty(event: Event): void {
+    this.permanentTrigger = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+    this.history.set('keep');
+    this.pendingEmpty.set(true);
+  }
+
+  protected cancelEmpty(): void {
+    this.pendingEmpty.set(false);
+    this.permanentTrigger?.focus();
+    this.permanentTrigger = null;
+  }
+
+  protected confirmEmpty(): void {
+    this.pendingEmpty.set(false);
+    this.permanentTrigger = null;
+    this.busyId.set(-1);
+    this.errorMessage.set(null);
+    this.api.emptyStudentGroupTrash(this.history()).subscribe({
+      next: () => {
+        this.busyId.set(null);
+        this.reload();
       },
       error: (error: unknown) => {
         this.busyId.set(null);
