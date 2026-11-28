@@ -1633,6 +1633,12 @@ td button.busy::after {
   margin-bottom: 1rem;
 }
 
+.trash-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
 .trash-toggle {
   display: inline-flex;
   align-items: center;
@@ -2016,8 +2022,11 @@ td button.busy::after {
 }
 
 .footer-mark {
+  /* Flex centres the word even when it is wider than the window and gets clipped on both sides. */
+  display: flex;
+  justify-content: center;
   margin: 0;
-  padding: 1.5rem 1.5rem 0;
+  padding: 1.5rem 0 0;
   font-size: clamp(2.2rem, 8.2vw, 9.5rem);
   font-weight: 700;
   line-height: 0.85;

@@ -7,7 +7,12 @@ Records which student group has which drone and accessories, from the loan throu
 ## Requirements
 
 ### Requirement: Loan drone
-An available drone SHALL be loaned to a student group. The system SHALL set the current date as loan date (REQ-004).
+An available drone SHALL be loaned to a student group. The system SHALL set the current date as loan date (REQ-004). The loan form SHALL offer only available drones, by name and without a status; loaned and defective drones are not offered.
+
+#### Scenario: Loan form offers only available drones
+- **GIVEN** "TELLO-07" is available, "TELLO-08" is loaned and "TELLO-09" is Defective
+- **WHEN** the loan form is opened
+- **THEN** the drone choice offers only "TELLO-07"
 
 #### Scenario: Loan an available drone
 - **GIVEN** the drone "TELLO-07" is available

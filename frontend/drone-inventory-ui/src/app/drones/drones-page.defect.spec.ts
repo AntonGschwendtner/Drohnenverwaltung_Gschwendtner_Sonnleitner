@@ -13,9 +13,11 @@ describe('Defects and missing parts in the interface', () => {
 
   const drones: Drone[] = [
     { id: 7, name: 'TELLO-07', status: 'Loaned', description: '' },
-    { id: 8, name: 'TELLO-08', status: 'Defective', description: 'Ersatz', defectNote: 'Motor 3 dreht nicht' },
+    { id: 8, name: 'TELLO-08', status: 'Defective', description: 'Ersatz', defectNote: 'Motor 3 dreht nicht', defectGroupName: 'Group 3' },
     { id: 9, name: 'TELLO-09', status: 'Available', description: '' },
   ];
+
+  const groups = [{ id: 3, name: 'Group 3' }];
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -63,7 +65,7 @@ describe('Defects and missing parts in the interface', () => {
     const defective = row(fixture, 'TELLO-08');
 
     expect(defective.querySelector('.status-defective')?.textContent?.trim()).toBe('Defective');
-    expect(defective.querySelector('.defect-note')?.textContent?.trim()).toBe('Damage: Motor 3 dreht nicht');
+    expect(defective.querySelector('.defect-note')?.textContent?.trim()).toBe('Damage: Motor 3 dreht nicht (Group 3)');
     expect(defective.querySelector('button.repair')).not.toBeNull();
     expect(defective.querySelector('button.report')).toBeNull();
     expect(row(fixture, 'TELLO-07').querySelector('button.report')).toBeNull();
@@ -88,15 +90,20 @@ describe('Defects and missing parts in the interface', () => {
     const fixture = await dronePage();
     (row(fixture, 'TELLO-09').querySelector('button.report') as HTMLButtonElement).click();
     await settle(fixture);
+    http.expectOne('/api/student-groups').flush(groups);
+    await settle(fixture);
     const element = fixture.nativeElement as HTMLElement;
     const description = element.querySelector('[role="alertdialog"] textarea') as HTMLTextAreaElement;
     description.value = 'Propeller gebrochen';
     description.dispatchEvent(new Event('input'));
+    const group = element.querySelector('[role="alertdialog"] select') as HTMLSelectElement;
+    group.value = '3';
+    group.dispatchEvent(new Event('change'));
     (element.querySelector('.dialog-confirm') as HTMLButtonElement).click();
     await settle(fixture);
 
     const request = http.expectOne({ method: 'POST', url: '/api/drones/9/defect' });
-    expect(request.request.body).toEqual({ description: 'Propeller gebrochen' });
+    expect(request.request.body).toEqual({ description: 'Propeller gebrochen', studentGroupId: 3 });
     request.flush({ ...drones[2], status: 'Defective', defectNote: 'Propeller gebrochen' });
     await settle(fixture);
     http.expectOne('/api/drones').flush(drones);
@@ -119,6 +126,8 @@ describe('Defects and missing parts in the interface', () => {
     const fixture = await dronePage();
     (row(fixture, 'TELLO-09').querySelector('button.report') as HTMLButtonElement).click();
     await settle(fixture);
+    http.expectOne('/api/student-groups').flush(groups);
+    await settle(fixture);
     ((fixture.nativeElement as HTMLElement).querySelector('.dialog-confirm') as HTMLButtonElement).click();
     await settle(fixture);
 
@@ -134,6 +143,8 @@ describe('Defects and missing parts in the interface', () => {
     const fixture = await dronePage();
     const report = row(fixture, 'TELLO-09').querySelector('button.report') as HTMLButtonElement;
     report.click();
+    await settle(fixture);
+    http.expectOne('/api/student-groups').flush(groups);
     await settle(fixture);
     ((fixture.nativeElement as HTMLElement).querySelector('.dialog-cancel') as HTMLButtonElement).click();
     await settle(fixture);

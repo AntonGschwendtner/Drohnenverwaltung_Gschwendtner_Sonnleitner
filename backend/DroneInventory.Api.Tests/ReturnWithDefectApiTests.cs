@@ -37,6 +37,7 @@ public sealed class ReturnWithDefectApiTests : IDisposable
         var drone = Assert.Single(await ListDronesAsync());
         Assert.Equal("Defective", drone.GetProperty("status").GetString());
         Assert.Equal("Propeller gebrochen", drone.GetProperty("defectNote").GetString());
+        Assert.Equal("Group 3", drone.GetProperty("defectGroupName").GetString());
         Assert.Equal(droneId, drone.GetProperty("id").GetInt32());
     }
 

@@ -96,6 +96,10 @@ public static class Messages
         "A defect needs a description.",
         "Ein Schaden braucht eine Beschreibung.");
 
+    public static string DefectNeedsStudentGroup => Pick(
+        "Choose the student group that reports the defect.",
+        "Wähle die Schülergruppe, die den Schaden meldet.");
+
     public static string DefectTooLong(int maxLength) => Pick(
         $"A defect description can have at most {maxLength} characters.",
         $"Eine Schadensbeschreibung darf höchstens {maxLength} Zeichen haben.");

@@ -19,12 +19,13 @@ public sealed class ReportAndRepairDefectApiTests : IDisposable
     {
         var droneId = await CreateAsync("/api/drones", new { name = "TELLO-07", description = "x" });
 
-        var response = await _client.PostAsJsonAsync($"/api/drones/{droneId}/defect", new { description = " Motor 3 dreht nicht " });
+        var response = await _client.PostAsJsonAsync($"/api/drones/{droneId}/defect", new { description = " Motor 3 dreht nicht ", studentGroupId = await CreateAsync("/api/student-groups", new { name = "Group 3" }) });
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var drone = Assert.Single(await ListDronesAsync());
         Assert.Equal("Defective", drone.GetProperty("status").GetString());
         Assert.Equal("Motor 3 dreht nicht", drone.GetProperty("defectNote").GetString());
+        Assert.Equal("Group 3", drone.GetProperty("defectGroupName").GetString());
     }
 
     [Theory]
@@ -37,6 +38,19 @@ public sealed class ReportAndRepairDefectApiTests : IDisposable
         var response = await _client.PostAsJsonAsync($"/api/drones/{droneId}/defect", new { description });
 
         await ApiResponseAssert.IsProblemAsync(response, HttpStatusCode.BadRequest);
+        Assert.Equal("Available", Assert.Single(await ListDronesAsync()).GetProperty("status").GetString());
+    }
+
+    [Fact]
+    public async Task Student_group_is_missing()
+    {
+        var droneId = await CreateAsync("/api/drones", new { name = "TELLO-07", description = "x" });
+
+        var withoutGroup = await _client.PostAsJsonAsync($"/api/drones/{droneId}/defect", new { description = "Motor 3" });
+        var unknownGroup = await _client.PostAsJsonAsync($"/api/drones/{droneId}/defect", new { description = "Motor 3", studentGroupId = 999 });
+
+        await ApiResponseAssert.IsProblemAsync(withoutGroup, HttpStatusCode.BadRequest);
+        await ApiResponseAssert.IsProblemAsync(unknownGroup, HttpStatusCode.BadRequest);
         Assert.Equal("Available", Assert.Single(await ListDronesAsync()).GetProperty("status").GetString());
     }
 
@@ -57,7 +71,7 @@ public sealed class ReportAndRepairDefectApiTests : IDisposable
         var studentGroupId = await CreateAsync("/api/student-groups", new { name = "Group 3" });
         await CreateAsync("/api/loans", new { droneId, studentGroupId });
 
-        var response = await _client.PostAsJsonAsync($"/api/drones/{droneId}/defect", new { description = "Motor 3" });
+        var response = await _client.PostAsJsonAsync($"/api/drones/{droneId}/defect", new { description = "Motor 3", studentGroupId });
 
         await ApiResponseAssert.IsProblemAsync(response, HttpStatusCode.Conflict);
         Assert.Equal("Loaned", Assert.Single(await ListDronesAsync()).GetProperty("status").GetString());
@@ -67,7 +81,7 @@ public sealed class ReportAndRepairDefectApiTests : IDisposable
     public async Task Repair_a_drone()
     {
         var droneId = await CreateAsync("/api/drones", new { name = "TELLO-07", description = "x" });
-        await _client.PostAsJsonAsync($"/api/drones/{droneId}/defect", new { description = "Motor 3" });
+        await _client.PostAsJsonAsync($"/api/drones/{droneId}/defect", new { description = "Motor 3", studentGroupId = await CreateAsync("/api/student-groups", new { name = "Group 3" }) });
 
         var response = await _client.PostAsync($"/api/drones/{droneId}/repair", null);
 
@@ -75,6 +89,7 @@ public sealed class ReportAndRepairDefectApiTests : IDisposable
         var drone = Assert.Single(await ListDronesAsync());
         Assert.Equal("Available", drone.GetProperty("status").GetString());
         Assert.Equal(JsonValueKind.Null, drone.GetProperty("defectNote").ValueKind);
+        Assert.Equal(JsonValueKind.Null, drone.GetProperty("defectGroupName").ValueKind);
     }
 
     [Fact]

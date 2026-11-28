@@ -23,6 +23,9 @@ namespace DroneInventory.Api.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("DefectGroupName")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("DefectNote")
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");

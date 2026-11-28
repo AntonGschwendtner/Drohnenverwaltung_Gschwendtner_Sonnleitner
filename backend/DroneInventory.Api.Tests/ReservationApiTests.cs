@@ -74,7 +74,7 @@ public sealed class ReservationApiTests : IDisposable
     public async Task Defective_drone()
     {
         var (drone, group3, _) = await SetupAsync();
-        await _client.PostAsJsonAsync($"/api/drones/{drone}/defect", new { description = "Motor" });
+        await _client.PostAsJsonAsync($"/api/drones/{drone}/defect", new { description = "Motor", studentGroupId = group3 });
 
         await ApiResponseAssert.IsProblemAsync(await ReserveAsync(drone, group3, "2026-08-21"), HttpStatusCode.Conflict);
     }

@@ -52,7 +52,8 @@ public class DroneService(DroneInventoryDbContext dbContext, TimeProvider timePr
                 .Where(reservation => reservation.DroneId == drone.Id && reservation.Date >= today)
                 .OrderBy(reservation => reservation.Date)
                 .Select(reservation => reservation.StudentGroup!.Name)
-                .FirstOrDefault());
+                .FirstOrDefault(),
+            drone.DefectGroupName);
     }
 
     public async Task<ServiceResult<DroneResponse>> CreateAsync(CreateDroneRequest request, CancellationToken cancellationToken)
@@ -152,6 +153,18 @@ public class DroneService(DroneInventoryDbContext dbContext, TimeProvider timePr
             return ServiceResult<DroneResponse>.Invalid(Messages.DefectTooLong(MaxDefectLength));
         }
 
+        // The group that reports the defect is required; a group in the trash cannot report one (REQ-024).
+        var groupName = request.StudentGroupId is { } groupId
+            ? await dbContext.StudentGroups
+                .Where(group => group.Id == groupId && group.DeletedAt == null)
+                .Select(group => group.Name)
+                .FirstOrDefaultAsync(cancellationToken)
+            : null;
+        if (groupName is null)
+        {
+            return ServiceResult<DroneResponse>.Invalid(Messages.DefectNeedsStudentGroup);
+        }
+
         var isLoaned = await dbContext.Loans.AnyAsync(
             loan => loan.DroneId == id && loan.Status == LoanStatus.Active,
             cancellationToken);
@@ -161,6 +174,7 @@ public class DroneService(DroneInventoryDbContext dbContext, TimeProvider timePr
         }
 
         drone.DefectNote = description;
+        drone.DefectGroupName = groupName;
         await dbContext.SaveChangesAsync(cancellationToken);
         return await GetAsync(id, cancellationToken);
     }
@@ -185,6 +199,7 @@ public class DroneService(DroneInventoryDbContext dbContext, TimeProvider timePr
         }
 
         drone.DefectNote = null;
+        drone.DefectGroupName = null;
         await dbContext.SaveChangesAsync(cancellationToken);
         return await GetAsync(id, cancellationToken);
     }
@@ -311,6 +326,35 @@ public class DroneService(DroneInventoryDbContext dbContext, TimeProvider timePr
         await transaction.CommitAsync(cancellationToken);
 
         return ServiceResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Empties the drone trash (REQ-034): every drone in it is deleted for good with the same history choice.
+    /// A drone in the trash is never loaned, so all of them go.
+    /// </summary>
+    public async Task<ServiceResult<EmptyTrashResponse>> EmptyTrashAsync(string? history, CancellationToken cancellationToken)
+    {
+        if (!HistoryChoice.IsValid(history))
+        {
+            return ServiceResult<EmptyTrashResponse>.Invalid(Messages.HistoryChoiceMissing);
+        }
+
+        var ids = await dbContext.Drones
+            .Where(drone => drone.DeletedAt != null)
+            .Select(drone => drone.Id)
+            .ToListAsync(cancellationToken);
+
+        var deleted = 0;
+        foreach (var id in ids)
+        {
+            var result = await DeletePermanentlyAsync(id, history, cancellationToken);
+            if (result.Error is null)
+            {
+                deleted++;
+            }
+        }
+
+        return ServiceResult<EmptyTrashResponse>.Success(new EmptyTrashResponse(deleted));
     }
 
     private Task<bool> IsLoanedAsync(int id, CancellationToken cancellationToken) =>

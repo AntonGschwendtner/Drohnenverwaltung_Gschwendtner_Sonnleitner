@@ -38,7 +38,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
           {{ i18n.t(statusKey(drone.status)) }}
         </span>
         @if (drone.defectNote) {
-          <span class="strip-note defect-note">{{ i18n.t('drones.defectLabel', { defect: drone.defectNote }) }}</span>
+          <span class="strip-note defect-note">{{ i18n.t('drones.defectLabel', { defect: drone.defectNote }) }}@if (drone.defectGroupName) { ({{ drone.defectGroupName }})}</span>
         }
       </p>
 
