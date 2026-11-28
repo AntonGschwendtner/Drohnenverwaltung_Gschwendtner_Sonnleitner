@@ -209,7 +209,7 @@ The drone page SHALL show the number of all drones, of available drones and of l
 - WHEN the drone page is shown
 - THEN the overview shows 3 drones, 2 available and 1 loaned
 
-## Weitere Anforderungen (REQ-015 bis REQ-041)
+## Weitere Anforderungen (REQ-015 bis REQ-043)
 
 Diese Anforderungen sind als OpenSpec-Changes beschlossen und alle umgesetzt (Stand 2026-11-25). Die vollständigen Szenarien stehen in den Delta-Specs des jeweiligen Change unter `openspec/changes/<change>/specs/`.
 
@@ -242,6 +242,8 @@ Diese Anforderungen sind als OpenSpec-Changes beschlossen und alle umgesetzt (St
 | REQ-039 | Backup und Wiederherstellen | Ganze Datenbank als Datei herunterladen und wieder einspielen | `settings-and-data` |
 | REQ-040 | Historie löschen | Knopf auf der Historienseite, löscht alle zurückgegebenen Ausleihen | `settings-and-data` |
 | REQ-041 | Auf einem Server betreiben | Port und Image per `.env`, fertiges Image für amd64 und arm64 aus GitHub, Health-Check `/api/health` | `docker-server` |
+| REQ-042 | Schadens-Historie | Jeder gemeldete Schaden bleibt mit Gruppe, Datum und Reparaturdatum erhalten; sichtbar auf den Detailseiten von Drohne und Schülergruppe | `defect-history` |
+| REQ-043 | Seitenwechsel startet oben | Beim Wechsel zwischen den Seiten beginnt die neue Seite ganz oben; Zurück und Vor stellen die alte Position wieder her | `defect-history` |
 
 ## Out of Scope
 

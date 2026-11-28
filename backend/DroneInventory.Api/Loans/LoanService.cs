@@ -226,10 +226,15 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
         var droneId = loanToReturn.DroneId;
 
         // A defect found at the return is reported by the group of the loan (REQ-024).
-        var loanGroupName = await dbContext.Loans
+        var loanGroup = await dbContext.Loans
             .Where(loan => loan.Id == id)
-            .Select(loan => loan.StudentGroup != null ? loan.StudentGroup.Name : loan.FormerStudentGroupName)
-            .FirstOrDefaultAsync(cancellationToken);
+            .Select(loan => new
+            {
+                loan.StudentGroupId,
+                Name = loan.StudentGroup != null ? loan.StudentGroup.Name : loan.FormerStudentGroupName,
+            })
+            .FirstAsync(cancellationToken);
+        var loanGroupName = loanGroup.Name;
 
         var items = await dbContext.Set<LoanItem>().Where(item => item.LoanId == id).ToListAsync(cancellationToken);
         var (returned, itemError) = ReadReturnedQuantities(request?.Items, items);
@@ -275,6 +280,20 @@ public class LoanService(DroneInventoryDbContext dbContext, TimeProvider timePro
                             .SetProperty(drone => drone.DefectNote, defect)
                             .SetProperty(drone => drone.DefectGroupName, loanGroupName),
                         cancellationToken);
+
+                // The damage history keeps the report with the group of the loan (REQ-042).
+                if (droneId is { } damagedDroneId)
+                {
+                    dbContext.DefectReports.Add(new DefectReport
+                    {
+                        DroneId = damagedDroneId,
+                        StudentGroupId = loanGroup.StudentGroupId,
+                        StudentGroupName = loanGroupName,
+                        Description = defect,
+                        ReportedOn = returnDate.Value,
+                    });
+                    await dbContext.SaveChangesAsync(cancellationToken);
+                }
             }
 
             await transaction.CommitAsync(cancellationToken);

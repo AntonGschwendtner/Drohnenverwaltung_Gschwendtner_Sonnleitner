@@ -175,6 +175,31 @@ public class DroneService(DroneInventoryDbContext dbContext, TimeProvider timePr
 
         drone.DefectNote = description;
         drone.DefectGroupName = groupName;
+
+        // The damage history keeps every report (REQ-042). Reporting again replaces the open report.
+        var openReport = await dbContext.DefectReports
+            .Where(report => report.DroneId == id && report.RepairedOn == null)
+            .OrderByDescending(report => report.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (openReport is null)
+        {
+            dbContext.DefectReports.Add(new DefectReport
+            {
+                DroneId = id,
+                StudentGroupId = request.StudentGroupId,
+                StudentGroupName = groupName,
+                Description = description,
+                ReportedOn = Today(),
+            });
+        }
+        else
+        {
+            openReport.StudentGroupId = request.StudentGroupId;
+            openReport.StudentGroupName = groupName;
+            openReport.Description = description;
+            openReport.ReportedOn = Today();
+        }
+
         await dbContext.SaveChangesAsync(cancellationToken);
         return await GetAsync(id, cancellationToken);
     }
@@ -200,6 +225,12 @@ public class DroneService(DroneInventoryDbContext dbContext, TimeProvider timePr
 
         drone.DefectNote = null;
         drone.DefectGroupName = null;
+
+        // The report stays in the damage history with the day of the repair (REQ-042).
+        var today = Today();
+        await dbContext.DefectReports
+            .Where(report => report.DroneId == id && report.RepairedOn == null)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(report => report.RepairedOn, today), cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         return await GetAsync(id, cancellationToken);
     }

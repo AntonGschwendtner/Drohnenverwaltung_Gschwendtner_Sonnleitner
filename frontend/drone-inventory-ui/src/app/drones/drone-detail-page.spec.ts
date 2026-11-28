@@ -44,7 +44,11 @@ describe('DroneDetailPage', () => {
     harness = await RouterTestingHarness.create();
   });
 
-  afterEach(() => http.verify());
+  // The damage history loads itself (REQ-042); its own spec checks it.
+  afterEach(() => {
+    http.match((request) => request.url === '/api/defects').filter((request) => !request.cancelled).forEach((request) => request.flush([]));
+    http.verify();
+  });
 
   async function open(id: number): Promise<HTMLElement> {
     const navigation = harness.navigateByUrl(`/drones/${id}`, DroneDetailPage);

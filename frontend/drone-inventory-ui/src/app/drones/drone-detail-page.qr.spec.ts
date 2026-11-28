@@ -23,6 +23,7 @@ describe('DroneDetailPage QR label', () => {
   });
 
   afterEach(() => {
+    http.match((request) => request.url === '/api/defects').filter((request) => !request.cancelled).forEach((request) => request.flush([]));
     http.verify();
     vi.restoreAllMocks();
   });

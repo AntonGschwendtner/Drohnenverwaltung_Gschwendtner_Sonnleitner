@@ -17,6 +17,41 @@ namespace DroneInventory.Api.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.13");
 
+            modelBuilder.Entity("DroneInventory.Api.Domain.DefectReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("DroneId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly?>("RepairedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("ReportedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("StudentGroupId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("StudentGroupName")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DroneId");
+
+                    b.HasIndex("StudentGroupId");
+
+                    b.ToTable("DefectReports");
+                });
+
             modelBuilder.Entity("DroneInventory.Api.Domain.Drone", b =>
                 {
                     b.Property<int>("Id")
@@ -196,6 +231,22 @@ namespace DroneInventory.Api.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("StudentGroupMembers", (string)null);
+                });
+
+            modelBuilder.Entity("DroneInventory.Api.Domain.DefectReport", b =>
+                {
+                    b.HasOne("DroneInventory.Api.Domain.Drone", "Drone")
+                        .WithMany()
+                        .HasForeignKey("DroneId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DroneInventory.Api.Domain.StudentGroup", null)
+                        .WithMany()
+                        .HasForeignKey("StudentGroupId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Drone");
                 });
 
             modelBuilder.Entity("DroneInventory.Api.Domain.Loan", b =>

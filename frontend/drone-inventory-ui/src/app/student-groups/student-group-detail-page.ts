@@ -5,6 +5,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, forkJoin, map, of, switchMap, tap } from 'rxjs';
 import { ApiService, Loan, readErrorMessage, StudentGroup } from '../api.service';
 import { I18nService } from '../i18n.service';
+import { DefectHistory } from '../shared/defect-history';
 import { EmptyState } from '../shared/empty-state';
 import { PageHead } from '../shared/page-head';
 import { StripSkeleton } from '../shared/strip-skeleton';
@@ -14,7 +15,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
  */
 @Component({
   selector: 'app-student-group-detail-page',
-  imports: [DatePipe, EmptyState, PageHead, RouterLink, StripSkeleton],
+  imports: [DatePipe, DefectHistory, EmptyState, PageHead, RouterLink, StripSkeleton],
   template: `
     <a class="back-link" routerLink="/student-groups">{{ i18n.t('groups.back') }}</a>
 
@@ -117,6 +118,8 @@ import { StripSkeleton } from '../shared/strip-skeleton';
           </table>
         }
       </section>
+
+      <app-defect-history for="studentGroup" [id]="studentGroup.id" />
     }
   `,
 })

@@ -17,7 +17,7 @@ Schulprojekt im Fach SYP, 4. INF, 2026/27, von Gschwendtner und Sonnleitner. Bet
 - Zurückgegebene Ausleihen dauerhaft als Historie behalten.
 - Listen durchsuchen: Drohnen nach Name und Status, Schülergruppen nach Name, die Historie nach Drohne oder Gruppe.
 - Listen per Klick auf den Spaltenkopf sortieren, ein zweiter Klick dreht die Reihenfolge um.
-- Eine Detailseite pro Drohne und pro Schülergruppe mit aktiver Ausleihe und allen früheren Ausleihen. Die Namen in den Listen führen dorthin.
+- Eine Detailseite pro Drohne und pro Schülergruppe mit aktiver Ausleihe, allen früheren Ausleihen und der **Schadens-Historie** (wer welchen Schaden wann gemeldet hat und wann er repariert wurde). Die Namen in den Listen führen dorthin.
 - Bei jeder aktiven Ausleihe anzeigen, seit wie vielen Tagen sie läuft. Ausleihen über 7 Tage werden als „Long loan“ markiert.
 - Vor der Rückgabe in einem Dialog mit Drohne und Gruppe nachfragen.
 - Bei der Rückgabe die zurückgegebenen Akkus und Propeller erfassen. Fehlteile stehen danach in der Historie.

@@ -6,6 +6,7 @@ import { catchError, forkJoin, map, Observable, of, switchMap, tap } from 'rxjs'
 import { ApiService, Drone, Loan, readErrorMessage, StudentGroup } from '../api.service';
 import { I18nService } from '../i18n.service';
 import { ConfirmDialog } from '../shared/confirm-dialog';
+import { DefectHistory } from '../shared/defect-history';
 import { EmptyState } from '../shared/empty-state';
 import { PageHead } from '../shared/page-head';
 import { QrCode } from '../shared/qr-code';
@@ -17,7 +18,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
  */
 @Component({
   selector: 'app-drone-detail-page',
-  imports: [ConfirmDialog, DatePipe, EmptyState, PageHead, QrCode, RouterLink, StripSkeleton],
+  imports: [ConfirmDialog, DatePipe, DefectHistory, EmptyState, PageHead, QrCode, RouterLink, StripSkeleton],
   template: `
     <a class="back-link" routerLink="/drones">{{ i18n.t('drones.back') }}</a>
 
@@ -186,6 +187,8 @@ import { StripSkeleton } from '../shared/strip-skeleton';
           </table>
         }
       </section>
+
+      <app-defect-history for="drone" [id]="drone.id" [version]="defectVersion()" />
     }
   `,
 })
@@ -207,6 +210,8 @@ export class DroneDetailPage implements OnInit {
   protected readonly defectGroupId = signal<number | null>(null);
   protected readonly studentGroups = signal<StudentGroup[]>([]);
   protected readonly defectBusy = signal(false);
+  /** Grows after every report or repair, so the damage history loads again. */
+  protected readonly defectVersion = signal(0);
   protected readonly defectError = signal<string | null>(null);
   private defectTrigger: HTMLElement | null = null;
 
@@ -250,6 +255,7 @@ export class DroneDetailPage implements OnInit {
       next: (changed) => {
         this.defectBusy.set(false);
         this.drone.set(changed);
+        this.defectVersion.update((version) => version + 1);
       },
       error: (error: unknown) => {
         this.defectBusy.set(false);

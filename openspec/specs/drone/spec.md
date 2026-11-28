@@ -297,3 +297,21 @@ The detail page of a drone SHALL show a QR code with the address of the loan pag
 - **GIVEN** the details of "TELLO-07" are shown
 - **WHEN** the user prints the label
 - **THEN** the printout contains only the QR code and the name "TELLO-07"
+
+### Requirement: Damage history
+The system SHALL keep every reported defect of a drone as an entry of its damage history with the reporting student group, the description, the day it was reported and, once repaired, the day of the repair (REQ-042). A repair SHALL keep the entry. The detail page of a drone and of a student group SHALL show its damage history, the newest report first. A student group deleted for good SHALL keep its name in the history; a drone deleted for good SHALL take its damage history with it.
+
+#### Scenario: Repaired defect stays in the history
+- **GIVEN** "Group 3" reported the defect "Motor 3" for "TELLO-07" on 19.08.2026
+- **WHEN** "TELLO-07" is marked as repaired on 21.08.2026
+- **THEN** the damage history of "TELLO-07" shows "Motor 3" by "Group 3", reported on 19.08.2026 and repaired on 21.08.2026
+
+#### Scenario: Defect from a return
+- **GIVEN** "TELLO-07" is loaned to "Group 3"
+- **WHEN** the loan is returned with the defect "Propeller gebrochen"
+- **THEN** the damage history of "Group 3" shows the open defect "Propeller gebrochen" of "TELLO-07"
+
+#### Scenario: Group deleted for good
+- **GIVEN** "Group 3" reported a defect for "TELLO-07"
+- **WHEN** "Group 3" is deleted for good
+- **THEN** the damage history of "TELLO-07" still shows "Group 3" as the reporting group
