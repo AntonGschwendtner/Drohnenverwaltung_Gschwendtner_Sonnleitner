@@ -2,9 +2,10 @@ import { DatePipe, DOCUMENT } from '@angular/common';
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { catchError, forkJoin, map, of, switchMap, tap } from 'rxjs';
-import { ApiService, Drone, Loan, readErrorMessage } from '../api.service';
+import { catchError, forkJoin, map, Observable, of, switchMap, tap } from 'rxjs';
+import { ApiService, Drone, Loan, readErrorMessage, StudentGroup } from '../api.service';
 import { I18nService } from '../i18n.service';
+import { ConfirmDialog } from '../shared/confirm-dialog';
 import { EmptyState } from '../shared/empty-state';
 import { PageHead } from '../shared/page-head';
 import { QrCode } from '../shared/qr-code';
@@ -16,7 +17,7 @@ import { StripSkeleton } from '../shared/strip-skeleton';
  */
 @Component({
   selector: 'app-drone-detail-page',
-  imports: [DatePipe, EmptyState, PageHead, QrCode, RouterLink, StripSkeleton],
+  imports: [ConfirmDialog, DatePipe, EmptyState, PageHead, QrCode, RouterLink, StripSkeleton],
   template: `
     <a class="back-link" routerLink="/drones">{{ i18n.t('drones.back') }}</a>
 
@@ -40,7 +41,57 @@ import { StripSkeleton } from '../shared/strip-skeleton';
         @if (drone.defectNote) {
           <span class="strip-note defect-note">{{ i18n.t('drones.defectLabel', { defect: drone.defectNote }) }}@if (drone.defectGroupName) { ({{ drone.defectGroupName }})}</span>
         }
+        @if (!drone.deletedAt && drone.status === 'Available') {
+          <button type="button" class="tool-link report" (click)="askToReportDefect($event)" [disabled]="defectBusy()">
+            {{ i18n.t('drones.reportDefect') }}
+          </button>
+        } @else if (!drone.deletedAt && drone.status === 'Defective') {
+          <button type="button" class="tool-link repair" (click)="askToRepair($event)" [disabled]="defectBusy()">
+            {{ i18n.t('drones.repair') }}
+          </button>
+        }
       </p>
+      @if (defectError(); as message) {
+        <p class="error" role="alert">{{ message }}</p>
+      }
+
+      @if (pendingDefect()) {
+        <app-confirm-dialog
+          [heading]="i18n.t('drones.reportTitle', { drone: drone.name })"
+          [text]="i18n.t('drones.reportText', { drone: drone.name })"
+          [confirmLabel]="i18n.t('drones.reportDefect')"
+          [cancelLabel]="i18n.t('dialog.cancel')"
+          (confirmed)="confirmDefect(drone)"
+          (cancelled)="closeDefectDialog()"
+        >
+          <div class="dialog-fields">
+            <label class="wide">
+              {{ i18n.t('drones.defectGroup') }}
+              <select name="defectGroup" (change)="defectGroupId.set(+$any($event.target).value || null)">
+                <option value="" [selected]="defectGroupId() === null">{{ i18n.t('loans.chooseGroup') }}</option>
+                @for (studentGroup of studentGroups(); track studentGroup.id) {
+                  <option [value]="studentGroup.id" [selected]="defectGroupId() === studentGroup.id">{{ studentGroup.name }}</option>
+                }
+              </select>
+            </label>
+            <label class="wide">
+              {{ i18n.t('drones.defectDescription') }}
+              <textarea name="defectDescription" rows="2" maxlength="500" [value]="defectDescription()" (input)="defectDescription.set($any($event.target).value)"></textarea>
+            </label>
+          </div>
+        </app-confirm-dialog>
+      }
+
+      @if (pendingRepair()) {
+        <app-confirm-dialog
+          [heading]="i18n.t('drones.repairTitle', { drone: drone.name })"
+          [text]="i18n.t('drones.repairText', { drone: drone.name })"
+          [confirmLabel]="i18n.t('drones.repair')"
+          [cancelLabel]="i18n.t('dialog.cancel')"
+          (confirmed)="confirmRepair(drone)"
+          (cancelled)="closeDefectDialog()"
+        />
+      }
 
       @if (drone.deletedAt) {
         <div class="trash-notice" role="status">
@@ -149,6 +200,64 @@ export class DroneDetailPage implements OnInit {
   protected readonly restoreError = signal<string | null>(null);
 
   /** A drone in the trash comes back from its own page, for example when it was opened from the history (REQ-034). */
+  /** Reporting and repairing a defect right on the detail page (REQ-024); the backend checks the request. */
+  protected readonly pendingDefect = signal(false);
+  protected readonly pendingRepair = signal(false);
+  protected readonly defectDescription = signal('');
+  protected readonly defectGroupId = signal<number | null>(null);
+  protected readonly studentGroups = signal<StudentGroup[]>([]);
+  protected readonly defectBusy = signal(false);
+  protected readonly defectError = signal<string | null>(null);
+  private defectTrigger: HTMLElement | null = null;
+
+  protected askToReportDefect(event: Event): void {
+    this.defectTrigger = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+    this.defectDescription.set('');
+    this.defectGroupId.set(null);
+    this.defectError.set(null);
+    this.pendingDefect.set(true);
+    this.api.listStudentGroups().subscribe({ next: (groups) => this.studentGroups.set(groups), error: () => undefined });
+  }
+
+  protected askToRepair(event: Event): void {
+    this.defectTrigger = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+    this.defectError.set(null);
+    this.pendingRepair.set(true);
+  }
+
+  protected closeDefectDialog(): void {
+    this.pendingDefect.set(false);
+    this.pendingRepair.set(false);
+    this.defectTrigger?.focus();
+    this.defectTrigger = null;
+  }
+
+  protected confirmDefect(drone: Drone): void {
+    this.pendingDefect.set(false);
+    this.defectTrigger = null;
+    this.runDefectAction(this.api.reportDefect(drone.id, this.defectDescription(), this.defectGroupId()));
+  }
+
+  protected confirmRepair(drone: Drone): void {
+    this.pendingRepair.set(false);
+    this.defectTrigger = null;
+    this.runDefectAction(this.api.repairDrone(drone.id));
+  }
+
+  private runDefectAction(request: Observable<Drone>): void {
+    this.defectBusy.set(true);
+    request.subscribe({
+      next: (changed) => {
+        this.defectBusy.set(false);
+        this.drone.set(changed);
+      },
+      error: (error: unknown) => {
+        this.defectBusy.set(false);
+        this.defectError.set(readErrorMessage(error, this.i18n.t('error.fallback')));
+      },
+    });
+  }
+
   protected restore(drone: Drone): void {
     if (this.restoring()) {
       return;

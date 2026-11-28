@@ -222,7 +222,17 @@ public class StudentGroupService(DroneInventoryDbContext dbContext, TimeProvider
             return ServiceResult<bool>.Conflict(Messages.StudentGroupHasActiveLoan(studentGroup.Name, loanedDrone));
         }
 
-        var loansOfGroup = dbContext.Loans.Where(loan => loan.StudentGroupId == id);
+        await RemoveFromTrashAsync(studentGroup, history, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+        return ServiceResult<bool>.Success(true);
+    }
+
+    /// <summary>Keeps or deletes the loans of a group and removes it; the caller saves and commits.</summary>
+    private async Task RemoveFromTrashAsync(StudentGroup studentGroup, string history, CancellationToken cancellationToken)
+    {
+        var loansOfGroup = dbContext.Loans.Where(loan => loan.StudentGroupId == studentGroup.Id);
         if (history == HistoryChoice.Keep)
         {
             var name = studentGroup.Name;
@@ -240,15 +250,12 @@ public class StudentGroupService(DroneInventoryDbContext dbContext, TimeProvider
 
         // The members go with the group through the cascade of the database.
         dbContext.StudentGroups.Remove(studentGroup);
-        await dbContext.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-
-        return ServiceResult<bool>.Success(true);
     }
 
     /// <summary>
     /// Empties the student group trash (REQ-033): every group in it is deleted for good with the same history choice.
-    /// A group that still has an active loan stays in the trash and is not counted.
+    /// A group that still has an active loan stays in the trash and is not counted. Everything runs in one
+    /// transaction: either all go or none.
     /// </summary>
     public async Task<ServiceResult<EmptyTrashResponse>> EmptyTrashAsync(string? history, CancellationToken cancellationToken)
     {
@@ -257,22 +264,22 @@ public class StudentGroupService(DroneInventoryDbContext dbContext, TimeProvider
             return ServiceResult<EmptyTrashResponse>.Invalid(Messages.HistoryChoiceMissing);
         }
 
-        var ids = await dbContext.StudentGroups
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+        var groups = await dbContext.StudentGroups
             .Where(group => group.DeletedAt != null)
-            .Select(group => group.Id)
+            .Where(group => !dbContext.Loans.Any(loan => loan.StudentGroupId == group.Id && loan.Status == LoanStatus.Active))
             .ToListAsync(cancellationToken);
 
-        var deleted = 0;
-        foreach (var id in ids)
+        foreach (var studentGroup in groups)
         {
-            var result = await DeletePermanentlyAsync(id, history, cancellationToken);
-            if (result.Error is null)
-            {
-                deleted++;
-            }
+            await RemoveFromTrashAsync(studentGroup, history!, cancellationToken);
         }
 
-        return ServiceResult<EmptyTrashResponse>.Success(new EmptyTrashResponse(deleted));
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+        return ServiceResult<EmptyTrashResponse>.Success(new EmptyTrashResponse(groups.Count));
     }
 
     /// <summary>

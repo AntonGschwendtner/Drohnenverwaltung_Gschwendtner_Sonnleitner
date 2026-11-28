@@ -305,7 +305,17 @@ public class DroneService(DroneInventoryDbContext dbContext, TimeProvider timePr
             return ServiceResult<bool>.Conflict(Messages.DroneIsLoanedCannotDelete(drone.Name));
         }
 
-        var loansOfDrone = dbContext.Loans.Where(loan => loan.DroneId == id);
+        await RemoveFromTrashAsync(drone, history, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+        return ServiceResult<bool>.Success(true);
+    }
+
+    /// <summary>Keeps or deletes the loans of a drone and removes it; the caller saves and commits.</summary>
+    private async Task RemoveFromTrashAsync(Drone drone, string history, CancellationToken cancellationToken)
+    {
+        var loansOfDrone = dbContext.Loans.Where(loan => loan.DroneId == drone.Id);
         if (history == HistoryChoice.Keep)
         {
             var name = drone.Name;
@@ -322,15 +332,11 @@ public class DroneService(DroneInventoryDbContext dbContext, TimeProvider timePr
         }
 
         dbContext.Drones.Remove(drone);
-        await dbContext.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-
-        return ServiceResult<bool>.Success(true);
     }
 
     /// <summary>
     /// Empties the drone trash (REQ-034): every drone in it is deleted for good with the same history choice.
-    /// A drone in the trash is never loaned, so all of them go.
+    /// A loaned drone stays in the trash. Everything runs in one transaction: either all go or none.
     /// </summary>
     public async Task<ServiceResult<EmptyTrashResponse>> EmptyTrashAsync(string? history, CancellationToken cancellationToken)
     {
@@ -339,22 +345,22 @@ public class DroneService(DroneInventoryDbContext dbContext, TimeProvider timePr
             return ServiceResult<EmptyTrashResponse>.Invalid(Messages.HistoryChoiceMissing);
         }
 
-        var ids = await dbContext.Drones
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+        var drones = await dbContext.Drones
             .Where(drone => drone.DeletedAt != null)
-            .Select(drone => drone.Id)
+            .Where(drone => !dbContext.Loans.Any(loan => loan.DroneId == drone.Id && loan.Status == LoanStatus.Active))
             .ToListAsync(cancellationToken);
 
-        var deleted = 0;
-        foreach (var id in ids)
+        foreach (var drone in drones)
         {
-            var result = await DeletePermanentlyAsync(id, history, cancellationToken);
-            if (result.Error is null)
-            {
-                deleted++;
-            }
+            await RemoveFromTrashAsync(drone, history!, cancellationToken);
         }
 
-        return ServiceResult<EmptyTrashResponse>.Success(new EmptyTrashResponse(deleted));
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+        return ServiceResult<EmptyTrashResponse>.Success(new EmptyTrashResponse(drones.Count));
     }
 
     private Task<bool> IsLoanedAsync(int id, CancellationToken cancellationToken) =>
