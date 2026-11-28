@@ -16,6 +16,8 @@ public class DroneInventoryDbContext(DbContextOptions<DroneInventoryDbContext> o
 
     public DbSet<Reservation> Reservations => Set<Reservation>();
 
+    public DbSet<DefectReport> DefectReports => Set<DefectReport>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Drone>()
@@ -97,6 +99,15 @@ public class DroneInventoryDbContext(DbContextOptions<DroneInventoryDbContext> o
             // when one is deleted for good or by the general reset; they go with it.
             reservation.HasOne(r => r.Drone).WithMany().HasForeignKey(r => r.DroneId).OnDelete(DeleteBehavior.Cascade);
             reservation.HasOne(r => r.StudentGroup).WithMany().HasForeignKey(r => r.StudentGroupId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<DefectReport>(report =>
+        {
+            report.Property(r => r.Description).HasMaxLength(500);
+            // The damage history belongs to the drone and goes with it when it is deleted for good (REQ-042).
+            report.HasOne(r => r.Drone).WithMany().HasForeignKey(r => r.DroneId).OnDelete(DeleteBehavior.Cascade);
+            // A group deleted for good leaves its reports; the name stays (REQ-042).
+            report.HasOne<StudentGroup>().WithMany().HasForeignKey(r => r.StudentGroupId).IsRequired(false).OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<LoanItem>(item =>

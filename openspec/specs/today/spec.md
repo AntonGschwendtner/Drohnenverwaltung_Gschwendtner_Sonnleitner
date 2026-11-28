@@ -33,3 +33,11 @@ The application SHALL open on a page "Today" (REQ-036). It SHALL show the number
 - **GIVEN** "TELLO-07" is reserved for "Group 3" today
 - **WHEN** the page "Today" is shown
 - **THEN** it lists "TELLO-07" for "Group 3" under reserved today
+
+### Requirement: Page change starts at the top
+Switching to another page through the navigation or a link SHALL show the new page from its top (REQ-043). Going back or forward in the browser SHALL return to the earlier scroll position.
+
+#### Scenario: Switch page after scrolling
+- **GIVEN** the drone list is scrolled down
+- **WHEN** "Loans" is chosen in the navigation
+- **THEN** the loan page is shown from its top

@@ -22,7 +22,11 @@ describe('StudentGroupDetailPage in the trash', () => {
     harness = await RouterTestingHarness.create();
   });
 
-  afterEach(() => http.verify());
+  // The damage history loads itself (REQ-042); its own spec checks it.
+  afterEach(() => {
+    http.match((request) => request.url === '/api/defects').filter((request) => !request.cancelled).forEach((request) => request.flush([]));
+    http.verify();
+  });
 
   async function openWith(studentGroup: StudentGroup): Promise<HTMLElement> {
     await harness.navigateByUrl('/student-groups/3', StudentGroupDetailPage);

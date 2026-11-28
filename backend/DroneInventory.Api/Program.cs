@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using DroneInventory.Api.Admin;
 using DroneInventory.Api.Common;
 using DroneInventory.Api.Data;
+using DroneInventory.Api.Defects;
 using DroneInventory.Api.Drones;
 using DroneInventory.Api.Loans;
 using DroneInventory.Api.Reservations;
@@ -29,6 +30,7 @@ builder.Services.AddScoped<LoanService>();
 builder.Services.AddScoped<AdminService>();
 builder.Services.AddScoped<ReservationService>();
 builder.Services.AddScoped<StatisticsService>();
+builder.Services.AddScoped<DefectService>();
 
 var app = builder.Build();
 
@@ -68,6 +70,7 @@ app.MapLoanEndpoints();
 app.MapAdminEndpoints();
 app.MapReservationEndpoints();
 app.MapStatisticsEndpoints();
+app.MapDefectEndpoints();
 
 // For monitoring or a reverse proxy in front of the container (REQ-041): healthy when the database opens.
 app.MapGet("/api/health", async (DroneInventoryDbContext dbContext, CancellationToken cancellationToken) =>

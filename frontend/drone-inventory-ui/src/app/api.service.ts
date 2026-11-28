@@ -89,6 +89,18 @@ export interface ResetRequest {
 }
 
 /** A drone in the trash with the number of loans a permanent delete would take with it (REQ-034). */
+/** One entry of the damage history (REQ-042); repairedOn is null while the defect is open. */
+export interface DefectReport {
+  id: number;
+  droneId: number;
+  droneName: string;
+  studentGroupId: number | null;
+  studentGroupName: string | null;
+  description: string;
+  reportedOn: string;
+  repairedOn: string | null;
+}
+
 export interface TrashedDrone {
   id: number;
   name: string;
@@ -313,6 +325,18 @@ export class ApiService {
   }
 
   /** Active and returned loans of one drone or one student group, the active loan first (REQ-018, REQ-019). */
+  /** The damage history of a drone or of a student group, the newest report first (REQ-042). */
+  listDefects(filter: { droneId?: number; studentGroupId?: number }): Observable<DefectReport[]> {
+    const params: Record<string, number> = {};
+    if (filter.droneId !== undefined) {
+      params['droneId'] = filter.droneId;
+    }
+    if (filter.studentGroupId !== undefined) {
+      params['studentGroupId'] = filter.studentGroupId;
+    }
+    return this.http.get<DefectReport[]>('/api/defects', { params });
+  }
+
   listLoansFor(filter: { droneId?: number; studentGroupId?: number }): Observable<Loan[]> {
     const params: Record<string, number> = {};
     if (filter.droneId !== undefined) {
