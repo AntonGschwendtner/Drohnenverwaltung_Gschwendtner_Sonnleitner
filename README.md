@@ -21,7 +21,7 @@ Schulprojekt im Fach SYP, 4. INF, 2026/27, von Gschwendtner und Sonnleitner. Bet
 - Bei jeder aktiven Ausleihe anzeigen, seit wie vielen Tagen sie läuft. Ausleihen über 7 Tage werden als „Long loan“ markiert.
 - Vor der Rückgabe in einem Dialog mit Drohne und Gruppe nachfragen.
 - Bei der Rückgabe die zurückgegebenen Akkus und Propeller erfassen. Fehlteile stehen danach in der Historie.
-- Einen Schaden melden, bei der Rückgabe oder jederzeit in der Drohnenliste. Dabei wird immer die meldende Schülergruppe festgehalten (bei der Rückgabe automatisch die Gruppe der Ausleihe) und beim Schaden angezeigt. Eine defekte Drohne hat den Status „Defective“ und lässt sich erst nach „Repaired“ wieder ausleihen.
+- Einen Schaden melden, bei der Rückgabe oder jederzeit in der Drohnenliste oder auf der Detailseite der Drohne. Dabei wird immer die meldende Schülergruppe festgehalten (bei der Rückgabe automatisch die Gruppe der Ausleihe) und beim Schaden angezeigt. Eine defekte Drohne hat den Status „Defective“ und lässt sich erst nach „Repaired“ wieder ausleihen.
 - Beim Ausleihen eine Notiz (zum Beispiel das Projekt) und ein geplantes Rückgabedatum angeben. Am Tag selbst steht „Heute fällig“ (orange), danach „Seit X Tagen überfällig“ (rot). Mit geplantem Datum ersetzt das die 7-Tage-Markierung.
 - **Einstellungen** (Zahnrad oben rechts) als Pop-up: Sprache, Hell/Dunkel, **Generalreset** zum Ankreuzen (alle Drohnen zurückgeben, alle Drohnen löschen, alle Schülergruppen löschen, ganze Historie löschen) sowie **Backup** herunterladen und wieder einspielen. X schließt ohne Änderung, „Übernehmen“ wendet an; Reset und Wiederherstellen fragen vorher noch einmal.
 - „Historie löschen“ auf der Historienseite löscht alle zurückgegebenen Ausleihen nach einer Rückfrage.

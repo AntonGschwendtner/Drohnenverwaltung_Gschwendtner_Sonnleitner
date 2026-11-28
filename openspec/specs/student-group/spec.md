@@ -315,7 +315,7 @@ The system SHALL delete a student group from the trash for good, together with i
 - **AND** "Group 3" and the active loan stay unchanged
 
 ### Requirement: Empty the student group trash
-The system SHALL delete all student groups in the trash permanently at once after a confirmation (REQ-033), with their members and with one history choice for all of them. A group that still has an active loan SHALL stay in the trash.
+The system SHALL delete all student groups in the trash permanently at once after a confirmation, in one step that deletes either all of them or none (REQ-033), with their members and with one history choice for all of them. A group that still has an active loan SHALL stay in the trash.
 
 #### Scenario: Empty the student group trash
 - **GIVEN** "Group 3" with a returned loan and "Group 4" are in the trash and "Group 5" is not

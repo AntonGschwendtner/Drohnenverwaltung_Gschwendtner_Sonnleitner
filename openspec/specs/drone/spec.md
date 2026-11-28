@@ -159,7 +159,7 @@ The system SHALL show a single drone with name, description and status, its acti
 - **THEN** the request is answered as not found
 
 ### Requirement: Report and repair a defect
-The system SHALL allow a defect with a required description of at most 500 characters and a required reporting student group to be reported for a drone that is not loaned (REQ-024). A defect reported with a return SHALL be reported by the group of the loan. The drone SHALL show the name of the reporting group with the defect. A defective drone SHALL be marked as repaired, which removes the defect and its group and makes it available again.
+The system SHALL allow a defect with a required description of at most 500 characters and a required reporting student group to be reported for a drone that is not loaned (REQ-024). Reporting and repairing SHALL be possible in the drone list and on the detail page of the drone. A defect reported with a return SHALL be reported by the group of the loan. The drone SHALL show the name of the reporting group with the defect. A defective drone SHALL be marked as repaired, which removes the defect and its group and makes it available again.
 
 #### Scenario: Report a defect
 - **GIVEN** "TELLO-07" is available
@@ -260,7 +260,7 @@ The system SHALL delete a drone from the trash for good (REQ-034). The user SHAL
 - **THEN** the deletion is rejected
 
 ### Requirement: Empty the drone trash
-The system SHALL delete all drones in the trash permanently at once after a confirmation (REQ-034). Like a single permanent delete, it SHALL require one choice for all of them whether their loans stay in the history or are deleted too.
+The system SHALL delete all drones in the trash permanently at once after a confirmation, in one step that deletes either all of them or none (REQ-034). Like a single permanent delete, it SHALL require one choice for all of them whether their loans stay in the history or are deleted too.
 
 #### Scenario: Empty the drone trash and keep the history
 - **GIVEN** "TELLO-07" with a returned loan and "TELLO-08" are in the trash and "TELLO-09" is not
